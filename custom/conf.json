@@ -1,4 +1,4 @@
 {
-	"ServicePort": 9000,
+	"ServicePort": 8080,
 	"DataPath": "testData"
 }
