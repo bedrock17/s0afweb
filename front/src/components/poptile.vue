@@ -25,8 +25,6 @@ export default class Poptile extends Vue {
   game: Game = new Game()
 
   mounted() {
-		console.log("mount!!!!")
-		alert("????")
     this.game.startGame()
   }
 

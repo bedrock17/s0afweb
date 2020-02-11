@@ -1,6 +1,5 @@
 <template>
   <div class="home">
-		<h1> ???????? </h1>
     <Poptile/>
   </div>
 </template>
