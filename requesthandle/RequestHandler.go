@@ -1,50 +1,94 @@
 package requesthandle
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
+
+	// "os"
 
 	"github.com/bedrock17/router"
-	"github.com/bedrock17/s0afWeb/data"
+	"github.com/bedrock17/s0afWeb/common"
+	"github.com/bedrock17/s0afWeb/model"
 )
+
+type dataBaseStruct struct {
+	RankList []model.PopTileRank
+}
+
+var globalDataBaseStruct dataBaseStruct
+
+func (d *dataBaseStruct) loadRankList(filePath string) {
+	data, err := ioutil.ReadFile(filePath)
+
+	common.Check(err)
+
+	err = json.Unmarshal(data, &d)
+
+	common.Check(err)
+
+}
+
+func (d *dataBaseStruct) saveRankList(filePath string) {
+	b, err := json.Marshal(d)
+	common.Check(err)
+
+	// err = os.Mkdir(dirName, 0644)
+
+	if len(filePath) > 0 {
+		err = ioutil.WriteFile(filePath, b, 0644)
+		common.Check(err)
+		// fmt.Fprint(c.ResponseWriter, string(b))
+	}
+
+}
 
 func index(c *router.Context) {
 	// fmt.Fprintf(c.ResponseWriter, "Welcome!")
 	http.Redirect(c.ResponseWriter, c.Request, "/static/index.html", http.StatusFound)
 }
 
-func staticHandle(c *router.Context) {
-	http.NotFound(c.ResponseWriter, c.Request) //정적파일을 찾지 못한경우
-}
+func customStaticHandle(next router.HandlerFunc) router.HandlerFunc {
 
-func accessControlHeader(next router.HandlerFunc) router.HandlerFunc {
+	filters := []string{"/static/", "/files/"}
+
 	return func(c *router.Context) {
-		c.ResponseWriter.Header().Set("Access-Control-Allow-Origin", "*")
-		next(c)
+
+		file := c.Request.URL.Path
+		pass := false
+		for _, v := range filters {
+			if strings.HasPrefix(file, v) {
+
+				pass = true
+				break
+			}
+		}
+
+		if !pass {
+			next(c)
+			return
+		}
+
+		router.StaticHandler(next)(c)
 	}
+
 }
 
-//Run : 핸들러를 등록하고 http 서버를 시작한다.
+// Run : 핸들러를 등록하고 http 서버를 시작한다.
 func Run(port int) {
-
-	data.MemoInit() //load config
 
 	server := router.NewServer()
 	server.AppendMiidleWare(router.LogHandler)
 	server.AppendMiidleWare(router.RecoverHandler)
-	server.AppendMiidleWare(router.StaticHandler)
-	server.AppendMiidleWare(accessControlHeader)
+	server.AppendMiidleWare(customStaticHandle)
 
 	server.HandleFunc("GET", "/", index)
-	server.HandleFunc("GET", "/memo", data.GetList)
-	server.HandleFunc("OPTIONS", "/memo/:data", data.Options)
-	server.HandleFunc("GET", "/memo/:data", data.Get)
-	server.HandleFunc("POST", "/memo/:data", data.Post)
-	server.HandleFunc("PUT", "/memo/:data", data.Update)
-	server.HandleFunc("DELETE", "/memo/:data", data.Delete)
 
-	server.HandleFunc("GET", "/static/*", staticHandle)
+	server.HandleFunc("POST", "/api/poptilerank", popTileRankReg)
+	server.HandleFunc("GET", "/api/poptilerank", popTileRankGet)
 
 	addr := "localhost:" + strconv.Itoa(int(port))
 	fmt.Println(addr)

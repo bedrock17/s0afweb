@@ -76,6 +76,7 @@ export class Game {
 
 	public score: number
 	public gameOver: boolean
+	public gameOverCallback: (() => void) | null
 
 	private handleInit: boolean
 
@@ -83,6 +84,7 @@ export class Game {
 		this.score = 0
 		this.gameOver = false
 		this.handleInit = false
+		this.gameOverCallback = null
 	}
 
 	private newBlocks() {
@@ -96,6 +98,11 @@ export class Game {
 						// console.log("end!!!")
 						this.gameOver = true
 						// this.startGame()
+						
+						if (this.gameOverCallback != null) {
+							this.gameOverCallback()
+						}
+
 						return
 						
 					}

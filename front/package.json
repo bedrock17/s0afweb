@@ -1,15 +1,19 @@
 {
-  "name": "front",
+  "name": "S0AF",
   "version": "0.1.0",
-	"private": true,
+  "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "axios": "^0.19.2",
+    "bootstrap": "^4.4.1",
+    "bootstrap-vue": "^2.4.2",
     "core-js": "^3.6.4",
     "vue": "^2.6.11",
+    "vue-axios": "^2.1.5",
     "vue-class-component": "^7.2.2",
     "vue-property-decorator": "^8.3.0",
     "vue-router": "^3.1.5"
@@ -28,6 +32,7 @@
     "node-sass": "^4.12.0",
     "sass-loader": "^8.0.2",
     "typescript": "~3.7.5",
+    "uglifyjs-webpack-plugin": "^2.2.0",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
