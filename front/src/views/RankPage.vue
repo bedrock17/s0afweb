@@ -1,6 +1,7 @@
 <template>
   <div class="RankPage">
     <Rank v-bind:RankList="pageRankList"/>
+		<input type="button" value="RELOAD" class="btn btn-outline-info" v-on:click="load"/>
 		<div id="nav">
         <router-link to="/" class="btn btn-outline-info">GAME</router-link>
     </div>
@@ -17,17 +18,23 @@ export default {
   components: {
 		Rank
   },
-
+	
 	data: ()=>{
 		return {
 			pageRankList: []
 		}
 	},
+	
+	methods: {
+		load() {
+			axios.get('/api/poptilerank').then((res) => {
+				this.pageRankList = res.data.RankList
+			})
+		},
+	},
 
 	mounted() {
-		axios.get('/api/poptilerank').then((res) => {
-			this.pageRankList = res.data.RankList
-		})
+		this.load()
 	}
 }
 </script>
