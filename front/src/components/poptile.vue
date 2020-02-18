@@ -75,15 +75,6 @@ export default class Poptile extends Vue {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 
-* {
-	-webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
 canvas {
   border: 1px solid black;
   /* margin-left: 10px; */
