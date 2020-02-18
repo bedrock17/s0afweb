@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -79,6 +80,10 @@ func customStaticHandle(next router.HandlerFunc) router.HandlerFunc {
 
 // Run : 핸들러를 등록하고 http 서버를 시작한다.
 func Run(port int) {
+
+	globalDataBaseStruct.loadRankList("jsondb/rank.json")
+
+	log.Println(globalDataBaseStruct)
 
 	server := router.NewServer()
 	server.AppendMiidleWare(router.LogHandler)

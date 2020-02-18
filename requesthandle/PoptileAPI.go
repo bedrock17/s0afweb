@@ -25,12 +25,18 @@ func popTileRankReg(c *router.Context) {
 		return
 	}
 
+	if data.Score < 15 || data.TouchCount < 15 {
+		fmt.Fprintf(c.ResponseWriter, ":(")
+		return
+	}
+
 	find := false
 
 	for i := 0; i < len(globalDataBaseStruct.RankList); i++ {
 		if globalDataBaseStruct.RankList[i].UserName == data.UserName {
 			if globalDataBaseStruct.RankList[i].Score < data.Score {
 				globalDataBaseStruct.RankList[i].Score = data.Score
+				globalDataBaseStruct.RankList[i].TouchCount = data.TouchCount
 			}
 			find = true
 			break
