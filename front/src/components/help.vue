@@ -35,6 +35,14 @@
 	}
 }
 
+@media (max-width: 500px) {
+  .help-text {
+    
+    width: 100%;
+
+  }
+}
+
 
 .bounce-enter-active {
   animation: bounce-in 2s;
