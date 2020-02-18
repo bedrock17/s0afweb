@@ -77,11 +77,14 @@ export class Game {
 	public score: number
 	public gameOver: boolean
 	public gameOverCallback: (() => void) | null
+	public touchcount: number
 
 	private handleInit: boolean
+	
 
 	constructor() {
 		this.score = 0
+		this.touchcount = 0
 		this.gameOver = false
 		this.handleInit = false
 		this.gameOverCallback = null
@@ -186,7 +189,8 @@ export class Game {
 				"j": j
 			}, MAP[i][j], 1)
 			
-			this.score += (count*count+count)/2 //점수 계산 식
+			this.touchcount += 1
+			this.score += count*count //(count*count+count)/2 //점수 계산 식
 			
 			draw()
 			dropBlocks()

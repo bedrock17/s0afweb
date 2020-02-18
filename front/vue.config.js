@@ -3,7 +3,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 module.exports = {
 	publicPath: process.env.NODE_ENV === "production" ? "./" : "/",
 	outputDir: "../static",
-	configureWebpack: {
+	configureWebpack: process.env.NODE_ENV === "production" ? {
 		plugins: [
 			new UglifyJsPlugin({
 				uglifyOptions: {
@@ -13,7 +13,7 @@ module.exports = {
 				}
 			}),
 		]
-	},
+	} : {},
 	devServer: {
 		proxy: {
 			"/api": {

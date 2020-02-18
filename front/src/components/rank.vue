@@ -1,33 +1,50 @@
 <template>
   <div class="Rank">
-    <div v-if="RankList.length > 0">
+    <div v-if="RankList && RankList.length > 0">
       <h1> RANK </h1>
       <div>
-        <p v-for="item in RankList" v-bind:key="item.UserName"> {{item.UserName}} : {{item.Score}} </p>
-      </div>
-
-      <div id="nav">
-        <router-link to="/">GAME</router-link>
-      </div>
+				<table class="table">
+					<thead class="thead-dark">
+						<tr>
+							<th>Name</th>
+							<th>Score</th>
+							<th>Touch</th>
+							<th>Score/Touch</th>
+						</tr>
+					</thead>
+					
+					<tbody>
+						<tr v-for="(item, index) in RankList" v-bind:key="index">
+							<td class="name"> {{item.UserName}}</td>
+							<td> {{item.Score}}</td>
+							<td> {{item.TouchCount}}</td>
+							<td> {{`${item.Score / item.TouchCount}`.substring(0, 5)}}</td>
+						</tr>
+					</tbody>
+        
+				</table>
+      </div>  
     </div>
   </div>
 </template>
 
+<style lang="scss" scoped>
+	.table .thead-dark th {
+		vertical-align: middle;
+	}	
+
+	td.name {
+		max-width: 140px;
+		word-break: break-word;
+	}
+</style>
+
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator"
+import { Prop, Component, Vue } from "vue-property-decorator"
 import axios from 'axios'
 
 @Component
 export default class Rank extends Vue {
-  
-  RankList = []
-
-  mounted() {
-    this.RankList = []
-    console.log("??")
-    axios.get('/api/poptilerank').then((res: any) => {
-        this.RankList = res.data.RankList
-      })
-  }
+	@Prop({default: []}) private RankList: Array<any> = []
 }
 </script>

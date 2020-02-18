@@ -3,9 +3,9 @@
     <!-- <h1>POPTILE</h1> -->
 		
 		<div v-show="!gameStart">
-			<input type="text" v-model=name class="form-control" placeholder="Name">
+			<input type="text" v-model=name class="form-control" placeholder="Name" maxlength="30">
 			<p> </p>
-			<input type="button" class="btn btn-outline-primary" value="start" v-on:click=startBtnHandle>
+			<input type="button" class="btn btn-outline-primary" value="START!" v-on:click=startBtnHandle>
 		</div>
 
 		<div v-show="gameStart">
@@ -23,19 +23,30 @@
 
 		<hr v-if="game.gameOver" />
 
-		<div v-if="game.gameOver && RankList.length > 0">
-			<p v-for="item in RankList" v-bind:key="item.UserName"> {{item.UserName}} : {{item.Score}} </p>
-		</div>
+		<Rank v-bind:RankList="RankList" v-if="game.gameOver" />
 
+		<div id="nav" v-if="!gameStart">
+      <router-link to="/rank" class="btn btn-outline-info">RANK</router-link>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
+		// <div v-if="game.gameOver && RankList.length > 0">
+		// 	<p v-for="item in RankList" v-bind:key="item.UserName"> {{item.UserName}} : {{item.Score}} </p>
+		// </div>
+		
+import Rank from '@/components/Rank.vue'
 import { Component, Vue } from "vue-property-decorator"
 import axios from 'axios'
 import { Game } from "../poptile"
 
-@Component
+@Component({
+  name: 'poptile',
+  components: {
+    Rank
+  }
+})
 export default class Poptile extends Vue {
 
 	game: Game = new Game()
@@ -54,7 +65,7 @@ export default class Poptile extends Vue {
 		axios.post('/api/poptilerank', {
 			UserName: this.name,
 			Score: this.game.score,
-			TouchCount: 0,
+			TouchCount: this.game.touchcount,
 			CheckSumSha256: ""
 			}).then((res: any) => {
 			this.RankList = res.data.RankList

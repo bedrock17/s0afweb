@@ -2,11 +2,6 @@
   <div class="home">
 		<Help />
     <Poptile/>
-
-    <div id="nav">
-      <router-link to="/rank">RANK</router-link>
-    </div>
-
   </div>
 </template>
 

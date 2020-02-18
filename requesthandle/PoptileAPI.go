@@ -3,6 +3,7 @@ package requesthandle
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"sort"
 
 	"github.com/bedrock17/router"
@@ -18,6 +19,11 @@ func popTileRankReg(c *router.Context) {
 	var data model.PopTileRank
 	err := json.Unmarshal(body, &data)
 	common.Check(err)
+
+	if len(data.UserName) > 61 {
+		fmt.Fprintf(c.ResponseWriter, "TOOOOOOOOO LONG.... (%d)", len(data.UserName))
+		return
+	}
 
 	find := false
 
@@ -42,6 +48,9 @@ func popTileRankReg(c *router.Context) {
 	b, err := json.Marshal(globalDataBaseStruct)
 	common.Check(err)
 	fmt.Fprintf(c.ResponseWriter, string(b))
+
+	err = ioutil.WriteFile("jsondb/rank.json", b, 0644)
+	common.Check((err))
 }
 
 func popTileRankGet(c *router.Context) {
