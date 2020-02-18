@@ -90,7 +90,7 @@ func Run(port int) {
 	server.HandleFunc("POST", "/api/poptilerank", popTileRankReg)
 	server.HandleFunc("GET", "/api/poptilerank", popTileRankGet)
 
-	addr := "localhost:" + strconv.Itoa(int(port))
+	addr := ":" + strconv.Itoa(int(port))
 	fmt.Println(addr)
 	server.Run(addr)
 
