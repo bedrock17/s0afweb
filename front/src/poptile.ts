@@ -241,6 +241,7 @@ export class Game {
 	public startGame() {
 		this.initMAP();
 		this.score = 0
+		this.touchcount = 0
 		this.gameOver = false
 		draw()
 	}

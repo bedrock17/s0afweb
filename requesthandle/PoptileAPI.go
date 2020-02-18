@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"sort"
 
+	"sync"
+
 	"github.com/bedrock17/router"
 	"github.com/bedrock17/s0afWeb/common"
 	"github.com/bedrock17/s0afWeb/model"
@@ -32,6 +34,10 @@ func popTileRankReg(c *router.Context) {
 
 	find := false
 
+	var mutex = &sync.Mutex{}
+
+
+	mutex.Lock()
 	for i := 0; i < len(globalDataBaseStruct.RankList); i++ {
 		if globalDataBaseStruct.RankList[i].UserName == data.UserName {
 			if globalDataBaseStruct.RankList[i].Score < data.Score {
@@ -57,6 +63,7 @@ func popTileRankReg(c *router.Context) {
 
 	err = ioutil.WriteFile("jsondb/rank.json", b, 0644)
 	common.Check((err))
+	mutex.Unlock()
 }
 
 func popTileRankGet(c *router.Context) {
