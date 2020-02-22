@@ -4,14 +4,27 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"sort"
 
+	"crypto/sha256"
 	"sync"
 
 	"github.com/bedrock17/router"
 	"github.com/bedrock17/s0afWeb/common"
 	"github.com/bedrock17/s0afWeb/model"
 )
+
+var rankMutex = &sync.Mutex{}
+
+func popTileRankLoad(c *router.Context) {
+	// fmt.Fprintf(c.ResponseWriter, "Welcome!")
+	rankMutex.Lock()
+	globalDataBaseStruct.loadRankList("jsondb/rank.json")
+	rankMutex.Unlock()
+	http.Redirect(c.ResponseWriter, c.Request, "/static/index.html", http.StatusFound)
+}
 
 func popTileRankReg(c *router.Context) {
 
@@ -32,17 +45,23 @@ func popTileRankReg(c *router.Context) {
 		return
 	}
 
+	input := fmt.Sprintf("%s%d", data.UserName, (data.Score + data.TouchCount))
+	hexSum := fmt.Sprintf("%x", sha256.Sum256([]byte(input)))
+
+	log.Printf("%s\n", body)
+	if data.Check != hexSum || data.Score > (120*120*data.TouchCount) {
+		fmt.Fprintf(c.ResponseWriter, "ㅠㅠ")
+		return
+	}
+
 	find := false
 
-	var mutex = &sync.Mutex{}
-
-
-	mutex.Lock()
+	rankMutex.Lock()
 	for i := 0; i < len(globalDataBaseStruct.RankList); i++ {
 		if globalDataBaseStruct.RankList[i].UserName == data.UserName {
 			if globalDataBaseStruct.RankList[i].Score < data.Score {
-				globalDataBaseStruct.RankList[i].Score = data.Score
-				globalDataBaseStruct.RankList[i].TouchCount = data.TouchCount
+				globalDataBaseStruct.RankList[i] = data
+				globalDataBaseStruct.RankList[i].Check = ""
 			}
 			find = true
 			break
@@ -57,13 +76,13 @@ func popTileRankReg(c *router.Context) {
 		return globalDataBaseStruct.RankList[i].Score > globalDataBaseStruct.RankList[j].Score
 	})
 
-	b, err := json.Marshal(globalDataBaseStruct)
+	b, err := json.MarshalIndent(globalDataBaseStruct, "", "\t")
 	common.Check(err)
 	fmt.Fprintf(c.ResponseWriter, string(b))
 
 	err = ioutil.WriteFile("jsondb/rank.json", b, 0644)
 	common.Check((err))
-	mutex.Unlock()
+	rankMutex.Unlock()
 }
 
 func popTileRankGet(c *router.Context) {

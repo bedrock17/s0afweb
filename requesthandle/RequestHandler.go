@@ -94,6 +94,7 @@ func Run(port int) {
 
 	server.HandleFunc("POST", "/api/poptilerank", popTileRankReg)
 	server.HandleFunc("GET", "/api/poptilerank", popTileRankGet)
+	server.HandleFunc("GET", "/api/poptilerankload", popTileRankLoad)
 
 	addr := ":" + strconv.Itoa(int(port))
 	fmt.Println(addr)

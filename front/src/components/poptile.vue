@@ -40,6 +40,7 @@ import Rank from '@/components/Rank.vue'
 import { Component, Vue } from "vue-property-decorator"
 import axios from 'axios'
 import { Game } from "../poptile"
+import { SHA256 } from "../sha256"
 
 @Component({
   name: 'poptile',
@@ -66,7 +67,7 @@ export default class Poptile extends Vue {
 			UserName: this.name,
 			Score: this.game.score,
 			TouchCount: this.game.touchcount,
-			CheckSumSha256: ""
+			Check: SHA256(this.name + (this.game.score+this.game.touchcount).toString())
 			}).then((res: any) => {
 			this.RankList = res.data.RankList
 			})
