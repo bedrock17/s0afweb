@@ -12,9 +12,9 @@ const MAP: any = {}
 
 const MAPX = 8 //max map width
 const MAPY = 15 //max map height
-const BWIDTH = 30 //block width 
-const BHEIGHT = 30 //block height 
-
+const BWIDTH = 31 //block width 
+const BHEIGHT = 31 //block height 
+const OUTLINE_PIXEL = 0
 const MAPPXWIDTH = 800 //canvas widlth
 const MAPPXHEIGHT = 800 //canvas heightㅁ
 
@@ -31,6 +31,9 @@ function getMousePos(canvas: HTMLCanvasElement, evt: any) {
 	};
 }
 
+function sleep(ms: number) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 
 function draw() { //draw blocks and score
@@ -40,12 +43,12 @@ function draw() { //draw blocks and score
 	ctx.fillRect(0, 0, MAPPXWIDTH, MAPPXHEIGHT)
 	ctx.globalAlpha = 1
 
-
+	
 	for (let i = 0; i < MAPY; i++) {
 		for (let j = 0; j < MAPX; j++) {
-			const ypos = i * (BHEIGHT + 1)
-			const xpos = j * (BWIDTH + 1)
-
+			const ypos = i * (BHEIGHT + OUTLINE_PIXEL)
+			const xpos = j * (BWIDTH + OUTLINE_PIXEL)
+			
 			ctx.fillStyle = "rgb" + colors[MAP[i][j]]
 			ctx.fillRect(xpos, ypos, BWIDTH, BHEIGHT)
 
@@ -55,10 +58,14 @@ function draw() { //draw blocks and score
 	}
 }
 
-function dropBlocks() {
+async function dropBlocks() {
 	let isDown = true
 
 	while (isDown) {
+		draw()
+
+		await sleep(100)
+		
 		isDown = false
 		for (let i = MAPY - 1; i > 0; i--) {
 			for (let j = 0; j < MAPX; j++) {
@@ -172,8 +179,8 @@ export class Game {
 		const xpos = pos.x
 		const ypos = pos.y
 	
-		const j = Math.floor(xpos / (BWIDTH + 1))
-		const i = Math.floor(ypos / (BHEIGHT + 1))
+		const j = Math.floor(xpos / (BWIDTH + OUTLINE_PIXEL))
+		const i = Math.floor(ypos / (BHEIGHT + OUTLINE_PIXEL))
 	
 		if (i >= MAPY || j >= MAPX) {
 			// console.log("big!", i, j)
