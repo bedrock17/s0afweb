@@ -58,26 +58,10 @@ function draw() { //draw blocks and score
 	}
 }
 
-async function dropBlocks() {
-	let isDown = true
-
-	while (isDown) {
-		draw()
-
-		await sleep(100)
-		
-		isDown = false
-		for (let i = MAPY - 1; i > 0; i--) {
-			for (let j = 0; j < MAPX; j++) {
-				if (MAP[i][j] == 0 && MAP[i - 1][j] != 0) {
-					MAP[i][j] = MAP[i - 1][j]
-					MAP[i - 1][j] = 0
-					isDown = true
-				}
-			}
-		}
-	}
-}
+type POS = {
+	x: number;
+	y: number;
+}	
 
 export class Game {
 
@@ -87,6 +71,7 @@ export class Game {
 	public touchcount: number
 
 	private handleInit: boolean
+	private lastPos: POS
 	
 
 	constructor() {
@@ -95,6 +80,7 @@ export class Game {
 		this.gameOver = false
 		this.handleInit = false
 		this.gameOverCallback = null
+		this.lastPos = {"y": -1, "x": -1}
 	}
 
 	private newBlocks() {
@@ -124,6 +110,42 @@ export class Game {
 					MAP[i][j] = randInt(1, BLCOKCOLORMAX)
 				}
 			}
+		}
+	}
+
+	// 이곳에서 그리기 및 블록처리를 해준다.
+	private async gameProcLoop() {
+		let createBlock = false
+		while (!this.gameOver) {
+			draw()
+	
+			await sleep(100)
+			
+			if (this.lastPos.x >= 0 && this.lastPos.y >= 0) {
+				const count = this.deleteblock({
+					"i": this.lastPos.y,
+					"j": this.lastPos.x
+				}, MAP[this.lastPos.y][this.lastPos.x], 1)
+				this.touchcount += 1
+				this.score += count*count //(count*count+count)/2 //점수 계산 식
+				this.lastPos = {"y": -1, "x": -1}
+				createBlock = true
+			}
+			
+			for (let i = MAPY - 1; i > 0; i--) {
+				for (let j = 0; j < MAPX; j++) {
+					if (MAP[i][j] == 0 && MAP[i - 1][j] != 0) {
+						MAP[i][j] = MAP[i - 1][j]
+						MAP[i - 1][j] = 0
+					}
+				}
+			}
+
+			if (createBlock) {
+				this.newBlocks()
+				createBlock = false
+			}
+			
 		}
 	}
 
@@ -191,20 +213,23 @@ export class Game {
 			// 빈 타일
 			return
 		} else {
-			const count = this.deleteblock({
-				"i": i,
-				"j": j
-			}, MAP[i][j], 1)
+
+			this.lastPos = {"y": i, "x": j};
+
+			// const count = this.deleteblock({
+				// "i": i,
+				// "j": j
+			// }, MAP[i][j], 1)
 			
-			this.touchcount += 1
-			this.score += count*count //(count*count+count)/2 //점수 계산 식
+			// this.touchcount += 1
+			// this.score += count*count //(count*count+count)/2 //점수 계산 식
 			
-			draw()
-			dropBlocks()
+			// draw()
+			// this.gameProcLoop()
 		}
 	
-		this.newBlocks()
-		draw()
+		// this.newBlocks()
+		// draw()
 	}
 
 	private initMAP(): void { //init game
@@ -246,11 +271,13 @@ export class Game {
 	}
 
 	public startGame() {
-		this.initMAP();
+		this.initMAP()
 		this.score = 0
 		this.touchcount = 0
 		this.gameOver = false
-		draw()
+
+		this.gameProcLoop() 
+		// draw()
 	}
 	
 }

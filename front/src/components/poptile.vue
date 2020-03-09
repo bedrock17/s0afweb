@@ -74,8 +74,8 @@ export default class Poptile extends Vue {
 	}
 
 	startBtnHandle() {
-		if (this.name.length > 0)
-			this.gameStart = true
+		// if (this.name.length > 0) //이름이 없어도 시작할 수 있도록..
+		this.gameStart = true
 	}
 
 	retryGame() {

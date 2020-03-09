@@ -57,32 +57,35 @@ func popTileRankReg(c *router.Context) {
 	find := false
 
 	rankMutex.Lock()
-	for i := 0; i < len(globalDataBaseStruct.RankList); i++ {
-		if globalDataBaseStruct.RankList[i].UserName == data.UserName {
-			if globalDataBaseStruct.RankList[i].Score < data.Score {
-				globalDataBaseStruct.RankList[i] = data
-				globalDataBaseStruct.RankList[i].Check = ""
+	if len(data.UserName) > 0 {
+		for i := 0; i < len(globalDataBaseStruct.RankList); i++ {
+			if globalDataBaseStruct.RankList[i].UserName == data.UserName {
+				if globalDataBaseStruct.RankList[i].Score < data.Score {
+					globalDataBaseStruct.RankList[i] = data
+					globalDataBaseStruct.RankList[i].Check = ""
+				}
+				find = true
+				break
 			}
-			find = true
-			break
 		}
-	}
 
-	if !find {
-		globalDataBaseStruct.RankList = append(globalDataBaseStruct.RankList, data)
-	}
+		if !find {
+			globalDataBaseStruct.RankList = append(globalDataBaseStruct.RankList, data)
+		}
 
-	sort.Slice(globalDataBaseStruct.RankList, func(i, j int) bool {
-		return globalDataBaseStruct.RankList[i].Score > globalDataBaseStruct.RankList[j].Score
-	})
+		sort.Slice(globalDataBaseStruct.RankList, func(i, j int) bool {
+			return globalDataBaseStruct.RankList[i].Score > globalDataBaseStruct.RankList[j].Score
+		})
+	}
 
 	b, err := json.MarshalIndent(globalDataBaseStruct, "", "\t")
 	common.Check(err)
+	err = ioutil.WriteFile("jsondb/rank.json", b, 0644)
+	rankMutex.Unlock()
+
 	fmt.Fprintf(c.ResponseWriter, string(b))
 
-	err = ioutil.WriteFile("jsondb/rank.json", b, 0644)
 	common.Check((err))
-	rankMutex.Unlock()
 }
 
 func popTileRankGet(c *router.Context) {
