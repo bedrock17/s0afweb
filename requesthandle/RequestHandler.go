@@ -12,8 +12,8 @@ import (
 	// "os"
 
 	"github.com/bedrock17/router"
-	"github.com/bedrock17/s0afWeb/common"
-	"github.com/bedrock17/s0afWeb/model"
+	"github.com/bedrock17/s0afweb/common"
+	"github.com/bedrock17/s0afweb/model"
 )
 
 type dataBaseStruct struct {
@@ -75,7 +75,6 @@ func customStaticHandle(next router.HandlerFunc) router.HandlerFunc {
 
 		router.StaticHandler(next)(c)
 	}
-
 }
 
 // Run : 핸들러를 등록하고 http 서버를 시작한다.
@@ -96,7 +95,11 @@ func Run(port int) {
 	server.HandleFunc("GET", "/api/poptilerank", popTileRankGet)
 	server.HandleFunc("GET", "/api/poptilerankload", popTileRankLoad)
 
+	server.HandleFunc("GET", "/poptile", vueURIHandelGenerator("./static/index.html"))
+	server.HandleFunc("GET", "/poptile/rank", vueURIHandelGenerator("./static/index.html"))
+
 	addr := ":" + strconv.Itoa(int(port))
+
 	fmt.Println(addr)
 	server.Run(addr)
 

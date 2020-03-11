@@ -1,11 +1,11 @@
 <template>
   <div class="help">
-    <div v-on:click="toggle">
-      <h1 v-bind:class="{active: showHint}">사용법</h1>
-    </div>
 
-    <transition name="bounce">
-      <div v-if="showHint" class="help-text">
+		<b-button v-b-toggle="'collapse-1'" variant="outline-info">사용법</b-button>
+
+		<!-- Element to collapse -->
+		<b-collapse id="collapse-1">
+			<div class="help-text">
         <p>1. 타일이 최대 높이를 넘으면 게임이 종료됩니다.</p>
         <p>
           2. 타일을 선택하면 선택된 타일과 인접한 같은 색의 타일이 지워지고 타일이
@@ -13,11 +13,19 @@
         </p>
         <p>3. 이름을 입력하면 이름으로 점수가 등록됩니다.</p>
       </div>
-    </transition>
+		</b-collapse>
+		<br>
+
   </div>
 </template>
 
 <style lang="scss" scoped>
+
+button {
+	margin-top: 10px;
+	margin-right: 10px;
+	margin-bottom: 20px;
+}
 
 .active {
 	color: #0af;
@@ -51,19 +59,6 @@
   animation: bounce-in 0s reverse;
 }
 
-@keyframes bounce-in {
-  0% {
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.3s ease-out; // note that we're transitioning max-height, not height!
-  }
-  100% {
-    overflow: hidden;
-    height: auto;
-    max-height: 600px; // still have to hard-code a value!
-    transition: max-height 0.3s ease-out; // note that we're transitioning max-height, not height!
-  }
-}
 </style>
 
 <script lang="ts">

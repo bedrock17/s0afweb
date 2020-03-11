@@ -3,13 +3,22 @@
     <!-- <h1>POPTILE</h1> -->
 		
 		<div v-show="!gameStart">
-			<input type="text" v-model=name class="form-control" placeholder="Name" maxlength="30">
+			<input type="text" v-model=name class="form-control username" placeholder="사용자이름" maxlength="30">
 			<p> </p>
 			<input type="button" class="btn btn-outline-primary" value="START!" v-on:click=startBtnHandle>
 		</div>
 
 		<div v-show="gameStart">
-			<h2> [{{name}}] SCORE : {{ game.score }}</h2>
+			
+			<h2> 
+				<span v-if="name.length > 0">
+					[{{name}}] 
+				</span> 
+				<span v-else>
+					{{name}} 
+				</span> 
+				SCORE: {{ game.score }}
+			</h2>
 
 			<div v-if="game.gameOver"> 
 				<h1> GAME OVER  </h1>
@@ -26,7 +35,7 @@
 		<Rank v-bind:RankList="RankList" v-if="game.gameOver" />
 
 		<div id="nav" v-if="!gameStart">
-      <router-link to="/rank" class="btn btn-outline-info">RANK</router-link>
+      <router-link to="/poptile/rank" class="btn btn-outline-info">RANK</router-link>
     </div>
   </div>
 </template>
@@ -56,8 +65,7 @@ export default class Poptile extends Vue {
 	RankList = []
 
   mounted() {
-    this.game.startGame()
-
+    // this.game.startGame()
 		this.game.gameOverCallback = this.gameOverCallback
   }
 
@@ -75,6 +83,7 @@ export default class Poptile extends Vue {
 
 	startBtnHandle() {
 		// if (this.name.length > 0) //이름이 없어도 시작할 수 있도록..
+		this.game.startGame()
 		this.gameStart = true
 	}
 
@@ -86,6 +95,20 @@ export default class Poptile extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+
+* {
+	-webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.username {
+	width: 500px;
+	margin: auto;
+}
 
 canvas {
   border: 1px solid black;

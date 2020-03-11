@@ -1,4 +1,3 @@
 {
-	"ServicePort": 8888,
-	"DataPath": "test"
+	"ServicePort": 8888
 }

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/bedrock17/s0afWeb/common"
-	"github.com/bedrock17/s0afWeb/requesthandle"
+	"github.com/bedrock17/s0afweb/common"
+	"github.com/bedrock17/s0afweb/requesthandle"
 )
 
 func main() {

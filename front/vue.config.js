@@ -1,7 +1,7 @@
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
-	publicPath: process.env.NODE_ENV === "production" ? "./" : "/",
+	publicPath: process.env.NODE_ENV === "production" ? "/static" : "/",
 	outputDir: "../static",
 	configureWebpack: process.env.NODE_ENV === "production" ? {
 		plugins: [

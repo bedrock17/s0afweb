@@ -12,8 +12,8 @@ import (
 	"sync"
 
 	"github.com/bedrock17/router"
-	"github.com/bedrock17/s0afWeb/common"
-	"github.com/bedrock17/s0afWeb/model"
+	"github.com/bedrock17/s0afweb/common"
+	"github.com/bedrock17/s0afweb/model"
 )
 
 var rankMutex = &sync.Mutex{}

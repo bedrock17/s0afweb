@@ -47,6 +47,7 @@ export class Game {
 	public gameOver: boolean
 	public gameOverCallback: (() => void) | null
 	public touchcount: number
+	public optionDeleteEffect: boolean
 
 	private handleInit: boolean
 	private lastPos: POS
@@ -59,6 +60,7 @@ export class Game {
 		this.handleInit = false
 		this.gameOverCallback = null
 		this.lastPos = {"y": -1, "x": -1}
+		this.optionDeleteEffect = true;
 	}
 
 	private draw() { //draw blocks and score
@@ -68,18 +70,18 @@ export class Game {
 		ctx.fillRect(0, 0, MAPPXWIDTH, MAPPXHEIGHT)
 		ctx.globalAlpha = 1
 	
-		const code = Math.floor(255-(this.score / 100)%256)
-		const bgColor = "(" + code + "," + code + "," + code + ")"
+		// const code = Math.floor(255-(this.score / 100)%256)
+		// const bgColor = "(" + code + "," + code + "," + code + ")"
 
 		for (let i = 0; i < MAPY; i++) {
 			for (let j = 0; j < MAPX; j++) {
 				const ypos = i * (BHEIGHT + OUTLINE_PIXEL)
 				const xpos = j * (BWIDTH + OUTLINE_PIXEL)
 
-				let colorCode = colors[MAP[i][j]]
+				const colorCode = colors[MAP[i][j]]
 				
-				if (MAP[i][j] == 0)
-					colorCode = bgColor
+				// if (MAP[i][j] == 0)
+				// 	colorCode = bgColor
 				
 				ctx.fillStyle = "rgb" + colorCode
 				ctx.fillRect(xpos, ypos, BWIDTH, BHEIGHT)
@@ -124,30 +126,41 @@ export class Game {
 	// 이곳에서 그리기 및 블록처리를 해준다.
 	private async gameProcLoop() {
 		let createBlock = false
+		
+		await sleep(100)
+
 		while (!this.gameOver) {
 			
-			await sleep(100)
+			await sleep(50)
 			
 			if (this.lastPos.x >= 0 && this.lastPos.y >= 0) {
-				const count = this.deleteblock({
+
+				const count = await this.deleteblock({
 					"i": this.lastPos.y,
 					"j": this.lastPos.x
 				}, MAP[this.lastPos.y][this.lastPos.x], 1)
+
 				this.touchcount += 1
 				this.score += count*count //(count*count+count)/2 //점수 계산 식
+				
 				this.lastPos = {"y": -1, "x": -1}
 				createBlock = true
 			}
 
+			let isDown = false
 			for (let i = MAPY - 1; i > 0; i--) {
 				for (let j = 0; j < MAPX; j++) {
 					if (MAP[i][j] == 0 && MAP[i - 1][j] != 0) {
 						MAP[i][j] = MAP[i - 1][j]
 						MAP[i - 1][j] = 0
+
+						isDown = true
 					}
 				}
 			}
-			this.draw()
+
+			if (isDown)
+				this.draw()
 			
 			if (createBlock) {
 				this.newBlocks()
@@ -160,7 +173,13 @@ export class Game {
 		}
 	}
 
-	private deleteblock(pos: any, blockCode: any, depth: number): number {
+
+	// return new Promise(function(resolve, reject) {
+  //   var items = [1,2,3];
+  //   resolve(items)
+	// });
+	
+  private async deleteblock(pos: any, blockCode: any, depth: number): Promise<number> {
 		
 		let count = 1
 		const nextpos = {
@@ -169,36 +188,40 @@ export class Game {
 		}
 	
 		MAP[pos.i][pos.j] = 0
-	
-		// console.log("delete block", pos.i, pos.j, blockCode)
-		// console.log(MAP)
-	
+		
+		if (this.optionDeleteEffect) { //블록을 지워나가는 과정을 보여주는 부분.
+			this.draw()
+			await sleep(50)
+		}
 		//up
 		if (pos.i != 0 && MAP[pos.i - 1][pos.j] == blockCode) {
 			nextpos.i = pos.i - 1
 			nextpos.j = pos.j
-			count += this.deleteblock(nextpos, blockCode, depth + 1)
+			count += await this.deleteblock(nextpos, blockCode, depth + 1)
 		}
 		//right
 		if (pos.j != MAPX - 1 && MAP[pos.i][pos.j + 1] == blockCode) {
 			nextpos.i = pos.i
 			nextpos.j = pos.j + 1
-			count += this.deleteblock(nextpos, blockCode, depth + 1)
+			count += await this.deleteblock(nextpos, blockCode, depth + 1)
 		}
 		//down
 		if (pos.i != MAPY - 1 && MAP[pos.i + 1][pos.j] == blockCode) {
 			nextpos.i = pos.i + 1
 			nextpos.j = pos.j
-			count += this.deleteblock(nextpos, blockCode, depth + 1)
+			count += await this.deleteblock(nextpos, blockCode, depth + 1)
 		}
 		//left
 		if (pos.j != 0 && MAP[pos.i][pos.j - 1] == blockCode) {
 			nextpos.i = pos.i
 			nextpos.j = pos.j - 1
-			count += this.deleteblock(nextpos, blockCode, depth + 1)
+			count += await this.deleteblock(nextpos, blockCode, depth + 1)
 		}
 		
-		return count
+		// return count
+		return new Promise<number>((resolve) => {
+			resolve(count);
+		})
 	}
 
 	private proc = (e: any) => { //mouse event
@@ -224,23 +247,8 @@ export class Game {
 			// 빈 타일
 			return
 		} else {
-
 			this.lastPos = {"y": i, "x": j};
-
-			// const count = this.deleteblock({
-				// "i": i,
-				// "j": j
-			// }, MAP[i][j], 1)
-			
-			// this.touchcount += 1
-			// this.score += count*count //(count*count+count)/2 //점수 계산 식
-			
-			// draw()
-			// this.gameProcLoop()
 		}
-	
-		// this.newBlocks()
-		// draw()
 	}
 
 	private initMAP(): void { //init game
@@ -285,9 +293,11 @@ export class Game {
 		this.initMAP()
 		this.score = 0
 		this.touchcount = 0
+		this.draw()
+		
 		this.gameOver = false
-
-		this.gameProcLoop() 
+		this.gameProcLoop()
+	
 		// draw()
 	}
 	
