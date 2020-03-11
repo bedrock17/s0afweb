@@ -49,7 +49,7 @@ func (d *dataBaseStruct) saveRankList(filePath string) {
 
 func index(c *router.Context) {
 	// fmt.Fprintf(c.ResponseWriter, "Welcome!")
-	http.Redirect(c.ResponseWriter, c.Request, "/static/index.html", http.StatusFound)
+	http.Redirect(c.ResponseWriter, c.Request, "/poptile", http.StatusFound)
 }
 
 func customStaticHandle(next router.HandlerFunc) router.HandlerFunc {
