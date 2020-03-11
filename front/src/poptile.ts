@@ -2,8 +2,9 @@ const colors = [ //color code
 	"(255, 255, 255)",
 	"(0, 171, 255)",
 	"(255, 171, 0)",
-	"(0, 255, 171) "
+	"(0, 255, 171)",
 ]
+
 const BLCOKCOLORMAX = 3
 let cvs: any //canvas
 let ctx: any //canvas 2d
@@ -35,29 +36,6 @@ function sleep(ms: number) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
-function draw() { //draw blocks and score
-
-	ctx.globalAlpha = 1
-	ctx.fillStyle = 'rgb(0, 0, 0)'
-	ctx.fillRect(0, 0, MAPPXWIDTH, MAPPXHEIGHT)
-	ctx.globalAlpha = 1
-
-	
-	for (let i = 0; i < MAPY; i++) {
-		for (let j = 0; j < MAPX; j++) {
-			const ypos = i * (BHEIGHT + OUTLINE_PIXEL)
-			const xpos = j * (BWIDTH + OUTLINE_PIXEL)
-			
-			ctx.fillStyle = "rgb" + colors[MAP[i][j]]
-			ctx.fillRect(xpos, ypos, BWIDTH, BHEIGHT)
-
-			//  console.log(xpos, ypos, BWIDTH, BHEIGHT)
-
-		}
-	}
-}
-
 type POS = {
 	x: number;
 	y: number;
@@ -82,6 +60,36 @@ export class Game {
 		this.gameOverCallback = null
 		this.lastPos = {"y": -1, "x": -1}
 	}
+
+	private draw() { //draw blocks and score
+
+		ctx.globalAlpha = 1
+		ctx.fillStyle = 'rgb(0, 0, 0)'
+		ctx.fillRect(0, 0, MAPPXWIDTH, MAPPXHEIGHT)
+		ctx.globalAlpha = 1
+	
+		const code = Math.floor(255-(this.score / 100)%256)
+		const bgColor = "(" + code + "," + code + "," + code + ")"
+
+		for (let i = 0; i < MAPY; i++) {
+			for (let j = 0; j < MAPX; j++) {
+				const ypos = i * (BHEIGHT + OUTLINE_PIXEL)
+				const xpos = j * (BWIDTH + OUTLINE_PIXEL)
+
+				let colorCode = colors[MAP[i][j]]
+				
+				if (MAP[i][j] == 0)
+					colorCode = bgColor
+				
+				ctx.fillStyle = "rgb" + colorCode
+				ctx.fillRect(xpos, ypos, BWIDTH, BHEIGHT)
+	
+				//  console.log(xpos, ypos, BWIDTH, BHEIGHT)
+	
+			}
+		}
+	}
+	
 
 	private newBlocks() {
 		let i = 0
@@ -117,8 +125,7 @@ export class Game {
 	private async gameProcLoop() {
 		let createBlock = false
 		while (!this.gameOver) {
-			draw()
-	
+			
 			await sleep(100)
 			
 			if (this.lastPos.x >= 0 && this.lastPos.y >= 0) {
@@ -131,7 +138,7 @@ export class Game {
 				this.lastPos = {"y": -1, "x": -1}
 				createBlock = true
 			}
-			
+
 			for (let i = MAPY - 1; i > 0; i--) {
 				for (let j = 0; j < MAPX; j++) {
 					if (MAP[i][j] == 0 && MAP[i - 1][j] != 0) {
@@ -140,11 +147,15 @@ export class Game {
 					}
 				}
 			}
-
+			this.draw()
+			
 			if (createBlock) {
 				this.newBlocks()
 				createBlock = false
+				this.draw()
+				await sleep(100)
 			}
+			
 			
 		}
 	}
