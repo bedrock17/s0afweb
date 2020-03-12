@@ -10,7 +10,7 @@
 
 <script>
 // @ is an alias to /src
-import Rank from '@/components/Rank.vue'
+import Rank from '@/components/rank.vue'
 import axios from 'axios'
 
 export default {

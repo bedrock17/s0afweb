@@ -45,7 +45,7 @@
 		// 	<p v-for="item in RankList" v-bind:key="item.UserName"> {{item.UserName}} : {{item.Score}} </p>
 		// </div>
 		
-import Rank from '@/components/Rank.vue'
+import Rank from '@/components/rank.vue'
 import { Component, Vue } from "vue-property-decorator"
 import axios from 'axios'
 import { Game } from "../poptile"
@@ -102,8 +102,16 @@ export default class Poptile extends Vue {
   -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  user-select: none;
+  user-select: initial;
 }
+
+input, input:before, input:after {
+  -webkit-user-select: initial;
+  -moz-user-select: initial;
+  -ms-user-select: initial;
+  user-select: initial;
+}
+
 
 .username {
 	width: 500px;
