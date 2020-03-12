@@ -47,7 +47,8 @@ export class Game {
 	public gameOver: boolean
 	public gameOverCallback: (() => void) | null
 	public touchcount: number
-	public optionDeleteEffect: boolean
+	public dropEffect: boolean
+	public deleteEffect: boolean
 
 	private handleInit: boolean
 	private lastPos: POS
@@ -60,7 +61,10 @@ export class Game {
 		this.handleInit = false
 		this.gameOverCallback = null
 		this.lastPos = {"y": -1, "x": -1}
-		this.optionDeleteEffect = true;
+
+		//option
+		this.dropEffect = true
+		this.deleteEffect = true
 	}
 
 	private draw() { //draw blocks and score
@@ -148,15 +152,24 @@ export class Game {
 			}
 
 			let isDown = false
-			for (let i = MAPY - 1; i > 0; i--) {
-				for (let j = 0; j < MAPX; j++) {
-					if (MAP[i][j] == 0 && MAP[i - 1][j] != 0) {
-						MAP[i][j] = MAP[i - 1][j]
-						MAP[i - 1][j] = 0
+			let isContinue = true
+			while (isContinue)
+			{
+				isContinue = false
+				for (let i = MAPY - 1; i > 0; i--) {
+					for (let j = 0; j < MAPX; j++) {
+						if (MAP[i][j] == 0 && MAP[i - 1][j] != 0) {
+							MAP[i][j] = MAP[i - 1][j]
+							MAP[i - 1][j] = 0
 
-						isDown = true
+							isDown = true
+							isContinue = true
+						}
 					}
 				}
+
+				if (this.dropEffect)
+					break;
 			}
 
 			if (isDown)
@@ -189,7 +202,7 @@ export class Game {
 	
 		MAP[pos.i][pos.j] = 0
 		
-		if (this.optionDeleteEffect) { //블록을 지워나가는 과정을 보여주는 부분.
+		if (this.deleteEffect) { //블록을 지워나가는 과정을 보여주는 부분.
 			this.draw()
 			await sleep(50)
 		}

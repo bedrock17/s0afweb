@@ -1,7 +1,15 @@
 <template>
   <div class="poptile">
     <!-- <h1>POPTILE</h1> -->
-		
+
+		<b-form-checkbox v-model="game.dropEffect" name="check-button" switch>
+      떨어짐 효과
+    </b-form-checkbox>
+
+		<b-form-checkbox v-model="game.deleteEffect" name="check-button" switch>
+      지우는 효과
+    </b-form-checkbox>
+
 		<div v-show="!gameStart">
 			<input type="text" v-model=name class="form-control username" placeholder="사용자이름" maxlength="30">
 			<p> </p>
@@ -59,13 +67,12 @@ import { SHA256 } from "../sha256"
 })
 export default class Poptile extends Vue {
 
-	game: Game = new Game()
+	game = new Game()
 	gameStart = false
 	name = ""
 	RankList = []
 
   mounted() {
-    // this.game.startGame()
 		this.game.gameOverCallback = this.gameOverCallback
   }
 
