@@ -4,6 +4,10 @@
 		<b-button v-b-toggle="'collapse-2'" variant="outline-info">업데이트 히스토리</b-button>
 		<b-collapse id="collapse-2">
 			<div class="text-update-log">
+        <h3>ver 20.3.13.2</h3>
+				<pre>
+	지우는 효과 BFS로 탐색방법 변경
+				</pre>
         <h3>ver 20.3.13.1</h3>
 				<pre>
 	URI처리 버그 수정

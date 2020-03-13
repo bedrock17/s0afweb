@@ -36,10 +36,28 @@ function sleep(ms: number) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+class Queue<T> {
+  list: T[] = [];
+  get length() {
+    return this.list.length;
+  }
+  enqueue(item: T) {
+    this.list.push(item);
+  }
+  dequeue() {
+    return this.list.shift();
+  }
+}
+
 type POS = {
 	x: number;
 	y: number;
-}	
+}
+
+type MAPPOS = {
+	i: number;
+	j: number;
+}
 
 export class Game {
 
@@ -49,6 +67,7 @@ export class Game {
 	public touchcount: number
 	public dropEffect: boolean
 	public deleteEffect: boolean
+	public displayScore: number
 
 	private handleInit: boolean
 	private lastPos: POS
@@ -61,7 +80,8 @@ export class Game {
 		this.handleInit = false
 		this.gameOverCallback = null
 		this.lastPos = {"y": -1, "x": -1}
-
+		this.displayScore = 0
+		
 		//option
 		this.dropEffect = true
 		this.deleteEffect = true
@@ -192,43 +212,64 @@ export class Game {
   //   resolve(items)
 	// });
 	
-  private async deleteblock(pos: any, blockCode: any, depth: number): Promise<number> {
+  private async deleteblock(argPos: MAPPOS, blockCode: any, depth: number): Promise<number> {
 		
-		let count = 1
+		let count = 0
 		const nextpos = {
 			"i": 0,
 			"j": 0
 		}
-	
-		MAP[pos.i][pos.j] = 0
 		
-		if (this.deleteEffect) { //블록을 지워나가는 과정을 보여주는 부분.
-			this.draw()
-			await sleep(50)
-		}
-		//up
-		if (pos.i != 0 && MAP[pos.i - 1][pos.j] == blockCode) {
-			nextpos.i = pos.i - 1
-			nextpos.j = pos.j
-			count += await this.deleteblock(nextpos, blockCode, depth + 1)
-		}
-		//right
-		if (pos.j != MAPX - 1 && MAP[pos.i][pos.j + 1] == blockCode) {
-			nextpos.i = pos.i
-			nextpos.j = pos.j + 1
-			count += await this.deleteblock(nextpos, blockCode, depth + 1)
-		}
-		//down
-		if (pos.i != MAPY - 1 && MAP[pos.i + 1][pos.j] == blockCode) {
-			nextpos.i = pos.i + 1
-			nextpos.j = pos.j
-			count += await this.deleteblock(nextpos, blockCode, depth + 1)
-		}
-		//left
-		if (pos.j != 0 && MAP[pos.i][pos.j - 1] == blockCode) {
-			nextpos.i = pos.i
-			nextpos.j = pos.j - 1
-			count += await this.deleteblock(nextpos, blockCode, depth + 1)
+
+		const queue = new Queue<MAPPOS>()
+		queue.enqueue(argPos)
+		while (queue.length > 0)
+		{
+			const pos = queue.dequeue()
+
+			if (pos == undefined)
+				break
+
+			MAP[pos.i][pos.j] = 0
+			// console.log(pos, queue.length)
+			count++
+			this.displayScore = this.score + count*count //지우면서 점수 올라가는것을 보여줌
+			
+			if (this.deleteEffect) { //블록을 지워나가는 과정을 보여주는 부분.
+				this.draw()
+				await sleep(25)
+			}
+			//up
+			if (pos.i != 0 && MAP[pos.i - 1][pos.j] == blockCode) {
+				// nextpos.i = pos.i - 1
+				// nextpos.j = pos.j
+				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
+				queue.enqueue({"i": pos.i - 1, "j": pos.j})
+			}
+			//right
+			if (pos.j != MAPX - 1 && MAP[pos.i][pos.j + 1] == blockCode) {
+				// nextpos.i = pos.i
+				// nextpos.j = pos.j + 1
+				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
+				// queue.enqueue(nextpos)
+				queue.enqueue({"i": pos.i, "j": pos.j + 1})
+			}
+			//down
+			if (pos.i != MAPY - 1 && MAP[pos.i + 1][pos.j] == blockCode) {
+				// nextpos.i = pos.i + 1
+				// nextpos.j = pos.j
+				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
+				// queue.enqueue(nextpos)
+				queue.enqueue({"i": pos.i + 1, "j": pos.j})
+			}
+			//left
+			if (pos.j != 0 && MAP[pos.i][pos.j - 1] == blockCode) {
+				// nextpos.i = pos.i
+				// nextpos.j = pos.j - 1
+				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
+				// queue.enqueue(nextpos)
+				queue.enqueue({"i": pos.i, "j": pos.j - 1})
+			}
 		}
 		
 		// return count
@@ -305,6 +346,7 @@ export class Game {
 	public startGame() {
 		this.initMAP()
 		this.score = 0
+		this.displayScore = 0
 		this.touchcount = 0
 		this.draw()
 		

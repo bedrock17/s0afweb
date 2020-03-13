@@ -25,7 +25,7 @@
 				<span v-else>
 					{{name}} 
 				</span> 
-				SCORE: {{ game.score }}
+				SCORE: {{ game.displayScore }}
 			</h2>
 
 			<div v-if="game.gameOver"> 
