@@ -230,6 +230,9 @@ export class Game {
 			if (pos == undefined)
 				break
 
+			if (MAP[pos.i][pos.j] == 0)
+				continue
+			
 			MAP[pos.i][pos.j] = 0
 			// console.log(pos, queue.length)
 			count++
