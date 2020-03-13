@@ -97,6 +97,8 @@ func Run(port int) {
 
 	server.HandleFunc("GET", "/poptile", vueURIHandelGenerator("./static/index.html"))
 	server.HandleFunc("GET", "/poptile/rank", vueURIHandelGenerator("./static/index.html"))
+	server.HandleFunc("GET", "/static/poptile", vueURIHandelGenerator("./static/index.html"))
+	server.HandleFunc("GET", "/static/poptile/rank", vueURIHandelGenerator("./static/index.html"))
 
 	addr := ":" + strconv.Itoa(int(port))
 

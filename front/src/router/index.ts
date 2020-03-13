@@ -21,6 +21,15 @@ const routes = [
 		component: Home
 	},
 	{
+		path: '/static/poptile',
+		name: 'Home',
+	},
+	{
+		path: '/static/poptile/rank',
+		name: 'RankPage',
+		component: () => import(/* webpackChunkName: "about" */ '../views/RankPage.vue')
+	},
+	{
 		path: '/poptile/rank',
 		name: 'RankPage',
 		// route level code-splitting

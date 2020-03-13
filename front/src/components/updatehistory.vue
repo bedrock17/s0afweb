@@ -4,6 +4,15 @@
 		<b-button v-b-toggle="'collapse-2'" variant="outline-info">업데이트 히스토리</b-button>
 		<b-collapse id="collapse-2">
 			<div class="text-update-log">
+        <h3>ver 20.3.13.1</h3>
+				<pre>
+	URI처리 버그 수정
+				</pre>
+        <h3>ver 20.3.12.2</h3>
+				<pre>
+	mac, ios에서 동작안되는 문제 재수정
+	효과 비활성화 가능하도록 수정
+				</pre>
         <h3>ver 20.3.12.1</h3>
 				<pre>
 	지워지는 효과 추가
