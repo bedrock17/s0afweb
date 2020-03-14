@@ -4,9 +4,14 @@
 		<b-button v-b-toggle="'collapse-2'" variant="outline-info">업데이트 히스토리</b-button>
 		<b-collapse id="collapse-2">
 			<div class="text-update-log">
+        <h3>ver 20.3.14.1</h3>
+				<pre>
+	게임을 계속 다시 시작할 때 내부적으로
+	게임이 두 개 이상 실행되는 버그 수정
+				</pre>
         <h3>ver 20.3.13.2</h3>
 				<pre>
-	지우는 효과 BFS로 탐색방법 변경
+	지우는 효과 BFS로 탐색 방법 변경
 				</pre>
         <h3>ver 20.3.13.1</h3>
 				<pre>
@@ -14,15 +19,16 @@
 				</pre>
         <h3>ver 20.3.12.2</h3>
 				<pre>
-	mac, ios에서 동작안되는 문제 재수정
+	mac, ios에서 동작 안되는 문제 재수정
 	효과 비활성화 가능하도록 수정
 				</pre>
         <h3>ver 20.3.12.1</h3>
 				<pre>
 	지워지는 효과 추가
-	URI처리 버그 수정
+	URI 처리 버그 수정
 	히스토리 추가
-	문의는 이곳으로 :) https://open.kakao.com/o/g9F8Ym1b
+	문의는 이곳으로
+	:) https://open.kakao.com/o/g9F8Ym1b
 				</pre>
 			</div>
 		</b-collapse>

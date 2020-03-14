@@ -127,6 +127,12 @@ input, input:before, input:after {
 	margin: auto;
 }
 
+@media (max-width: 500px) {
+  .username {
+    width: 100%;
+  }
+}
+
 canvas {
   border: 1px solid black;
   /* margin-left: 10px; */
