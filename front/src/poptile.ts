@@ -1,23 +1,7 @@
-const colors = [ //color code
-	"(255, 255, 255)",
-	"(0, 171, 255)",
-	"(255, 171, 0)",
-	"(0, 255, 171)",
-]
 
-const BLCOKCOLORMAX = 3
+
 let cvs: any //canvas
 let ctx: any //canvas 2d
-
-const MAP: any = {}
-
-const MAPX = 8 //max map width
-const MAPY = 15 //max map height
-const BWIDTH = 31 //block width 
-const BHEIGHT = 31 //block height 
-const OUTLINE_PIXEL = 0
-const MAPPXWIDTH = 800 //canvas widlth
-const MAPPXHEIGHT = 800 //canvas heightㅁ
 
 function randInt(min: number, max: number) {
 	const ranNum = Math.floor(Math.random() * (max - min + 1)) + min
@@ -71,7 +55,19 @@ export class Game {
 
 	private handleInit: boolean
 	private lastPos: POS
+	private colors: string[]
 	
+	private blockMax: number
+	private map: number[][]
+	private maxBlockRow: number
+	private maxBlockColum: number
+	private BWIDTH: number
+	private BHEIGHT: number
+	private OUTLINE_PIXEL: number
+	private MAPPXWIDTH: number
+	private MAPPXHEIGHT: number
+
+	private gameID: number //게임 루프제어용
 
 	constructor() {
 		this.score = 0
@@ -81,34 +77,55 @@ export class Game {
 		this.gameOverCallback = null
 		this.lastPos = {"y": -1, "x": -1}
 		this.displayScore = 0
-		
+
+		this.map = [[]]
+		this.blockMax = 3 //default
+
+		this.maxBlockRow = 15 //max map width
+		this.maxBlockColum = 8 //max map height
+		this.BWIDTH = 31 //block width 
+		this.BHEIGHT = 31 //block height 
+		this.OUTLINE_PIXEL = 0
+		this.MAPPXWIDTH = 800 //canvas widlth
+		this.MAPPXHEIGHT = 800 //canvas height
+		this.gameID = 0
+
 		//option
 		this.dropEffect = true
 		this.deleteEffect = true
+
+		this.colors = [ //color code
+			"(255, 255, 255)",
+			"(0, 171, 255)",
+			"(255, 171, 0)",
+			"(0, 255, 171)",
+		]
 	}
+
+	
 
 	private draw() { //draw blocks and score
 
 		ctx.globalAlpha = 1
 		ctx.fillStyle = 'rgb(0, 0, 0)'
-		ctx.fillRect(0, 0, MAPPXWIDTH, MAPPXHEIGHT)
+		ctx.fillRect(0, 0, this.MAPPXWIDTH, this.MAPPXHEIGHT)
 		ctx.globalAlpha = 1
 	
 		// const code = Math.floor(255-(this.score / 100)%256)
 		// const bgColor = "(" + code + "," + code + "," + code + ")"
 
-		for (let i = 0; i < MAPY; i++) {
-			for (let j = 0; j < MAPX; j++) {
-				const ypos = i * (BHEIGHT + OUTLINE_PIXEL)
-				const xpos = j * (BWIDTH + OUTLINE_PIXEL)
+		for (let i = 0; i < this.maxBlockRow; i++) {
+			for (let j = 0; j < this.maxBlockColum; j++) {
+				const ypos = i * (this.BHEIGHT + this.OUTLINE_PIXEL)
+				const xpos = j * (this.BWIDTH + this.OUTLINE_PIXEL)
 
-				const colorCode = colors[MAP[i][j]]
+				const colorCode = this.colors[this.map[i][j]]
 				
 				// if (MAP[i][j] == 0)
 				// 	colorCode = bgColor
 				
 				ctx.fillStyle = "rgb" + colorCode
-				ctx.fillRect(xpos, ypos, BWIDTH, BHEIGHT)
+				ctx.fillRect(xpos, ypos, this.BWIDTH, this.BHEIGHT)
 	
 				//  console.log(xpos, ypos, BWIDTH, BHEIGHT)
 	
@@ -120,10 +137,10 @@ export class Game {
 	private newBlocks() {
 		let i = 0
 		let j = 0
-		for (i = 0; i < MAPY; i++) {
-			for (j = 0; j < MAPX; j++) {
+		for (i = 0; i < this.maxBlockRow; i++) {
+			for (j = 0; j < this.maxBlockColum; j++) {
 				if (i == 0) {
-					if (MAP[i][j] != 0) {
+					if (this.map[i][j] != 0) {
 						//end
 						// console.log("end!!!")
 						this.gameOver = true
@@ -137,23 +154,23 @@ export class Game {
 						
 					}
 				} else {
-					MAP[i - 1][j] = MAP[i][j]
+					this.map[i - 1][j] = this.map[i][j]
 				}
 	
-				if (i == MAPY - 1) {
-					MAP[i][j] = randInt(1, BLCOKCOLORMAX)
+				if (i == this.maxBlockRow - 1) {
+					this.map[i][j] = randInt(1, this.blockMax)
 				}
 			}
 		}
 	}
 
 	// 이곳에서 그리기 및 블록처리를 해준다.
-	private async gameProcLoop() {
+	private async gameProcLoop(gameID: number) {
 		let createBlock = false
 		
 		await sleep(100)
 
-		while (!this.gameOver) {
+		while (!this.gameOver && gameID == this.gameID) {
 			
 			await sleep(50)
 			
@@ -162,7 +179,7 @@ export class Game {
 				const count = await this.deleteblock({
 					"i": this.lastPos.y,
 					"j": this.lastPos.x
-				}, MAP[this.lastPos.y][this.lastPos.x], 1)
+				}, this.map[this.lastPos.y][this.lastPos.x], 1)
 
 				this.touchcount += 1
 				this.score += count*count //(count*count+count)/2 //점수 계산 식
@@ -176,11 +193,11 @@ export class Game {
 			while (isContinue)
 			{
 				isContinue = false
-				for (let i = MAPY - 1; i > 0; i--) {
-					for (let j = 0; j < MAPX; j++) {
-						if (MAP[i][j] == 0 && MAP[i - 1][j] != 0) {
-							MAP[i][j] = MAP[i - 1][j]
-							MAP[i - 1][j] = 0
+				for (let i = this.maxBlockRow - 1; i > 0; i--) {
+					for (let j = 0; j < this.maxBlockColum; j++) {
+						if (this.map[i][j] == 0 && this.map[i - 1][j] != 0) {
+							this.map[i][j] = this.map[i - 1][j]
+							this.map[i - 1][j] = 0
 
 							isDown = true
 							isContinue = true
@@ -206,12 +223,6 @@ export class Game {
 		}
 	}
 
-
-	// return new Promise(function(resolve, reject) {
-  //   var items = [1,2,3];
-  //   resolve(items)
-	// });
-	
   private async deleteblock(argPos: MAPPOS, blockCode: any, depth: number): Promise<number> {
 		
 		let count = 0
@@ -230,10 +241,10 @@ export class Game {
 			if (pos == undefined)
 				break
 
-			if (MAP[pos.i][pos.j] == 0)
+			if (this.map[pos.i][pos.j] == 0)
 				continue
 			
-			MAP[pos.i][pos.j] = 0
+			this.map[pos.i][pos.j] = 0
 			// console.log(pos, queue.length)
 			count++
 			this.displayScore = this.score + count*count //지우면서 점수 올라가는것을 보여줌
@@ -243,14 +254,14 @@ export class Game {
 				await sleep(25)
 			}
 			//up
-			if (pos.i != 0 && MAP[pos.i - 1][pos.j] == blockCode) {
+			if (pos.i != 0 && this.map[pos.i - 1][pos.j] == blockCode) {
 				// nextpos.i = pos.i - 1
 				// nextpos.j = pos.j
 				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
 				queue.enqueue({"i": pos.i - 1, "j": pos.j})
 			}
 			//right
-			if (pos.j != MAPX - 1 && MAP[pos.i][pos.j + 1] == blockCode) {
+			if (pos.j != this.maxBlockColum - 1 && this.map[pos.i][pos.j + 1] == blockCode) {
 				// nextpos.i = pos.i
 				// nextpos.j = pos.j + 1
 				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
@@ -258,7 +269,7 @@ export class Game {
 				queue.enqueue({"i": pos.i, "j": pos.j + 1})
 			}
 			//down
-			if (pos.i != MAPY - 1 && MAP[pos.i + 1][pos.j] == blockCode) {
+			if (pos.i != this.maxBlockRow - 1 && this.map[pos.i + 1][pos.j] == blockCode) {
 				// nextpos.i = pos.i + 1
 				// nextpos.j = pos.j
 				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
@@ -266,7 +277,7 @@ export class Game {
 				queue.enqueue({"i": pos.i + 1, "j": pos.j})
 			}
 			//left
-			if (pos.j != 0 && MAP[pos.i][pos.j - 1] == blockCode) {
+			if (pos.j != 0 && this.map[pos.i][pos.j - 1] == blockCode) {
 				// nextpos.i = pos.i
 				// nextpos.j = pos.j - 1
 				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
@@ -292,15 +303,15 @@ export class Game {
 		const xpos = pos.x
 		const ypos = pos.y
 	
-		const j = Math.floor(xpos / (BWIDTH + OUTLINE_PIXEL))
-		const i = Math.floor(ypos / (BHEIGHT + OUTLINE_PIXEL))
+		const j = Math.floor(xpos / (this.BWIDTH + this.OUTLINE_PIXEL))
+		const i = Math.floor(ypos / (this.BHEIGHT + this.OUTLINE_PIXEL))
 	
-		if (i >= MAPY || j >= MAPX) {
+		if (i >= this.maxBlockRow || j >= this.maxBlockColum) {
 			// console.log("big!", i, j)
 			return
 		}
 	
-		if (MAP[i][j] == 0) {
+		if (this.map[i][j] == 0) {
 			// 빈 타일
 			return
 		} else {
@@ -316,12 +327,12 @@ export class Game {
 			return
 		}
 	
-		for (let i = 0; i < MAPY; i++) {
-			if (typeof (MAP[i]) == "undefined")
-				MAP[i] = {}
+		for (let i = 0; i < this.maxBlockRow; i++) {
+			if (typeof (this.map[i]) == "undefined")
+				this.map[i] = []
 	
-			for (let j = 0; j < MAPX; j++) {
-				MAP[i][j] = 0
+			for (let j = 0; j < this.maxBlockColum; j++) {
+				this.map[i][j] = 0
 			}
 		}
 	
@@ -336,7 +347,7 @@ export class Game {
 	
 			ctx.globalAlpha = 0.2
 			ctx.fillStyle = 'rgb(0, 171, 255)'
-			ctx.fillRect(0, 0, MAPPXWIDTH, MAPPXHEIGHT)
+			ctx.fillRect(0, 0, this.MAPPXWIDTH, this.MAPPXHEIGHT)
 			ctx.globalAlpha = 1
 
 			this.handleInit = true
@@ -354,7 +365,8 @@ export class Game {
 		this.draw()
 		
 		this.gameOver = false
-		this.gameProcLoop()
+		this.gameID++
+		this.gameProcLoop(this.gameID)
 	
 		// draw()
 	}

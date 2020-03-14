@@ -59,6 +59,8 @@ import axios from 'axios'
 import { Game } from "../poptile"
 import { SHA256 } from "../sha256"
 
+const gGame = new Game() //게임은 하나만 돌아야 되니 이곳에서 한번 할당한다.
+
 @Component({
   name: 'poptile',
   components: {
@@ -67,7 +69,7 @@ import { SHA256 } from "../sha256"
 })
 export default class Poptile extends Vue {
 
-	game = new Game()
+	game = gGame
 	gameStart = false
 	name = ""
 	RankList = []
