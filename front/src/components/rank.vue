@@ -15,7 +15,35 @@
 					
 					<tbody>
 						<tr v-for="(item, index) in RankList" v-bind:key="index">
-							<td class="name"> {{item.UserName}}</td>
+							
+							
+							<td v-if="item.Score > 150000" class="name">
+								<span class="user-rb-first">{{item.UserName.substring(0, 1)}}</span>
+								<span class="user-rb-last">{{item.UserName.substring(1)}}</span>
+							</td>
+							<td v-else-if="item.Score > 100000" class="name">
+								<span class="user-red">{{item.UserName}}</span>
+							</td>
+							<td v-else-if="item.Score > 80000" class="name">
+								<span class="user-orange">{{item.UserName}}</span>
+							</td>
+							<td v-else-if="item.Score > 60000" class="name">
+								<span class="user-violet">{{item.UserName}}</span>
+							</td>
+							<td v-else-if="item.Score > 40000" class="name">
+								<span class="user-blue">{{item.UserName}}</span>
+							</td>
+							<td v-else-if="item.Score > 30000" class="name">
+								<span class="user-cyan">{{item.UserName}}</span>
+							</td>
+							<td v-else-if="item.Score > 15000" class="name">
+								<span class="user-green">{{item.UserName}}</span>
+							</td>
+							<td v-else class="name">
+								<span class="user-gray">{{item.UserName}}</span>
+							</td>
+
+
 							<td> {{item.Score}}</td>
 							<td> {{item.TouchCount}}</td>
 							<td> {{`${item.Score / item.TouchCount}`.substring(0, 5)}}</td>
@@ -35,9 +63,47 @@
 	}	
 
 	td.name {
+		font-weight: bold;
 		max-width: 140px;
 		word-break: break-word;
 	}
+
+	.user-rb-first {
+		color: red;
+	}
+	.user-rb-last {
+		color: black;
+	}
+
+	.user-red {
+		color: red
+	}
+
+	.user-orange {
+		color: orange;
+	}
+
+	.user-violet {
+		color: violet;
+	}
+
+	.user-blue {
+		color: blue;
+	}
+
+	.user-cyan {
+		color:cyan;
+	}
+
+	.user-greeen {
+		color:green;
+	}
+
+	.user-gray {
+		color:gray;
+	}
+
+
 </style>
 
 <script lang="ts">

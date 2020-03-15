@@ -4,6 +4,8 @@
 		<b-button v-b-toggle="'collapse-2'" variant="outline-info">업데이트 히스토리</b-button>
 		<b-collapse id="collapse-2">
 			<div class="text-update-log">
+				<h3>ver 20.3.15.1</h3>
+	랭크페이지 점수별 색상 추가
         <h3>ver 20.3.14.1</h3>
 				<pre>
 	게임을 계속 다시 시작할 때 내부적으로
