@@ -80,11 +80,11 @@
 	}
 
 	.user-orange {
-		color: orange;
+		color: #FF8C00;
 	}
 
 	.user-violet {
-		color: violet;
+		color: #a0a;
 	}
 
 	.user-blue {
@@ -92,11 +92,11 @@
 	}
 
 	.user-cyan {
-		color:cyan;
+		color:#03A89E;
 	}
 
-	.user-greeen {
-		color:green;
+	.user-green {
+		color: green;
 	}
 
 	.user-gray {
