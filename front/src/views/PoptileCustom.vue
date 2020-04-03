@@ -39,10 +39,7 @@
 			</div>
 
 			<div v-show="!game.gameOver">
-			<!-- <canvas id="cvs" v-bind:style="{width: Number(this.mapWidth)*40 + 'px', height: Number(this.mapHeight)*40 + 'px'}"> </canvas> -->
-			<!-- <canvas id="cvs" v-bind:style="{width: 245 + 'px', height: 460 + 'px'}"> </canvas> -->
-			<canvas id="cvs" :width="Number(this.mapWidth)*31 + 'px'" :height="Number(this.mapHeight)*31 + 'px'"> </canvas>
-			<!-- <canvas id="cvs" width="245px" height="460px"> </canvas> -->
+				<canvas id="cvs" :width="Number(this.mapWidth)*31 + 'px'" :height="Number(this.mapHeight)*31 + 'px'"> </canvas>
 			</div>
 		</div>
 

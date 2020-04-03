@@ -12,16 +12,10 @@ const routes = [
 		name: 'Home',
 		component: Home
 	},
-	{
-		path: '/poptile/custom',
-		name: 'poptileClassic',
-		component: PoptileCustom
-	},
-	{
-		path: '/poptile/classic',
-		name: 'poptileClassic',
-		component: PoptileClassic
-	},
+	{path: '/poptile/custom', name: 'poptileCustom', component: PoptileCustom},
+	{path: '/poptile/classic', name: 'poptileClassic', component: PoptileClassic},
+	{path: '/static/poptile/custom', name: 'poptileCustom', component: PoptileCustom},
+	{path: '/static/poptile/classic', name: 'poptileClassic', component: PoptileClassic},
 	{
 		path: '/poptile',
 		name: 'Home',
