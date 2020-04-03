@@ -2,6 +2,8 @@
   <div id="app">
     <router-view/>
 		<p></p>
+		<router-link to="/" class="btn btn-outline-info"> 시작페이지로 </router-link>
+		<p></p>
 		<h1>SPONSOR</h1>
 		<a target="_blank" href="https://panty.run" alt="탈알고" title="탈알고"><img :src="require('./assets/talalgo.png')" /></a>
   </div>

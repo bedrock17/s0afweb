@@ -1,6 +1,5 @@
 <template>
-  <div class="poptile">
-		<Help />
+  <div class="poptileCustom">
   
 		<b-form-checkbox v-model="game.dropEffect" name="check-button" switch>
       떨어짐 효과
@@ -11,20 +10,26 @@
     </b-form-checkbox>
 
 		<div v-show="!gameStart">
-			<input type="text" v-model=name class="form-control username" placeholder="사용자이름" maxlength="30">
-			<p> </p>
+			
+			<input type="number" class="form-control gameSettingInput" placeholder="width" maxlength="2" v-model=mapWidth>
+			<input type="number" class="form-control gameSettingInput" placeholder="height" maxlength="2" v-model=mapHeight>
+
+			<input type="number" class="form-control gameSettingInput" placeholder="블럭개수" maxlength="2" v-model=blockMax>
+			<input type="button" class="btn btn-outline-primary" value="생성!" v-on:click=blockColorCode> <br>
+
+			
+			<input type="text" class="form-control gameSettingInput" placeholder="색상코드"	 v-for="(item, index) in colorArray" v-model="colorArray[index]" v-bind:key="index">
+			
+
 			<input type="button" class="btn btn-outline-primary" value="START!" v-on:click=startBtnHandle>
+		
 		</div>
 
 		<div v-show="gameStart">
+
+			<input type="button" class="btn btn-outline-primary" value="RESET" v-on:click=reset>
 			
 			<h2> 
-				<span v-if="name.length > 0">
-					[{{name}}] 
-				</span> 
-				<span v-else>
-					{{name}} 
-				</span> 
 				SCORE: {{ game.displayScore }}
 			</h2>
 
@@ -34,17 +39,14 @@
 			</div>
 
 			<div v-show="!game.gameOver">
-			<canvas id="cvs" width="245px" height="460px"> </canvas>
+			<!-- <canvas id="cvs" v-bind:style="{width: Number(this.mapWidth)*40 + 'px', height: Number(this.mapHeight)*40 + 'px'}"> </canvas> -->
+			<!-- <canvas id="cvs" v-bind:style="{width: 245 + 'px', height: 460 + 'px'}"> </canvas> -->
+			<canvas id="cvs" :width="Number(this.mapWidth)*31 + 'px'" :height="Number(this.mapHeight)*31 + 'px'"> </canvas>
+			<!-- <canvas id="cvs" width="245px" height="460px"> </canvas> -->
 			</div>
 		</div>
 
-		<hr v-if="game.gameOver" />
 
-		<Rank v-bind:RankList="RankList" v-if="game.gameOver" />
-
-		<div id="nav" v-if="!gameStart">
-      <router-link to="/poptile/rank" class="btn btn-outline-info">RANK</router-link>
-    </div>
   </div>
 </template>
 
@@ -53,53 +55,63 @@
 		// 	<p v-for="item in RankList" v-bind:key="item.UserName"> {{item.UserName}} : {{item.Score}} </p>
 		// </div>
 		
-import Rank from '@/components/rank.vue'
 import { Component, Vue } from "vue-property-decorator"
-import Help from "@/components/help.vue"
-import axios from 'axios'
 import { Game } from "../poptile"
-import { SHA256 } from "../sha256"
 
 const gGame = new Game() //게임은 하나만 돌아야 되니 이곳에서 한번 할당하고 다시 만들지 않는다.
 
+function randColor(): number {
+	return Math.floor(Math.random() * (255)) 
+}
+
 @Component({
-  name: 'poptile',
+  name: 'poptileCustom',
   components: {
-		Help,
-    Rank
   }
 })
-export default class Poptile extends Vue {
+export default class PoptileCustom extends Vue {
 
 	game = gGame
 	gameStart = false
-	name = ""
 	RankList = []
+	blockMax = "3" //입력이 텍스트라 문자열로 처리
+	mapWidth = "8"
+	mapHeight = "15"
+	colorArray: string[] = []
 
   mounted() {
-		this.game.gameOverCallback = this.gameOverCallback
+		this.game.gameOver = true
+	}
+	
+  blockColorCode () {
+		
+		this.colorArray = []
+
+		for (let i = 0; i < (Number(this.blockMax)+1); i++) {
+			if (i == 0)
+				this.colorArray.push( `(255, 255, 255)` )
+			else
+				this.colorArray.push( `(${randColor()}, ${randColor()}, ${randColor()})` )
+		}
+		return this.colorArray
   }
 
-	gameOverCallback() {
-		this.RankList = []
-		axios.post('/api/poptilerank', {
-			UserName: this.name,
-			Score: this.game.score,
-			TouchCount: this.game.touchcount,
-			Check: SHA256(this.name + (this.game.score+this.game.touchcount).toString())
-			}).then((res: any) => {
-			this.RankList = res.data.RankList
-			})
-	}
-
 	startBtnHandle() {
-		// if (this.name.length > 0) //이름이 없어도 시작할 수 있도록..
-		this.game.startGame()
-		this.gameStart = true
+
+		if (Number(this.blockMax) > 0) {
+			this.game.setColors(this.colorArray)
+			this.game.setMapSize(Number(this.mapWidth), Number(this.mapHeight))
+			this.game.startGame()
+			this.gameStart = true
+		}
 	}
 
 	retryGame() {
 		this.game.startGame()
+	}
+
+	reset() {
+		this.gameStart = false
 	}
 }
 </script>
@@ -124,13 +136,13 @@ input, input:before, input:after {
 }
 
 
-.username {
+.gameSettingInput {
 	width: 500px;
 	margin: auto;
 }
 
 @media (max-width: 500px) {
-  .username {
+  .gameSettingInput {
     width: 100%;
   }
 }

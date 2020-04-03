@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import PoptileClassic from '../views/PoptileClassic.vue'
+import PoptileCustom from '../views/PoptileCustom.vue'
 
 Vue.use(VueRouter)
 
@@ -9,6 +11,16 @@ const routes = [
 		path: '/static/index.html',
 		name: 'Home',
 		component: Home
+	},
+	{
+		path: '/poptile/custom',
+		name: 'poptileClassic',
+		component: PoptileCustom
+	},
+	{
+		path: '/poptile/classic',
+		name: 'poptileClassic',
+		component: PoptileClassic
 	},
 	{
 		path: '/poptile',

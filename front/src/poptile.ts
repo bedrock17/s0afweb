@@ -102,6 +102,18 @@ export class Game {
 		]
 	}
 
+	public setColors(colorArray: string[]) {
+		this.blockMax = colorArray.length -1
+		this.colors = colorArray
+	}
+
+	public setMapSize(width = 8, height = 15) {
+		this.maxBlockColum = width
+		this.maxBlockRow = height
+
+		this.MAPPXWIDTH = this.maxBlockColum * this.BWIDTH //canvas widlth
+		this.MAPPXHEIGHT = this.maxBlockRow * this.BHEIGHT //canvas height
+	}
 	
 
 	private draw() { //draw blocks and score
@@ -168,9 +180,12 @@ export class Game {
 	private async gameProcLoop(gameID: number) {
 		let createBlock = false
 		
-		await sleep(100)
+		this.initMAP()
+		this.draw()
+		// await sleep(100)
 
 		while (!this.gameOver && gameID == this.gameID) {
+			// console.log(this.gameOver, gameID, this.gameID)
 			
 			await sleep(50)
 			
@@ -226,12 +241,7 @@ export class Game {
   private async deleteblock(argPos: MAPPOS, blockCode: any, depth: number): Promise<number> {
 		
 		let count = 0
-		const nextpos = {
-			"i": 0,
-			"j": 0
-		}
 		
-
 		const queue = new Queue<MAPPOS>()
 		queue.enqueue(argPos)
 		while (queue.length > 0)
@@ -255,33 +265,18 @@ export class Game {
 			}
 			//up
 			if (pos.i != 0 && this.map[pos.i - 1][pos.j] == blockCode) {
-				// nextpos.i = pos.i - 1
-				// nextpos.j = pos.j
-				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
 				queue.enqueue({"i": pos.i - 1, "j": pos.j})
 			}
 			//right
 			if (pos.j != this.maxBlockColum - 1 && this.map[pos.i][pos.j + 1] == blockCode) {
-				// nextpos.i = pos.i
-				// nextpos.j = pos.j + 1
-				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
-				// queue.enqueue(nextpos)
 				queue.enqueue({"i": pos.i, "j": pos.j + 1})
 			}
 			//down
 			if (pos.i != this.maxBlockRow - 1 && this.map[pos.i + 1][pos.j] == blockCode) {
-				// nextpos.i = pos.i + 1
-				// nextpos.j = pos.j
-				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
-				// queue.enqueue(nextpos)
 				queue.enqueue({"i": pos.i + 1, "j": pos.j})
 			}
 			//left
 			if (pos.j != 0 && this.map[pos.i][pos.j - 1] == blockCode) {
-				// nextpos.i = pos.i
-				// nextpos.j = pos.j - 1
-				// count += await this.deleteblock(nextpos, blockCode, depth + 1)
-				// queue.enqueue(nextpos)
 				queue.enqueue({"i": pos.i, "j": pos.j - 1})
 			}
 		}
@@ -336,6 +331,8 @@ export class Game {
 			}
 		}
 	
+		this.newBlocks()
+
 		if (this.handleInit == false) {
 			ctx = cvs.getContext('2d')
 			
@@ -352,20 +349,20 @@ export class Game {
 
 			this.handleInit = true
 		}
-	
-		// console.log(MAP)
-		this.newBlocks()
 	}
 
 	public startGame() {
-		this.initMAP()
+		
 		this.score = 0
 		this.displayScore = 0
 		this.touchcount = 0
-		this.draw()
 		
 		this.gameOver = false
 		this.gameID++
+		this.handleInit = false
+		
+		cvs = null
+
 		this.gameProcLoop(this.gameID)
 	
 		// draw()

@@ -4,6 +4,8 @@
 		<b-button v-b-toggle="'collapse-2'" variant="outline-info">업데이트 히스토리</b-button>
 		<b-collapse id="collapse-2">
 			<div class="text-update-log">
+				<h3>ver 20.4.3.1</h3>
+	사용자가 블럭 종류 및 색을 설정 할 수 있는 모드 추가, 기능 확장중 현재 베타버전
 				<h3>ver 20.3.15.1</h3>
 	랭크페이지 점수별 색상 추가
         <h3>ver 20.3.14.1</h3>

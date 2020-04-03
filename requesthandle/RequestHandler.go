@@ -23,13 +23,17 @@ type dataBaseStruct struct {
 var globalDataBaseStruct dataBaseStruct
 
 func (d *dataBaseStruct) loadRankList(filePath string) {
+
 	data, err := ioutil.ReadFile(filePath)
 
-	common.Check(err)
+	if err == nil {
 
-	err = json.Unmarshal(data, &d)
+		err = json.Unmarshal(data, &d)
 
-	common.Check(err)
+		common.Check(err)
+	} else {
+		fmt.Println("load rank list error!", err)
+	}
 
 }
 
@@ -96,8 +100,13 @@ func Run(port int) {
 	server.HandleFunc("GET", "/api/poptilerankload", popTileRankLoad)
 
 	server.HandleFunc("GET", "/poptile", vueURIHandelGenerator("./static/index.html"))
+	server.HandleFunc("GET", "/poptile/classic", vueURIHandelGenerator("./static/index.html"))
+	server.HandleFunc("GET", "/poptile/custom", vueURIHandelGenerator("./static/index.html"))
 	server.HandleFunc("GET", "/poptile/rank", vueURIHandelGenerator("./static/index.html"))
+
 	server.HandleFunc("GET", "/static/poptile", vueURIHandelGenerator("./static/index.html"))
+	server.HandleFunc("GET", "/static/poptile/classic", vueURIHandelGenerator("./static/index.html"))
+	server.HandleFunc("GET", "/static/poptile/custom", vueURIHandelGenerator("./static/index.html"))
 	server.HandleFunc("GET", "/static/poptile/rank", vueURIHandelGenerator("./static/index.html"))
 
 	addr := ":" + strconv.Itoa(int(port))
