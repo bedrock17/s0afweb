@@ -20,8 +20,8 @@
 			
 			<input type="text" class="form-control gameSettingInput" placeholder="색상코드"	 v-for="(item, index) in colorArray" v-model="colorArray[index]" v-bind:key="index">
 			
-
-			<input type="button" class="btn btn-outline-primary" value="START!" v-on:click=startBtnHandle>
+			
+			<input v-if="colorArray.length > 1"  type="button" class="btn btn-outline-primary" value="START!" v-on:click=startBtnHandle>
 		
 		</div>
 
