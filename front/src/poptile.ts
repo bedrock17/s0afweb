@@ -41,6 +41,7 @@ type POS = {
 type MAPPOS = {
 	i: number;
 	j: number;
+	depth: number;
 }
 
 export class Game {
@@ -193,8 +194,9 @@ export class Game {
 
 				const count = await this.deleteblock({
 					"i": this.lastPos.y,
-					"j": this.lastPos.x
-				}, this.map[this.lastPos.y][this.lastPos.x], 1)
+					"j": this.lastPos.x,
+					"depth": 0
+				}, this.map[this.lastPos.y][this.lastPos.x])
 
 				this.touchcount += 1
 				this.score += count*count //(count*count+count)/2 //점수 계산 식
@@ -221,7 +223,7 @@ export class Game {
 				}
 
 				if (this.dropEffect)
-					break;
+					break
 			}
 
 			if (isDown)
@@ -238,12 +240,14 @@ export class Game {
 		}
 	}
 
-  private async deleteblock(argPos: MAPPOS, blockCode: any, depth: number): Promise<number> {
+  private async deleteblock(argPos: MAPPOS, blockCode: any): Promise<number> {
 		
 		let count = 0
 		
 		const queue = new Queue<MAPPOS>()
 		queue.enqueue(argPos)
+
+		let depth = argPos.depth
 		while (queue.length > 0)
 		{
 			const pos = queue.dequeue()
@@ -260,24 +264,27 @@ export class Game {
 			this.displayScore = this.score + count*count //지우면서 점수 올라가는것을 보여줌
 			
 			if (this.deleteEffect) { //블록을 지워나가는 과정을 보여주는 부분.
-				this.draw()
-				await sleep(25)
+				if (depth < pos.depth) {
+					this.draw()
+					await sleep(50)
+					depth = pos.depth
+				}
 			}
 			//up
 			if (pos.i != 0 && this.map[pos.i - 1][pos.j] == blockCode) {
-				queue.enqueue({"i": pos.i - 1, "j": pos.j})
+				queue.enqueue({"i": pos.i - 1, "j": pos.j, "depth": pos.depth + 1})
 			}
 			//right
 			if (pos.j != this.maxBlockColum - 1 && this.map[pos.i][pos.j + 1] == blockCode) {
-				queue.enqueue({"i": pos.i, "j": pos.j + 1})
+				queue.enqueue({"i": pos.i, "j": pos.j + 1, "depth": pos.depth + 1})
 			}
 			//down
 			if (pos.i != this.maxBlockRow - 1 && this.map[pos.i + 1][pos.j] == blockCode) {
-				queue.enqueue({"i": pos.i + 1, "j": pos.j})
+				queue.enqueue({"i": pos.i + 1, "j": pos.j, "depth": pos.depth + 1})
 			}
 			//left
 			if (pos.j != 0 && this.map[pos.i][pos.j - 1] == blockCode) {
-				queue.enqueue({"i": pos.i, "j": pos.j - 1})
+				queue.enqueue({"i": pos.i, "j": pos.j - 1, "depth": pos.depth + 1})
 			}
 		}
 		
