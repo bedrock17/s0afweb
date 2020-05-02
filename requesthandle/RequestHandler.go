@@ -122,6 +122,7 @@ func Run(httpServerConfig HTTPServerConfifg) {
 	// server.Run(addr)
 
 	// e.Logger.Fatal(e.Start(addr))
-	e.Logger.Fatal(e.Start(addr)) //HTTP
+	e.Logger.Fatal(e.StartAutoTLS(addr))
+	// e.Logger.Fatal(e.Start(":8080")) //HTTP DEBUG
 
 }
