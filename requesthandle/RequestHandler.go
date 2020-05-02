@@ -92,7 +92,7 @@ func Run(httpServerConfig HTTPServerConfifg) {
 
 	e := echo.New()
 
-	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("<DOMAIN>")
+	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist(httpServerConfig.HostName)
 	// Cache certificates
 	e.AutoTLSManager.Cache = autocert.DirCache("./cache")
 
