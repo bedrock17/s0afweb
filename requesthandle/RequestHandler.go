@@ -99,7 +99,8 @@ func Run(httpServerConfig HTTPServerConfifg) {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
 
-	e.GET("/", index)
+	// e.GET("/", index)
+	e.File("/", "./static/index.html")
 
 	e.Static("/static", "./static")
 
