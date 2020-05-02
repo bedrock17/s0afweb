@@ -11,8 +11,9 @@ const defaultConfigPath string = "conf/conf.json"
 
 //Config : 유저가 변경 가능한 설정들
 type Config struct {
+	HostName    string `json:HostName`
 	ServicePort int    `json:"ServicePort"`
-	DataPath    string `json:"DataPath"`
+	// DataPath    string `json:"DataPath"`
 }
 
 //GlobalConfig :  전역 설정값

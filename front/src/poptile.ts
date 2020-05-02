@@ -261,10 +261,10 @@ export class Game {
 			this.map[pos.i][pos.j] = 0
 			// console.log(pos, queue.length)
 			count++
-			this.displayScore = this.score + count*count //지우면서 점수 올라가는것을 보여줌
 			
 			if (this.deleteEffect) { //블록을 지워나가는 과정을 보여주는 부분.
 				if (depth < pos.depth) {
+					this.displayScore = this.score + count*count //지우면서 점수 올라가는것을 보여줌
 					this.draw()
 					await sleep(50)
 					depth = pos.depth

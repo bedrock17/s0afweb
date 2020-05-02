@@ -10,10 +10,13 @@ import (
 	"strings"
 
 	// "os"
-
 	"github.com/bedrock17/router"
 	"github.com/bedrock17/s0afweb/common"
 	"github.com/bedrock17/s0afweb/model"
+	"golang.org/x/crypto/acme/autocert"
+
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 type dataBaseStruct struct {
@@ -23,7 +26,6 @@ type dataBaseStruct struct {
 var globalDataBaseStruct dataBaseStruct
 
 func (d *dataBaseStruct) loadRankList(filePath string) {
-
 	data, err := ioutil.ReadFile(filePath)
 
 	if err == nil {
@@ -34,7 +36,6 @@ func (d *dataBaseStruct) loadRankList(filePath string) {
 	} else {
 		fmt.Println("load rank list error!", err)
 	}
-
 }
 
 func (d *dataBaseStruct) saveRankList(filePath string) {
@@ -48,12 +49,12 @@ func (d *dataBaseStruct) saveRankList(filePath string) {
 		common.Check(err)
 		// fmt.Fprint(c.ResponseWriter, string(b))
 	}
-
 }
 
-func index(c *router.Context) {
+func index(c echo.Context) error {
 	// fmt.Fprintf(c.ResponseWriter, "Welcome!")
-	http.Redirect(c.ResponseWriter, c.Request, "/poptile", http.StatusFound)
+	// http.Redirect(c.ResponseWriter, c.Request, "/poptile", http.StatusFound)
+	return c.String(http.StatusOK, "HELLO!")
 }
 
 func customStaticHandle(next router.HandlerFunc) router.HandlerFunc {
@@ -66,7 +67,6 @@ func customStaticHandle(next router.HandlerFunc) router.HandlerFunc {
 		pass := false
 		for _, v := range filters {
 			if strings.HasPrefix(file, v) {
-
 				pass = true
 				break
 			}
@@ -82,36 +82,46 @@ func customStaticHandle(next router.HandlerFunc) router.HandlerFunc {
 }
 
 // Run : 핸들러를 등록하고 http 서버를 시작한다.
-func Run(port int) {
+func Run(httpServerConfig HTTPServerConfifg) {
 
 	globalDataBaseStruct.loadRankList("jsondb/rank.json")
 
 	log.Println(globalDataBaseStruct)
 
-	server := router.NewServer()
-	server.AppendMiidleWare(router.LogHandler)
-	server.AppendMiidleWare(router.RecoverHandler)
-	server.AppendMiidleWare(customStaticHandle)
+	// server := router.NewServer()
 
-	server.HandleFunc("GET", "/", index)
+	e := echo.New()
 
-	server.HandleFunc("POST", "/api/poptilerank", popTileRankReg)
-	server.HandleFunc("GET", "/api/poptilerank", popTileRankGet)
-	server.HandleFunc("GET", "/api/poptilerankload", popTileRankLoad)
+	e.AutoTLSManager.HostPolicy = autocert.HostWhitelist("<DOMAIN>")
+	// Cache certificates
+	e.AutoTLSManager.Cache = autocert.DirCache("./cache")
 
-	server.HandleFunc("GET", "/poptile", vueURIHandelGenerator("./static/index.html"))
-	server.HandleFunc("GET", "/poptile/classic", vueURIHandelGenerator("./static/index.html"))
-	server.HandleFunc("GET", "/poptile/custom", vueURIHandelGenerator("./static/index.html"))
-	server.HandleFunc("GET", "/poptile/rank", vueURIHandelGenerator("./static/index.html"))
+	e.Use(middleware.Recover())
+	e.Use(middleware.Logger())
 
-	server.HandleFunc("GET", "/static/poptile", vueURIHandelGenerator("./static/index.html"))
-	server.HandleFunc("GET", "/static/poptile/classic", vueURIHandelGenerator("./static/index.html"))
-	server.HandleFunc("GET", "/static/poptile/custom", vueURIHandelGenerator("./static/index.html"))
-	server.HandleFunc("GET", "/static/poptile/rank", vueURIHandelGenerator("./static/index.html"))
+	e.GET("/", index)
 
-	addr := ":" + strconv.Itoa(int(port))
+	e.Static("/static", "./static")
+
+	e.POST("/api/poptilerank", popTileRankReg)
+	e.GET("/api/poptilerank", popTileRankGet)
+	// e.GET("/api/poptilerankload", popTileRankLod)
+
+	e.File("/poptile", "./static/index.html")
+	e.File("/poptile/classic", "./static/index.html")
+	e.File("/poptile/custom", "./static/index.html")
+	e.File("/poptile/rank", "./static/index.html")
+	e.File("/static/poptile", "./static/idex.html")
+	e.File("/static/poptile/classic", "./static/index.html")
+	e.File("/static/pptile/custom", "./static/index.html")
+	e.File("/static/popile/rank", "./static/index.html")
+
+	addr := ":" + strconv.Itoa(int(httpServerConfig.HTTPSPort))
 
 	fmt.Println(addr)
-	server.Run(addr)
+	// server.Run(addr)
+
+	// e.Logger.Fatal(e.Start(addr))
+	e.Logger.Fatal(e.Start(addr)) //HTTP
 
 }

@@ -1,3 +1,4 @@
 {
-	"ServicePort": 8888
+	"HostName":	"sample.sample.com",
+	"ServicePort": 443
 }

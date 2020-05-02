@@ -1,57 +1,57 @@
 package requesthandle
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"sort"
-
-	"crypto/sha256"
 	"sync"
 
-	"github.com/bedrock17/router"
 	"github.com/bedrock17/s0afweb/common"
 	"github.com/bedrock17/s0afweb/model"
+	"github.com/labstack/echo"
 )
 
 var rankMutex = &sync.Mutex{}
 
-func popTileRankLoad(c *router.Context) {
-	// fmt.Fprintf(c.ResponseWriter, "Welcome!")
-	rankMutex.Lock()
-	globalDataBaseStruct.loadRankList("jsondb/rank.json")
-	rankMutex.Unlock()
-	http.Redirect(c.ResponseWriter, c.Request, "/static/index.html", http.StatusFound)
-}
+// func popTileRankLoad(c echo.Context) {
+// 	// fmt.Fprintf(c.ResponseWriter, "Welcome!")
+// 	rankMutex.Lock()
+// 	globalDataBaseStruct.loadRankList("jsondb/rank.json")
+// 	rankMutex.Unlock()
+// 	http.Redirect(c.ResponseWriter, c.Request, "/static/index.html", http.StatusFound)
+// }
 
-func popTileRankReg(c *router.Context) {
+func popTileRankReg(c echo.Context) error {
 
-	body := make([]byte, c.Request.ContentLength)
-	c.Request.Body.Read(body)
+	data := new(model.PopTileRank)
+	// c.Request.Body.Read(body)
+	// body := make([]byte, c.Request.ContentLength)
+	// err := json.Unmarshal(body, &data)
 
-	var data model.PopTileRank
-	err := json.Unmarshal(body, &data)
-	common.Check(err)
+	err := c.Bind(data)
+	if err != nil {
+		common.Check(err)
+	}
 
 	if len(data.UserName) > 61 {
-		fmt.Fprintf(c.ResponseWriter, "TOOOOOOOOO LONG.... (%d)", len(data.UserName))
-		return
+
+		return c.String(http.StatusOK, fmt.Sprintf("TOOOOOOOOO LONG.... (%d)", len(data.UserName)))
 	}
 
 	if data.Score < 15 || data.TouchCount < 15 {
-		fmt.Fprintf(c.ResponseWriter, ":(")
-		return
+		// fmt.Fprintf(c.ResponseWriter, ":(")
+		return c.String(http.StatusForbidden, "ERROR(403)")
 	}
 
 	input := fmt.Sprintf("%s%d", data.UserName, (data.Score + data.TouchCount))
 	hexSum := fmt.Sprintf("%x", sha256.Sum256([]byte(input)))
 
-	log.Printf("%s\n", body)
 	if data.Check != hexSum || data.Score > (120*120*data.TouchCount) {
-		fmt.Fprintf(c.ResponseWriter, "ㅠㅠ")
-		return
+		// fmt.Fprintf(c.ResponseWriter, "ㅠㅠ")
+		return c.String(http.StatusForbidden, "ERROR(403)")
 	}
 
 	find := false
@@ -61,7 +61,7 @@ func popTileRankReg(c *router.Context) {
 		for i := 0; i < len(globalDataBaseStruct.RankList); i++ {
 			if globalDataBaseStruct.RankList[i].UserName == data.UserName {
 				if globalDataBaseStruct.RankList[i].Score < data.Score {
-					globalDataBaseStruct.RankList[i] = data
+					globalDataBaseStruct.RankList[i] = *data
 					globalDataBaseStruct.RankList[i].Check = ""
 				}
 				find = true
@@ -70,7 +70,7 @@ func popTileRankReg(c *router.Context) {
 		}
 
 		if !find {
-			globalDataBaseStruct.RankList = append(globalDataBaseStruct.RankList, data)
+			globalDataBaseStruct.RankList = append(globalDataBaseStruct.RankList, *data)
 		}
 
 		sort.Slice(globalDataBaseStruct.RankList, func(i, j int) bool {
@@ -83,13 +83,14 @@ func popTileRankReg(c *router.Context) {
 	err = ioutil.WriteFile("jsondb/rank.json", b, 0644)
 	rankMutex.Unlock()
 
-	fmt.Fprintf(c.ResponseWriter, string(b))
-
+	// fmt.Fprintf(c.ResponseWriter, string(b))
 	common.Check((err))
+	return c.String(http.StatusOK, string(b))
 }
 
-func popTileRankGet(c *router.Context) {
+func popTileRankGet(c echo.Context) error {
 	b, err := json.Marshal(globalDataBaseStruct)
 	common.Check(err)
-	fmt.Fprintf(c.ResponseWriter, string(b))
+	// fmt.Fprintf(c.ResponseWriter, string(b))
+	return c.String(http.StatusOK, string(b))
 }
