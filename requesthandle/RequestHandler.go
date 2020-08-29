@@ -112,10 +112,14 @@ func Run(httpServerConfig HTTPServerConfifg) {
 	e.File("/poptile/classic", "./static/index.html")
 	e.File("/poptile/custom", "./static/index.html")
 	e.File("/poptile/rank", "./static/index.html")
-	e.File("/static/poptile", "./static/idex.html")
-	e.File("/static/poptile/classic", "./static/index.html")
-	e.File("/static/pptile/custom", "./static/index.html")
-	e.File("/static/popile/rank", "./static/index.html")
+
+	e.File("/static/poptile*", "./static/index.html")
+	/*
+		e.File("/static/poptile", "./static/index.html")
+		e.File("/static/poptile/classic", "./static/index.html")
+		e.File("/static/poptile/custom", "./static/index.html")
+		e.File("/static/poptile/rank", "./static/index.html")
+	*/
 
 	addr := ":" + strconv.Itoa(int(httpServerConfig.HTTPSPort))
 
