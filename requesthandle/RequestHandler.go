@@ -7,10 +7,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	// "os"
-	"github.com/bedrock17/router"
+
 	"github.com/bedrock17/s0afweb/common"
 	"github.com/bedrock17/s0afweb/model"
 	"golang.org/x/crypto/acme/autocert"
@@ -57,38 +56,12 @@ func index(c echo.Context) error {
 	return c.String(http.StatusOK, "HELLO!")
 }
 
-func customStaticHandle(next router.HandlerFunc) router.HandlerFunc {
-
-	filters := []string{"/static/", "/files/"}
-
-	return func(c *router.Context) {
-
-		file := c.Request.URL.Path
-		pass := false
-		for _, v := range filters {
-			if strings.HasPrefix(file, v) {
-				pass = true
-				break
-			}
-		}
-
-		if !pass {
-			next(c)
-			return
-		}
-
-		router.StaticHandler(next)(c)
-	}
-}
-
 // Run : 핸들러를 등록하고 http 서버를 시작한다.
 func Run(httpServerConfig HTTPServerConfifg) {
 
 	globalDataBaseStruct.loadRankList("jsondb/rank.json")
 
 	log.Println(globalDataBaseStruct)
-
-	// server := router.NewServer()
 
 	e := echo.New()
 
@@ -99,14 +72,12 @@ func Run(httpServerConfig HTTPServerConfifg) {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
 
-	// e.GET("/", index)
 	e.File("/", "./static/index.html")
 
 	e.Static("/static", "./static")
 
 	e.POST("/api/poptilerank", popTileRankReg)
 	e.GET("/api/poptilerank", popTileRankGet)
-	// e.GET("/api/poptilerankload", popTileRankLod)
 
 	e.File("/poptile", "./static/index.html")
 	e.File("/poptile/classic", "./static/index.html")
@@ -114,18 +85,10 @@ func Run(httpServerConfig HTTPServerConfifg) {
 	e.File("/poptile/rank", "./static/index.html")
 
 	e.File("/static/poptile*", "./static/index.html")
-	/*
-		e.File("/static/poptile", "./static/index.html")
-		e.File("/static/poptile/classic", "./static/index.html")
-		e.File("/static/poptile/custom", "./static/index.html")
-		e.File("/static/poptile/rank", "./static/index.html")
-	*/
 
 	addr := ":" + strconv.Itoa(int(httpServerConfig.HTTPSPort))
 
 	fmt.Println(addr)
-	// server.Run(addr)
-
 	// e.Logger.Fatal(e.Start(addr))
 	e.Logger.Fatal(e.StartAutoTLS(addr))
 	// e.Logger.Fatal(e.Start(":8080")) //HTTP DEBUG
