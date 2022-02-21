@@ -1,4 +1,5 @@
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const WebpackObfuscator = require('webpack-obfuscator');
 
 module.exports = {
 	publicPath: process.env.NODE_ENV === "production" ? "/static" : "/",
@@ -12,6 +13,9 @@ module.exports = {
 					mangle: true
 				}
 			}),
+			new WebpackObfuscator ({
+				rotateStringArray: true
+			}, [])
 		]
 	} : {},
 	devServer: {
