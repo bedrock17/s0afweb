@@ -1,5 +1,10 @@
 package game
 
+type Pos struct {
+	x int
+	y int
+}
+
 type PoptileGame struct {
 	Score      uint64
 	Touchcount uint64
@@ -7,6 +12,9 @@ type PoptileGame struct {
 	width   int
 	height  int
 	mapSize [][]int
+
+	GameHistroty []string
+	BlockHisroty []Pos
 }
 
 func (self *PoptileGame) MakeBlocks(line string) {
@@ -18,9 +26,9 @@ func (self *PoptileGame) MakeBlocks(line string) {
 	}
 }
 
-func (self *PoptileGame) InitMap(width, height uint) {
-	self.mapSize = make([][]uint8, height)
+func (self *PoptileGame) InitMap(width, height int) {
+	self.mapSize = make([][]int, height)
 	for i := 0; i < height; i++ {
-		self.mapSize[i] = make([]uint8, width)
+		self.mapSize[i] = make([]int, width)
 	}
 }
