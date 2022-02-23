@@ -121,8 +121,8 @@ export class Game {
 	private async draw(animationFrame: number) { //draw blocks and score
 		
 		// ctx.globalAlpha = 1
-		// ctx.fillStyle = 'rgb(255, 255, 255)'
-		// ctx.fillRect(0, 0, this.MAPPXWIDTH, this.MAPPXHEIGHT)
+		ctx.fillStyle = 'rgb(255, 255, 255)'
+		ctx.fillRect(0, 0, this.MAPPXWIDTH, this.BHEIGHT)
 
 		for (let animationIndex = 0; animationIndex < animationFrame; animationIndex++) {
 			
@@ -208,7 +208,8 @@ export class Game {
 
 				this.touchcount += 1
 				this.score += count*count //(count*count+count)/2 //점수 계산 식
-				
+				this.displayScore = this.score
+
 				this.lastPos = {"y": -1, "x": -1}
 				createBlock = true
 			}
