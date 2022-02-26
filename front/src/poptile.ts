@@ -182,7 +182,7 @@ export class Game {
 				}
 	
 				if (i == this.maxBlockRow - 1) {
-					this.map[i][j] = randInt(1, this.blockMax, this.score)
+					this.map[i][j] = (randInt(1, this.blockMax, this.score) + j) % this.blockMax + 1
 				}
 			}
 
