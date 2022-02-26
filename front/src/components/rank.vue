@@ -15,7 +15,10 @@
 
           <tbody>
             <tr v-for="(item, index) in RankList" v-bind:key="index">
-              <td v-if="item.Score > 200000" class="name">
+              <td v-if="index == 0" class="name">
+                <span class="user-hyper">{{ item.UserName }}</span>
+              </td>
+              <td v-else-if="item.Score > 200000" class="name">
                 <span class="user-rb-first">{{
                   item.UserName.substring(0, 1)
                 }}</span>
@@ -57,66 +60,79 @@
 </template>
 
 <style lang="scss" scoped>
-	.table .thead-dark th {
-		vertical-align: middle;
-	}	
+.table .thead-dark th {
+  vertical-align: middle;
+}
 
-	td.name {
-		font-weight: bold;
-		max-width: 140px;
-		word-break: break-word;
-	}
+td.name {
+  font-weight: bold;
+  max-width: 140px;
+  word-break: break-word;
+}
+
 @media (min-width: 1280px) {
-.Rank{
-	display: inline-block;
-	width: 50%;
+  .Rank {
+    display: inline-block;
+    width: 50%;
+  }
 }
+
+.user-hyper {
+  animation: hyper 1.5s ease-in-out infinite;
 }
 
+@keyframes hyper {
+	0%    {color: #f8be00; text-shadow: 0 0 8px rgba(248,190,  0,0.1);}
+	20%   {color: #ff0000; text-shadow: 0 0 8px rgba(255,  0,  0,0.1);}
+	40%   {color: #ff009a; text-shadow: 0 0 8px rgba(255,  0,154,0.1);}
+	60%   {color: #00aaff; text-shadow: 0 0 8px rgba(  0,  0,253,0.1);}
+	80%   {color: #00e7d6; text-shadow: 0 0 8px rgba(  0,231,214,0.1);}
+	100%  {color: #b0e700; text-shadow: 0 0 8px rgba(176,231,  0,0.1);}
+}
 
-	.user-red {
-		color: red
-	}
-
-	.user-orange {
-		color: #FF8C00;
-	}
 .user-rb-first {
   color: black;
 }
+
 .user-rb-last {
   color: red;
 }
 
-	.user-violet {
-		color: #a0a;
-	}
+.user-red {
+  color: red;
+}
 
-	.user-blue {
-		color: blue;
-	}
+.user-orange {
+  color: #ff8c00;
+}
 
-	.user-cyan {
-		color:#03A89E;
-	}
+.user-violet {
+  color: #a0a;
+}
 
-	.user-green {
-		color: green;
-	}
+.user-blue {
+  color: blue;
+}
 
-	.user-gray {
-		color:gray;
-	}
+.user-cyan {
+  color: #03a89e;
+}
 
+.user-green {
+  color: green;
+}
 
+.user-gray {
+  color: gray;
+}
 </style>
 
 <script lang="ts">
-import { Prop, Component, Vue } from "vue-property-decorator"
-import axios from 'axios'
+import { Prop, Component, Vue } from "vue-property-decorator";
+import axios from "axios";
 
 @Component
 export default class Rank extends Vue {
-	@Prop({default: []}) private RankList: Array<any> = []
+  @Prop({ default: [] }) private RankList: Array<any> = [];
 }
 </script>
