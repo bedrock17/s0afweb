@@ -3,8 +3,8 @@
 let cvs: any //canvas
 let ctx: any //canvas 2d
 
-function randInt(min: number, max: number) {
-	const ranNum = Math.floor(Math.random() * (max - min + 1)) + min
+function randInt(min: number, max: number, count: number) {
+	const ranNum = (Math.floor(Math.random() * (max - min + 1)) + count) % (max - min + 1) + min
 	return ranNum
 }
 
@@ -182,7 +182,7 @@ export class Game {
 				}
 	
 				if (i == this.maxBlockRow - 1) {
-					this.map[i][j] = randInt(1, this.blockMax)
+					this.map[i][j] = randInt(1, this.blockMax, this.score)
 				}
 			}
 
@@ -251,8 +251,12 @@ export class Game {
 			
 			if (createBlock) {
 				this.newBlocks()
+				if (this.dropEffect) {
+					await this.draw(5)
+				} else {
+					await this.draw(1)
+				}
 				createBlock = false
-				await this.draw(5)
 			}
 			
 			
