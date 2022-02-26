@@ -200,7 +200,7 @@ export class Game {
 			
 			if (this.lastPos.x >= 0 && this.lastPos.y >= 0) {
 
-				const count = await this.deleteblock({
+				const count = await this.removeBlocks({
 					"i": this.lastPos.y,
 					"j": this.lastPos.x,
 					"depth": 0
@@ -248,7 +248,7 @@ export class Game {
 		}
 	}
 
-  private async deleteblock(argPos: MAPPOS, blockCode: any): Promise<number> {
+  private async removeBlocks(argPos: MAPPOS, blockCode: any): Promise<number> {
 		
 		let count = 0
 		
