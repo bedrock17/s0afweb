@@ -1,0 +1,37 @@
+@import "utils";
+
+#wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  border: 1px solid currentColor;
+  border-radius: rem(4px);
+
+  color: black;
+  font-size: rem(14);
+
+  background: transparent;
+
+  appearance: none;
+
+  @mixin colored-button($color) {
+    color: $color;
+
+    &:hover {
+      color: var(--color-white);
+
+      background: $color;
+    }
+  }
+
+  &.skyblue {
+    @include colored-button(var(--color-blue));
+  }
+
+  &.green {
+    @include colored-button(var(--color-green));
+  }
+}

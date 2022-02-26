@@ -1,0 +1,8 @@
+@use "sass:math";
+
+@function strip($value) {
+  @return math.div($value, $value * 0 + 1);
+}
+@function rem($px, $base:16) {
+  @return #{math.div(strip($px), strip($base))}rem;
+}
