@@ -86,6 +86,8 @@ export default class Poptile extends Vue {
 			UserName: this.name,
 			Score: this.game.score,
 			TouchCount: this.game.touchcount,
+			LineHistory: this.game.lineHistory,
+			TouchHistory: this.game.touchHistory,
 			Check: SHA256(this.name + (this.game.score+this.game.touchcount).toString())
 			}).then((res: any) => {
 			this.RankList = res.data.RankList

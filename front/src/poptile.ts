@@ -53,6 +53,8 @@ export class Game {
 	public dropEffect: boolean
 	public deleteEffect: boolean
 	public displayScore: number
+	public lineHistory: string[] = []
+	public touchHistory: POS[] = []
 
 	private handleInit: boolean
 	private lastPos: POS
@@ -69,6 +71,7 @@ export class Game {
 	private MAPPXHEIGHT: number
 
 	private gameID: number //게임 루프제어용
+
 
 	constructor() {
 		this.score = 0
@@ -182,6 +185,14 @@ export class Game {
 					this.map[i][j] = randInt(1, this.blockMax)
 				}
 			}
+
+			if (i == this.maxBlockRow - 1) {
+				let historyItem = ""
+				for (j = 0; j < this.maxBlockColum; j++) {
+					historyItem += this.map[i][j].toString()
+				}
+				this.lineHistory.push(historyItem)
+			}
 		}
 	}
 
@@ -199,7 +210,7 @@ export class Game {
 			await sleep(33)
 			
 			if (this.lastPos.x >= 0 && this.lastPos.y >= 0) {
-
+				this.touchHistory.push(this.lastPos)
 				const count = await this.removeBlocks({
 					"i": this.lastPos.y,
 					"j": this.lastPos.x,
@@ -371,7 +382,9 @@ export class Game {
 		this.score = 0
 		this.displayScore = 0
 		this.touchcount = 0
-		
+		this.lineHistory = []
+		this.touchHistory = []
+
 		this.gameOver = false
 		this.gameID++
 		this.handleInit = false

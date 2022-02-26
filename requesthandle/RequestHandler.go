@@ -28,7 +28,7 @@ func (d *dataBaseStruct) loadRankList(filePath string) {
 	data, err := ioutil.ReadFile(filePath)
 
 	if err == nil {
-
+		fmt.Println(data)
 		err = json.Unmarshal(data, &d)
 
 		common.Check(err)
@@ -90,7 +90,7 @@ func Run(httpServerConfig HTTPServerConfifg) {
 
 	fmt.Println(addr)
 	// e.Logger.Fatal(e.Start(addr))
-	e.Logger.Fatal(e.StartAutoTLS(addr))
-	// e.Logger.Fatal(e.Start(":8080")) //HTTP DEBUG
+	// e.Logger.Fatal(e.StartAutoTLS(addr))
+	e.Logger.Fatal(e.Start(":8080")) //HTTP DEBUG
 
 }
