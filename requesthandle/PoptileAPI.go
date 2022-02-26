@@ -10,27 +10,16 @@ import (
 	"sync"
 
 	"github.com/bedrock17/s0afweb/common"
+	"github.com/bedrock17/s0afweb/game"
 	"github.com/bedrock17/s0afweb/model"
 	"github.com/labstack/echo"
 )
 
 var rankMutex = &sync.Mutex{}
 
-// func popTileRankLoad(c echo.Context) {
-// 	// fmt.Fprintf(c.ResponseWriter, "Welcome!")
-// 	rankMutex.Lock()
-// 	globalDataBaseStruct.loadRankList("jsondb/rank.json")
-// 	rankMutex.Unlock()
-// 	http.Redirect(c.ResponseWriter, c.Request, "/static/index.html", http.StatusFound)
-// }
-
 func popTileRankReg(c echo.Context) error {
 
 	data := new(model.PopTileRank)
-	// c.Request.Body.Read(body)
-	// body := make([]byte, c.Request.ContentLength)
-	// err := json.Unmarshal(body, &data)
-
 	err := c.Bind(data)
 	if err != nil {
 		common.Check(err)
@@ -50,7 +39,13 @@ func popTileRankReg(c echo.Context) error {
 	hexSum := fmt.Sprintf("%x", sha256.Sum256([]byte(input)))
 
 	if data.Check != hexSum || data.Score > (120*120*data.TouchCount) {
-		// fmt.Fprintf(c.ResponseWriter, "ㅠㅠ")
+		return c.String(http.StatusForbidden, "ERROR(403)")
+	}
+
+	if game.GameValidChceck(data) {
+		fmt.Println("Check Pass!!")
+	} else {
+		fmt.Println("Check Error!!")
 		return c.String(http.StatusForbidden, "ERROR(403)")
 	}
 

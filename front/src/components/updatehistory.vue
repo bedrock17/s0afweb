@@ -4,6 +4,8 @@
 		<b-button v-b-toggle="'collapse-2'" variant="outline-info">업데이트 히스토리</b-button>
 		<b-collapse id="collapse-2">
 			<div class="text-update-log">
+				<h3>ver 22.2.23.1</h3>
+	새로운 블럭이 추가될때 효과 추가
 				<h3>ver 20.4.4.1</h3>
 	지우는 효과 개선
 				<h3>ver 20.4.3.1</h3>
@@ -34,7 +36,7 @@
 	URI 처리 버그 수정
 	히스토리 추가
 	문의는 이곳으로
-	:) https://open.kakao.com/o/g9F8Ym1b
+	:) https://open.kakao.com/me/cube_
 				</pre>
 			</div>
 		</b-collapse>

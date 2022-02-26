@@ -11,6 +11,9 @@
 
 <style lang="scss">
 
+.home {
+  margin-top: 10px;
+}
 
 
 </style>

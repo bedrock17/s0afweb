@@ -28,7 +28,7 @@ func (d *dataBaseStruct) loadRankList(filePath string) {
 	data, err := ioutil.ReadFile(filePath)
 
 	if err == nil {
-
+		fmt.Println(data)
 		err = json.Unmarshal(data, &d)
 
 		common.Check(err)

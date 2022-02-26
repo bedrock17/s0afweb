@@ -3,8 +3,8 @@
 let cvs: any //canvas
 let ctx: any //canvas 2d
 
-function randInt(min: number, max: number) {
-	const ranNum = Math.floor(Math.random() * (max - min + 1)) + min
+function randInt(min: number, max: number, count: number) {
+	const ranNum = (Math.floor(Math.random() * (max - min + 1)) + count) % (max - min + 1) + min
 	return ranNum
 }
 
@@ -53,6 +53,8 @@ export class Game {
 	public dropEffect: boolean
 	public deleteEffect: boolean
 	public displayScore: number
+	public lineHistory: string[] = []
+	public touchHistory: POS[] = []
 
 	private handleInit: boolean
 	private lastPos: POS
@@ -69,6 +71,7 @@ export class Game {
 	private MAPPXHEIGHT: number
 
 	private gameID: number //게임 루프제어용
+
 
 	constructor() {
 		this.score = 0
@@ -117,32 +120,40 @@ export class Game {
 	}
 	
 
-	private draw() { //draw blocks and score
+	// animationFrame 인자로 넘어온 값 만큼 블록이 올라가는 과정을 프임별로 보여준다
+	private async draw(animationFrame: number) { //draw blocks and score
+		
+		// ctx.globalAlpha = 1
+		ctx.fillStyle = 'rgb(255, 255, 255)'
+		ctx.fillRect(0, 0, this.MAPPXWIDTH, this.BHEIGHT)
 
-		ctx.globalAlpha = 1
-		ctx.fillStyle = 'rgb(0, 0, 0)'
-		ctx.fillRect(0, 0, this.MAPPXWIDTH, this.MAPPXHEIGHT)
-		ctx.globalAlpha = 1
-	
-		// const code = Math.floor(255-(this.score / 100)%256)
-		// const bgColor = "(" + code + "," + code + "," + code + ")"
-
-		for (let i = 0; i < this.maxBlockRow; i++) {
-			for (let j = 0; j < this.maxBlockColum; j++) {
-				const ypos = i * (this.BHEIGHT + this.OUTLINE_PIXEL)
-				const xpos = j * (this.BWIDTH + this.OUTLINE_PIXEL)
-
-				const colorCode = this.colors[this.map[i][j]]
+		for (let animationIndex = 0; animationIndex < animationFrame; animationIndex++) {
+			
+			let yposFrameValue = 0
+			if (animationFrame > 1) {
+				yposFrameValue = (this.BHEIGHT * (animationFrame - animationIndex - 1)) / animationFrame
 				
-				// if (MAP[i][j] == 0)
-				// 	colorCode = bgColor
-				
-				ctx.fillStyle = "rgb" + colorCode
-				ctx.fillRect(xpos, ypos, this.BWIDTH, this.BHEIGHT)
-	
-				//  console.log(xpos, ypos, BWIDTH, BHEIGHT)
-	
 			}
+
+			for (let i = 0; i < this.maxBlockRow; i++) {
+				for (let j = 0; j < this.maxBlockColum; j++) {
+					const ypos = i * (this.BHEIGHT + this.OUTLINE_PIXEL)
+					const xpos = j * (this.BWIDTH + this.OUTLINE_PIXEL)
+
+					const colorCode = this.colors[this.map[i][j]]
+					
+					// if (MAP[i][j] == 0)
+					// 	colorCode = bgColor
+					
+					ctx.fillStyle = "rgb" + colorCode
+					ctx.fillRect(xpos, ypos+yposFrameValue, this.BWIDTH, this.BHEIGHT)
+		
+					//  console.log(xpos, ypos, BWIDTH, BHEIGHT)
+		
+				}
+			}
+			if (animationFrame > 1)
+				await sleep(33)
 		}
 	}
 	
@@ -171,8 +182,16 @@ export class Game {
 				}
 	
 				if (i == this.maxBlockRow - 1) {
-					this.map[i][j] = randInt(1, this.blockMax)
+					this.map[i][j] = (randInt(1, this.blockMax, this.score) + j) % this.blockMax + 1
 				}
+			}
+
+			if (i == this.maxBlockRow - 1) {
+				let historyItem = ""
+				for (j = 0; j < this.maxBlockColum; j++) {
+					historyItem += this.map[i][j].toString()
+				}
+				this.lineHistory.push(historyItem)
 			}
 		}
 	}
@@ -182,17 +201,17 @@ export class Game {
 		let createBlock = false
 		
 		this.initMAP()
-		this.draw()
+		await this.draw(1)
 		// await sleep(100)
 
 		while (!this.gameOver && gameID == this.gameID) {
 			// console.log(this.gameOver, gameID, this.gameID)
 			
-			await sleep(50)
+			await sleep(33)
 			
 			if (this.lastPos.x >= 0 && this.lastPos.y >= 0) {
-
-				const count = await this.deleteblock({
+				this.touchHistory.push(this.lastPos)
+				const count = await this.removeBlocks({
 					"i": this.lastPos.y,
 					"j": this.lastPos.x,
 					"depth": 0
@@ -200,15 +219,15 @@ export class Game {
 
 				this.touchcount += 1
 				this.score += count*count //(count*count+count)/2 //점수 계산 식
-				
+				this.displayScore = this.score
+
 				this.lastPos = {"y": -1, "x": -1}
 				createBlock = true
 			}
 
 			let isDown = false
 			let isContinue = true
-			while (isContinue)
-			{
+			while (isContinue) {
 				isContinue = false
 				for (let i = this.maxBlockRow - 1; i > 0; i--) {
 					for (let j = 0; j < this.maxBlockColum; j++) {
@@ -222,25 +241,29 @@ export class Game {
 					}
 				}
 
-				if (this.dropEffect)
-					break
+				if (this.dropEffect) {
+					if (isDown) {
+						await this.draw(1)
+						await sleep(33)
+					}
+				}
 			}
-
-			if (isDown)
-				this.draw()
 			
 			if (createBlock) {
 				this.newBlocks()
+				if (this.dropEffect) {
+					await this.draw(5)
+				} else {
+					await this.draw(1)
+				}
 				createBlock = false
-				this.draw()
-				await sleep(100)
 			}
 			
 			
 		}
 	}
 
-  private async deleteblock(argPos: MAPPOS, blockCode: any): Promise<number> {
+  private async removeBlocks(argPos: MAPPOS, blockCode: any): Promise<number> {
 		
 		let count = 0
 		
@@ -265,8 +288,8 @@ export class Game {
 			if (this.deleteEffect) { //블록을 지워나가는 과정을 보여주는 부분.
 				if (depth < pos.depth) {
 					this.displayScore = this.score + count*count //지우면서 점수 올라가는것을 보여줌
-					this.draw()
-					await sleep(50)
+					await this.draw(1)
+					await sleep(33)
 					depth = pos.depth
 				}
 			}
@@ -363,7 +386,9 @@ export class Game {
 		this.score = 0
 		this.displayScore = 0
 		this.touchcount = 0
-		
+		this.lineHistory = []
+		this.touchHistory = []
+
 		this.gameOver = false
 		this.gameID++
 		this.handleInit = false
@@ -372,13 +397,6 @@ export class Game {
 
 		this.gameProcLoop(this.gameID)
 	
-		// draw()
 	}
 	
 }
-
-// $(document).ready(function () {
-// 	console.log("MAP INIT")
-//  initMAP();
-// 	draw();
-// })
