@@ -10,6 +10,6 @@ export const Container = styled.div({
     width: '100%',
     minHeight: '100%',
     margin: '0 auto',
-    padding: `${rem(24)} 0`,
+    padding: `${rem(24)} ${rem(16)}`,
   }
 });
