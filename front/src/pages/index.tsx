@@ -12,6 +12,7 @@ const IndexPage: Component = () => {
       <button className={classNames(styles.button, styles.skyblue)}>PLAY!</button>
       <button className={classNames(styles.button, styles.green)}>PLAY!</button>
       <Switch checked={checked} onChange={setChecked} />
+      <input type={'text'} className={styles.input} placeholder={'test name'} />
     </div>
   );
 };
