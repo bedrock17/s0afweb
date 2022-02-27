@@ -16,7 +16,7 @@ const IndexPage = () => {
       </Switch>
       <Input type={'text'} placeholder={'사용자 이름'} />
       <Button color={'blue'}>Solo Play</Button>
-      <Button color={'green'} disabled>Online Play</Button>
+      <Button color={'blue'} disabled>Online Play</Button>
     </Wrapper>
   );
 };

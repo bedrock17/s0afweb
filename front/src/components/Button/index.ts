@@ -3,7 +3,7 @@ import { memo } from 'react';
 
 import { styled } from '~/stitches.config';
 
-const Container = styled('footer', {
+const Container = styled('button', {
   '&': {
     minWidth: rem(140),
     margin: `${rem(6)} ${rem(4)}`,
@@ -42,7 +42,7 @@ const Container = styled('footer', {
         '&:not([disabled]):hover': {
           backgroundColor: '$blue',
         }
-      }
+      },
     }
   },
 });

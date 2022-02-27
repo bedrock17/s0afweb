@@ -1,16 +1,17 @@
-import React, { memo } from 'react';
+import React, { memo, PropsWithChildren } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 
 import {
   Container, Label, Thumb, Wrapper
 } from './styles';
 
 
-type Props = {
+type Props = PropsWithChildren<{
   checked: boolean,
-  onChange: (checked: boolean) => void,
-};
+  onChange: Dispatch<SetStateAction<boolean>>,
+}>;
 
-const Switch: React.FC<Props> = ({ checked, onChange, children }) => {
+const Switch = ({ checked, onChange, children }: Props) => {
   const onClick = () => onChange(!checked);
 
   return (
@@ -26,7 +27,6 @@ const Switch: React.FC<Props> = ({ checked, onChange, children }) => {
       </Container>
       <Label>{ children }</Label>
     </Wrapper>
-
   );
 };
 
