@@ -1,10 +1,10 @@
-import type { Component } from 'solid-js';
+import React from 'react';
 
 import Footer from '~/components/Footer';
 
 import { Container } from './styles';
 
-const Layout: Component = ({ children }) => (
+const Layout: React.FC = ({ children }) => (
   <Container>
     { children }
     <Footer />

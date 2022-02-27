@@ -1,7 +1,8 @@
 import { rem } from 'polished';
-import { styled } from 'solid-styled-components';
 
-export const Container = styled.div({
+import { styled } from '~/stitches.config';
+
+export const Container = styled('div', {
   '&': {
     display: 'flex',
     flexDirection: 'column',

@@ -9,11 +9,17 @@
   },
   "plugins": [
     "import",
+    "react",
+    "react-hooks",
+    "jsx-a11y",
     "@typescript-eslint"
   ],
   "extends": [
     "plugin:import/recommended",
     "plugin:import/typescript",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended",
     "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
@@ -104,6 +110,14 @@
         }
       }
     ],
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [
+          ".tsx"
+        ]
+      }
+    ],
     "no-console": [
       "error",
       {
@@ -113,6 +127,10 @@
         ]
       }
     ],
+    "react/no-unescaped-entities": "warn",
+    "react/prop-types": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/require-default-props": "off",
     "semi": "off",
     "space-before-blocks": "error",
     "no-shadow": "off",
@@ -174,6 +192,9 @@
     }
   ],
   "settings": {
+    "react": {
+      "version": "detect"
+    },
     "import/resolver": {
       "typescript": {}
     }

@@ -1,11 +1,9 @@
 import { em, rem } from 'polished';
-import { DefaultTheme, styled } from 'solid-styled-components';
+import { memo } from 'react';
 
-type Props = {
-  color: keyof DefaultTheme['colors'],
-};
+import { styled } from '~/stitches.config';
 
-const Container = styled.button<Props>(props => ({
+const Container = styled('footer', {
   '&': {
     minWidth: rem(140),
     margin: `${rem(6)} ${rem(4)}`,
@@ -13,29 +11,40 @@ const Container = styled.button<Props>(props => ({
     border: `${em(1)} solid currentColor`,
     borderRadius: rem(4),
 
-    color: props.theme?.colors[props.color],
     fontSize: rem(20),
+
+    textAlign: 'center',
 
     backgroundColor: 'transparent',
 
     appearance: 'none',
 
     '&[disabled]': {
-      borderColor: props.theme?.colors.gray300,
+      borderColor: '$gray300',
 
-      color: props.theme?.colors.gray300,
+      color: '$gray300',
 
       cursor: 'not-allowed',
 
       opacity: 0.5
     },
   },
+
   '&:not([disabled]):hover': {
+    color: '$white',
+  },
 
-    color: props.theme?.colors.white,
+  variants: {
+    color: {
+      blue: {
+        color: '$blue',
 
-    backgroundColor:  props.theme?.colors[props.color],
-  }
-}));
+        '&:not([disabled]):hover': {
+          backgroundColor: '$blue',
+        }
+      }
+    }
+  },
+});
 
-export default Container;
+export default memo(Container);

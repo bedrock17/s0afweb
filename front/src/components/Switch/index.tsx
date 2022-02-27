@@ -1,4 +1,4 @@
-import type { Accessor, Component } from 'solid-js';
+import React, { memo } from 'react';
 
 import {
   Container, Label, Thumb, Wrapper
@@ -6,23 +6,23 @@ import {
 
 
 type Props = {
-  checked: Accessor<boolean>,
+  checked: boolean,
   onChange: (checked: boolean) => void,
 };
 
-const Switch: Component<Props> = ({ checked, onChange, children }) => {
-  const onClick = () => onChange(!checked());
+const Switch: React.FC<Props> = ({ checked, onChange, children }) => {
+  const onClick = () => onChange(!checked);
 
   return (
     <Wrapper>
       <Container
         type={'button'}
         data-toggle={'button'}
-        aria-pressed={checked()}
+        aria-pressed={checked}
         onClick={onClick}
-        activated={checked()}
+        activated={checked}
       >
-        <Thumb activated={checked()}  />
+        <Thumb activated={checked}  />
       </Container>
       <Label>{ children }</Label>
     </Wrapper>
@@ -30,4 +30,4 @@ const Switch: Component<Props> = ({ checked, onChange, children }) => {
   );
 };
 
-export default Switch;
+export default memo(Switch);

@@ -1,7 +1,8 @@
 import { rem } from 'polished';
-import { styled } from 'solid-styled-components';
 
-export const Container = styled.footer({
+import { styled } from '~/stitches.config';
+
+export const Container = styled('footer', {
   '&': {
     display: 'flex',
     flexDirection: 'column',
@@ -10,11 +11,11 @@ export const Container = styled.footer({
   }
 });
 
-export const Title = styled.h2(props => ({
+export const Title = styled('h2', {
   '&': {
-    color: props.theme?.colors.gray900,
+    color: '$gray900',
 
     textAlign: 'center',
     textTransform: 'uppercase',
   }
-}));
+});

@@ -1,46 +1,51 @@
 import { rem } from 'polished';
-import { styled } from 'solid-styled-components';
+import { memo } from 'react';
 
-type Props = {
-  activated: boolean,
-};
+import { styled } from '~/stitches.config';
 
-export const Wrapper = styled.div({
-  display: 'flex',
-  alignItems: 'center',
-  alignSelf: 'flex-end',
-});
-
-export const Label = styled.span({
-  fontSize: rem(16),
-});
-
-export const Container = styled.button<Props>(props => ({
-  position: 'relative',
-
-  width: rem(48),
-  height: rem(24),
-  marginRight: rem(6),
-  padding: 0,
-  border: 'none',
-  borderRadius: rem(24),
-
-  color: props.theme?.colors.blue,
-
-  backgroundColor: (
-    props.activated
-      ? props.theme?.colors.blue
-      : props?.theme?.colors.gray100
-  ),
-
-  transition: 'background-color 0.2s ease-in-out',
-
-  '&:focus, &:focus.active': {
-    outline: 'none',
+export const Wrapper = styled('div', {
+  '&': {
+    display: 'flex',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
   },
+});
+
+export const Label = memo(styled('span', {
+  fontSize: rem(16),
 }));
 
-export const Thumb = styled.div<Props>(props => ({
+export const Container = styled('button', {
+  '&': {
+    position: 'relative',
+
+    width: rem(48),
+    height: rem(24),
+    marginRight: rem(6),
+    padding: 0,
+    border: 'none',
+    borderRadius: rem(24),
+
+    color: '$blue',
+
+    backgroundColor: '$gray100',
+
+    transition: 'background-color 0.2s ease-in-out',
+
+    '&:focus, &:focus.active': {
+      outline: 'none',
+    },
+  },
+  variants: {
+    activated: {
+      true: {
+        backgroundColor: '$blue',
+      },
+    }
+  }
+});
+
+export const Thumb = styled('div', {
   '&': {
     position: 'absolute',
     top: rem(3),
@@ -50,10 +55,17 @@ export const Thumb = styled.div<Props>(props => ({
     height: rem(18),
     borderRadius: rem(18),
 
-    background: props.theme?.colors.white,
+    background: '$white',
 
-    transform: `translateX(${props.activated ? rem(24) : 0})`,
+    transform: 'translateX(0)',
 
     transition: 'transform 0.25s',
   },
-}));
+  variants: {
+    activated: {
+      true: {
+        transform: `translateX(${rem(24)})`,
+      },
+    },
+  }
+});

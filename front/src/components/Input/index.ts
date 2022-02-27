@@ -1,17 +1,19 @@
 import { rem } from 'polished';
-import { styled } from 'solid-styled-components';
+import { memo } from 'react';
 
-const Container = styled.input(props => ({
+import { styled } from '~/stitches.config';
+
+const Container = styled('input', {
   '&': {
     width: '100%',
     padding: `${rem(6)} ${rem(8)}`,
-    border: `1px solid ${props.theme?.colors.gray100}`,
+    border: '1px solid $gray100',
     borderRadius: rem(4),
 
     fontSize: rem(16),
 
     appearance: 'none',
   },
-}));
+});
 
-export default Container;
+export default memo(Container);

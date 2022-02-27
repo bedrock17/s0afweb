@@ -1,7 +1,9 @@
-import { em, rem } from 'polished';
-import { styled } from 'solid-styled-components';
+import { rem } from 'polished';
+import { memo } from 'react';
 
-export const Wrapper = styled.div({
+import { styled } from '~/stitches.config';
+
+export const Wrapper = styled('div', {
   '&': {
     display: 'flex',
     flexDirection: 'column',
@@ -13,11 +15,11 @@ export const Wrapper = styled.div({
   }
 });
 
-export const Title = styled.h1(props => ({
+export const Title = memo(styled('h1', {
   '&': {
     marginBottom: rem(24),
 
-    color: props.theme?.colors.blue,
+    color: '$blue',
     fontSize: rem(40),
     textAlign: 'center',
     textTransform: 'uppercase',

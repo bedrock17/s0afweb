@@ -1,25 +1,17 @@
-import { Route, Routes } from 'solid-app-router';
-import type { Component } from 'solid-js';
-import { lazy } from 'solid-js';
-import { ThemeProvider } from 'solid-styled-components';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 
-import { lightTheme } from '../theme';
-import Layout from '~/layout';
+import Layout from './layout';
+import IndexPage from './pages/Index';
 
-
-const IndexPage = lazy(() => import('./pages/index'));
-
-const App: Component = () => {
+function App() {
   return (
-    <ThemeProvider theme={lightTheme}>
-      <Layout>
-        <Routes>
-          <Route path={'/'} element={<IndexPage />} />
-          <Route path={'/play'} element={null} />
-        </Routes>
-      </Layout>
-    </ThemeProvider>
+    <Layout>
+      <Routes>
+        <Route path={'/'} element={<IndexPage />} />
+      </Routes>
+    </Layout>
   );
-};
+}
 
 export default App;

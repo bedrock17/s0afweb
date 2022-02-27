@@ -1,5 +1,4 @@
-import type { Component } from 'solid-js';
-import { createSignal } from 'solid-js';
+import React, { useState } from 'react';
 
 import Button from '~/components/Button';
 import Input from '~/components/Input';
@@ -7,8 +6,8 @@ import Switch from '~/components/Switch';
 
 import { Title, Wrapper } from './styles';
 
-const IndexPage: Component = () => {
-  const [checked, setChecked] = createSignal(false);
+const IndexPage = () => {
+  const [checked, setChecked] = useState(false);
   return (
     <Wrapper>
       <Title>Poptile</Title>

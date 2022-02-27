@@ -1,10 +1,10 @@
-import type { Component } from 'solid-js';
+import React from 'react';
 
 import talalgo from '~/assets/talalgo.png';
 
 import { Container, Title } from './styles';
 
-const Footer: Component = () => {
+const Footer = () => {
   return (
     <Container>
       <Title>Sponsor</Title>
