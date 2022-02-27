@@ -1,10 +1,20 @@
 {
+  "extends": [
+    "stylelint-config-styled-components"
+  ],
   "plugins": [
-    "stylelint-scss",
     "stylelint-order",
     "stylelint-config-rational-order/plugin"
   ],
-  "customSyntax": "postcss-scss",
+  "overrides": [
+    {
+      "files": ["**/*.{ts,tsx}"],
+      "customSyntax": "@stylelint/postcss-css-in-js",
+      "rules": {
+        "at-rule-no-unknown": null
+      }
+    }
+  ],
   "rules": {
     "order/properties-order": [],
     "plugin/rational-order": [

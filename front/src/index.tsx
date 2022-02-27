@@ -1,6 +1,6 @@
 /* @refresh reload */
 
-import './index.scss';
+import './index.css';
 
 import { Router } from 'solid-app-router';
 import { render } from 'solid-js/web';

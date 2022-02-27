@@ -1,18 +1,18 @@
 import type { Component } from 'solid-js';
 import { createSignal } from 'solid-js';
 
-import styles from '~/components.module.scss';
+import Button from '~/components/Button';
+import Input from '~/components/Input';
 import Switch from '~/components/Switch';
-import { classNames } from '~/utils';
 
 const IndexPage: Component = () => {
   const [checked, setChecked] = createSignal(false);
   return (
     <div>
-      <button className={classNames(styles.button, styles.skyblue)}>PLAY!</button>
-      <button className={classNames(styles.button, styles.green)}>PLAY!</button>
+      <Button color={'blue'}>PLAY!</Button>
+      <Button color={'green'}>PLAY!</Button>
       <Switch checked={checked} onChange={setChecked} />
-      <input type={'text'} className={styles.input} placeholder={'test name'} />
+      <Input type={'text'} placeholder={'test name'} />
     </div>
   );
 };
