@@ -1,4 +1,4 @@
-import { rem } from 'polished';
+import { em, rem } from 'polished';
 import { DefaultTheme, styled } from 'solid-styled-components';
 
 type Props = {
@@ -7,18 +7,30 @@ type Props = {
 
 const Container = styled.button<Props>(props => ({
   '&': {
-    padding: `${rem(8)} ${rem(16)}`,
-    border: '1px solid currentColor',
+    minWidth: rem(140),
+    margin: `${rem(6)} ${rem(4)}`,
+    padding: `${rem(6)} ${rem(12)}`,
+    border: `${em(1)} solid currentColor`,
     borderRadius: rem(4),
 
     color: props.theme?.colors[props.color],
-    fontSize: rem(14),
+    fontSize: rem(20),
 
     backgroundColor: 'transparent',
 
     appearance: 'none',
+
+    '&[disabled]': {
+      borderColor: props.theme?.colors.gray300,
+
+      color: props.theme?.colors.gray300,
+
+      cursor: 'not-allowed',
+
+      opacity: 0.5
+    },
   },
-  '&:hover': {
+  '&:not([disabled]):hover': {
 
     color: props.theme?.colors.white,
 

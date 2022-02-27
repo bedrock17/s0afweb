@@ -6,6 +6,7 @@ declare module 'solid-styled-components' {
       white: string,
       gray100: string,
       gray300: string,
+      gray900: string,
 
       blue: string,
       green: string,

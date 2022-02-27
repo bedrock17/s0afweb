@@ -1,6 +1,8 @@
 import type { Accessor, Component } from 'solid-js';
 
-import { Container, Thumb } from './styles';
+import {
+  Container, Label, Thumb, Wrapper
+} from './styles';
 
 
 type Props = {
@@ -8,19 +10,23 @@ type Props = {
   onChange: (checked: boolean) => void,
 };
 
-const Switch: Component<Props> = ({ checked, onChange }) => {
+const Switch: Component<Props> = ({ checked, onChange, children }) => {
   const onClick = () => onChange(!checked());
 
   return (
-    <Container
-      type={'button'}
-      data-toggle={'button'}
-      aria-pressed={checked()}
-      onClick={onClick}
-      activated={checked()}
-    >
-      <Thumb activated={checked()}  />
-    </Container>
+    <Wrapper>
+      <Container
+        type={'button'}
+        data-toggle={'button'}
+        aria-pressed={checked()}
+        onClick={onClick}
+        activated={checked()}
+      >
+        <Thumb activated={checked()}  />
+      </Container>
+      <Label>{ children }</Label>
+    </Wrapper>
+
   );
 };
 

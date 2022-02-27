@@ -5,12 +5,22 @@ type Props = {
   activated: boolean,
 };
 
+export const Wrapper = styled.div({
+  display: 'flex',
+  alignItems: 'center',
+  alignSelf: 'flex-end',
+});
+
+export const Label = styled.span({
+  fontSize: rem(16),
+});
+
 export const Container = styled.button<Props>(props => ({
   position: 'relative',
 
   width: rem(48),
   height: rem(24),
-  margin: `0 ${rem(16)}`,
+  marginRight: rem(6),
   padding: 0,
   border: 'none',
   borderRadius: rem(24),
