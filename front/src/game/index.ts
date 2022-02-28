@@ -2,10 +2,6 @@ function randInt(min: number, max: number, count: number) {
   return (Math.floor(Math.random() * (max - min + 1)) + count) % (max - min + 1) + min;
 }
 
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 class Queue<T> {
   list: T[] = [];
   get length() {
@@ -39,6 +35,7 @@ export class Game {
   public animationEffect: boolean;
   public lineHistory: string[] = [];
   public touchHistory: Point[] = [];
+  public createBlock = false;
 
   private lastPos: Point;
   private _colors: string[];
@@ -125,7 +122,7 @@ export class Game {
   }
 
   // animationFrame 인자로 넘어온 값 만큼 블록이 올라가는 과정을 프임별로 보여준다
-  private async draw(animationFrame: number) { //draw blocks and score
+  private draw(animationFrame: number) { //draw blocks and score
     this.context.fillStyle = 'rgb(255, 255, 255)';
     this.context.fillRect(0, 0, this.MAPPXWIDTH, this.BHEIGHT);
 
@@ -148,8 +145,6 @@ export class Game {
           this.context.fillRect(xPos, yPos + yposFrameValue, this.BWIDTH, this.BHEIGHT);
         }
       }
-      if (animationFrame > 1)
-        await sleep(33);
     }
   }
 
@@ -189,7 +184,7 @@ export class Game {
     }
   }
 
-  private async removeBlocks(argPos: MapPosition, blockCode: number): Promise<number> {
+  private removeBlocks(argPos: MapPosition, blockCode: number): number {
     let count = 0;
 
     const queue = new Queue<MapPosition>();
@@ -210,10 +205,7 @@ export class Game {
 
       if (this.animationEffect) { //블록을 지워나가는 과정을 보여주는 부분.
         if (depth < pos.depth) {
-          this.score += count * count; //지우면서 점수 올라가는것을 보여줌
-          this.onScoreChangeCallback?.(this.score);
-          await this.draw(1);
-          await sleep(33);
+          this.draw(1);
           depth = pos.depth;
         }
       }
@@ -236,9 +228,7 @@ export class Game {
     }
 
     // return count
-    return new Promise<number>((resolve) => {
-      resolve(count);
-    });
+    return count;
   }
 
   private onTileClick = (e: MouseEvent) => { //mouse event
@@ -277,59 +267,59 @@ export class Game {
   }
 
   // 이곳에서 그리기 및 블록처리를 해준다.
-  private async gameProcLoop(gameID: number) {
-    let createBlock = false;
+  private gameProcLoop = () => {
+    this.draw(5);
 
-    this.initialize();
-    await this.draw(1);
+    if (this.gameOver) {
+      return;
+    }
 
-    while (!this.gameOver && gameID === this.gameID) {
-      await sleep(33);
+    if (this.lastPos.x >= 0 && this.lastPos.y >= 0) {
+      this.touchHistory.push(this.lastPos);
+      const count = this.removeBlocks({
+        'i': this.lastPos.y,
+        'j': this.lastPos.x,
+        'depth': 0
+      }, this.map[this.lastPos.y][this.lastPos.x]);
+      this.score += count * count;
+      this.onScoreChangeCallback?.(this.score);
 
-      if (this.lastPos.x >= 0 && this.lastPos.y >= 0) {
-        this.touchHistory.push(this.lastPos);
-        await this.removeBlocks({
-          'i': this.lastPos.y,
-          'j': this.lastPos.x,
-          'depth': 0
-        }, this.map[this.lastPos.y][this.lastPos.x]);
+      this.touchCount += 1;
 
-        this.touchCount += 1;
+      this.lastPos = { 'y': -1, 'x': -1 };
+      this.createBlock = true;
+    }
 
-        this.lastPos = { 'y': -1, 'x': -1 };
-        createBlock = true;
-      }
+    let isDown = false;
+    let isContinue = true;
+    while (isContinue) {
+      isContinue = false;
+      for (let i = this.maxBlockRow - 1; i > 0; i--) {
+        for (let j = 0; j < this.maxBlockColumn; j++) {
+          if (this.map[i][j] === 0 && this.map[i - 1][j] !== 0) {
+            this.map[i][j] = this.map[i - 1][j];
+            this.map[i - 1][j] = 0;
 
-      let isDown = false;
-      let isContinue = true;
-      while (isContinue) {
-        isContinue = false;
-        for (let i = this.maxBlockRow - 1; i > 0; i--) {
-          for (let j = 0; j < this.maxBlockColumn; j++) {
-            if (this.map[i][j] === 0 && this.map[i - 1][j] !== 0) {
-              this.map[i][j] = this.map[i - 1][j];
-              this.map[i - 1][j] = 0;
-
-              isDown = true;
-              isContinue = true;
-            }
+            isDown = true;
+            isContinue = true;
           }
         }
-
-        if (this.animationEffect && isDown) {
-          await this.draw(1);
-          await sleep(33);
-        }
       }
 
-      if (createBlock) {
-        this.newBlocks();
-        const frame = this.animationEffect ? 5 : 1;
-        await this.draw(frame);
-        createBlock = false;
-      }
+      // if (this.animationEffect && isDown) {
+      //   this.draw(1);
+      // }
     }
-  }
+
+    if (this.createBlock) {
+      this.newBlocks();
+      // const frame = this.animationEffect ? 5 : 1;
+      // this.draw(frame);
+      this.createBlock = false;
+    }
+
+    window.requestAnimationFrame(this.gameProcLoop);
+  };
 
   public startGame() {
     this.score = 0;
@@ -337,9 +327,11 @@ export class Game {
     this.lineHistory = [];
     this.touchHistory = [];
     this.gameOver = false;
+    this.createBlock = false;
     this.gameID++;
 
-    void this.gameProcLoop(this.gameID);
+    this.initialize();
+    window.requestAnimationFrame(this.gameProcLoop);
   }
 
   public set onScoreChange(fn: CallableFunction) {
