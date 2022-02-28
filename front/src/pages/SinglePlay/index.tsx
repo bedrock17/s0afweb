@@ -1,19 +1,19 @@
-import React, {
-  useEffect, useRef, useState 
-} from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-import { gameAnimationEffectState, gameUsernameState } from '~/atoms/game';
+import {
+  gameAnimationEffectState, gameScoreState, gameUsernameState
+} from '~/atoms/game';
 import GameCanvas from '~/components/GameCanvas';
 import Switch from '~/components/Switch';
-import type { Game  } from '~/game';
+import type { Game } from '~/game';
 
 import { Wrapper } from './styles';
 
 const IndexPage = () => {
   const username = useRecoilValue(gameUsernameState);
   const gameRef = useRef<Game>();
-  const [score, setScore] = useState(0);
+  const [score, setScore] = useRecoilState(gameScoreState);
   const [animationEffect, setAnimationEffect] = useRecoilState(gameAnimationEffectState);
 
   useEffect(() => {
@@ -23,7 +23,6 @@ const IndexPage = () => {
     }
 
     game.onScoreChange = setScore;
-
   }, [gameRef]);
 
   return (
