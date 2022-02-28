@@ -293,6 +293,7 @@ export class Game {
     if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
       
       if (this.createBlock) {
+        this.onScoreChangeCallback?.(this.score + this.removeBlockCount * this.removeBlockCount);
         this.newBlocks();
         this.createBlock = false;
         this.lastPos = { 'y': -1, 'x': -1 };
