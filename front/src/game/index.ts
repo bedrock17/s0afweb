@@ -27,10 +27,10 @@ type MapPoint = {
 };
 
 const direction4: Point[] = [
-  { x: 0,y: 1 },
-  { x: 1,y: 0 },
+  { x: 0, y: 1 },
+  { x: 1, y: 0 },
   { x: 0, y: -1 },
-  { x: -1,y: 0 },
+  { x: -1, y: 0 },
 ];
 
 export class Game {
@@ -42,7 +42,7 @@ export class Game {
   public animationEffect: boolean;
   public lineHistory: string[] = [];
   public touchHistory: Point[] = [];
-  
+
   private createBlock = false;
   private lastPos: Point;
   private _colors: string[];
@@ -126,7 +126,7 @@ export class Game {
     }
     return false;
   }
-  
+
   private set colors(colors: string[]) {
     this.blockMax = colors.length - 1;
     this._colors = colors;
@@ -244,13 +244,13 @@ export class Game {
 
   // 이곳에서 그리기 및 블록처리를 해준다.
   private gameProcLoop = () => {
-    
+
     if (this.gameOver) {
       return;
     }
 
     let userInputProc = true;
-    
+
     do {
       userInputProc = true;
       if (this.bfsQueue.length > 0) {
@@ -285,13 +285,13 @@ export class Game {
         }
       }
     } while (this.animationEffect === false && (this.removeBlockCount > 0 || userInputProc === false));
-    
+
     if (this.removeBlockCount !== 0) {
       this.onScoreChangeCallback?.(this.score + this.removeBlockCount * this.removeBlockCount);
     }
 
     if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
-      
+
       if (this.createBlock) {
         this.onScoreChangeCallback?.(this.score + this.removeBlockCount * this.removeBlockCount);
         this.newBlocks();
@@ -299,10 +299,10 @@ export class Game {
         this.lastPos = { 'y': -1, 'x': -1 };
       }
     }
-    
+
     if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
       this.touchHistory.push(this.lastPos);
-      
+
       this.removeBlockCode = this.map[this.lastPos.y][this.lastPos.x];
       this.removeBlockCount = 1;
       this.map[this.lastPos.y][this.lastPos.x] = 0;
@@ -311,8 +311,7 @@ export class Game {
       this.touchCount += 1;
       this.createBlock = true;
     }
-    else
-    {
+    else {
       this.draw(1);
     }
 
