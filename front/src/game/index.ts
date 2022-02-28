@@ -20,11 +20,18 @@ type Point = {
   y: number,
 };
 
-type MapPosition = {
+type MapPoint = {
   i: number,
   j: number,
   depth: number,
 };
+
+const direction4: Point[] = [
+  { x: 0,y: 1 },
+  { x: 1,y: 0 },
+  { x: 0, y: -1 },
+  { x: -1,y: 0 },
+];
 
 export class Game {
 
@@ -35,8 +42,8 @@ export class Game {
   public animationEffect: boolean;
   public lineHistory: string[] = [];
   public touchHistory: Point[] = [];
-  public createBlock = false;
-
+  
+  private createBlock = false;
   private lastPos: Point;
   private _colors: string[];
 
@@ -52,10 +59,12 @@ export class Game {
 
   private onScoreChangeCallback?: CallableFunction;
 
-  private gameID: number; //게임 루프제어용
-
   private canvas: HTMLCanvasElement; //canvas
   private context: CanvasRenderingContext2D; //canvas 2d
+
+  private bfsQueue: Queue<Point>;
+  private removeBlockCode = 0;
+  private removeBlockCount = 0;
 
   constructor(canvas: HTMLCanvasElement) {
     this.score = 0;
@@ -74,7 +83,6 @@ export class Game {
     this.OUTLINE_PIXEL = 0;
     this.MAPPXWIDTH = 800; //canvas widlth
     this.MAPPXHEIGHT = 800; //canvas height
-    this.gameID = 0;
 
     //option
     this.animationEffect = true;
@@ -94,9 +102,11 @@ export class Game {
       '(255, 171, 0)',
       '(0, 255, 171)',
     ];
+
+    this.bfsQueue = new Queue<Point>();
   }
 
-  private static getMousePos(canvas: HTMLCanvasElement, evt: MouseEvent) {
+  private static getMousePoint(canvas: HTMLCanvasElement, evt: MouseEvent) {
     const rect = canvas.getBoundingClientRect();
     return {
       x: evt.clientX - rect.left,
@@ -104,6 +114,19 @@ export class Game {
     };
   }
 
+  private static addPoint(p1: Point, p2: Point): Point {
+    return { x: p1.x + p2.x, y: p1.y + p2.y };
+  }
+
+  private pointIsValid(p: Point): boolean {
+    if (0 <= p.y && p.y < this.maxBlockRow) {
+      if (0 <= p.x && p.x < this.maxBlockColumn) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
   private set colors(colors: string[]) {
     this.blockMax = colors.length - 1;
     this._colors = colors;
@@ -184,55 +207,8 @@ export class Game {
     }
   }
 
-  private removeBlocks(argPos: MapPosition, blockCode: number): number {
-    let count = 0;
-
-    const queue = new Queue<MapPosition>();
-    queue.enqueue(argPos);
-
-    let depth = argPos.depth;
-    while (queue.length > 0) {
-      const pos = queue.dequeue();
-
-      if (pos === undefined)
-        break;
-
-      if (this.map[pos.i][pos.j] === 0)
-        continue;
-
-      this.map[pos.i][pos.j] = 0;
-      count++;
-
-      if (this.animationEffect) { //블록을 지워나가는 과정을 보여주는 부분.
-        if (depth < pos.depth) {
-          this.draw(1);
-          depth = pos.depth;
-        }
-      }
-      //up
-      if (pos.i !== 0 && this.map[pos.i - 1][pos.j] === blockCode) {
-        queue.enqueue({ 'i': pos.i - 1, 'j': pos.j, 'depth': pos.depth + 1 });
-      }
-      //right
-      if (pos.j !== this.maxBlockColumn - 1 && this.map[pos.i][pos.j + 1] === blockCode) {
-        queue.enqueue({ 'i': pos.i, 'j': pos.j + 1, 'depth': pos.depth + 1 });
-      }
-      //down
-      if (pos.i !== this.maxBlockRow - 1 && this.map[pos.i + 1][pos.j] === blockCode) {
-        queue.enqueue({ 'i': pos.i + 1, 'j': pos.j, 'depth': pos.depth + 1 });
-      }
-      //left
-      if (pos.j !== 0 && this.map[pos.i][pos.j - 1] === blockCode) {
-        queue.enqueue({ 'i': pos.i, 'j': pos.j - 1, 'depth': pos.depth + 1 });
-      }
-    }
-
-    // return count
-    return count;
-  }
-
-  private onTileClick = (e: MouseEvent) => { //mouse event
-    const pos = Game.getMousePos(this.canvas, e);
+  private onTileClick = (e: MouseEvent) => {
+    const pos = Game.getMousePoint(this.canvas, e);
     const { x, y } = pos;
 
     const column = Math.floor(x / (this.BWIDTH + this.OUTLINE_PIXEL));
@@ -268,57 +244,80 @@ export class Game {
 
   // 이곳에서 그리기 및 블록처리를 해준다.
   private gameProcLoop = () => {
-    this.draw(5);
-
+    
     if (this.gameOver) {
       return;
     }
 
-    if (this.lastPos.x >= 0 && this.lastPos.y >= 0) {
-      this.touchHistory.push(this.lastPos);
-      const count = this.removeBlocks({
-        'i': this.lastPos.y,
-        'j': this.lastPos.x,
-        'depth': 0
-      }, this.map[this.lastPos.y][this.lastPos.x]);
-      this.score += count * count;
-      this.onScoreChangeCallback?.(this.score);
-
-      this.touchCount += 1;
-
-      this.lastPos = { 'y': -1, 'x': -1 };
-      this.createBlock = true;
-    }
-
-    let isDown = false;
-    let isContinue = true;
-    while (isContinue) {
-      isContinue = false;
-      for (let i = this.maxBlockRow - 1; i > 0; i--) {
-        for (let j = 0; j < this.maxBlockColumn; j++) {
-          if (this.map[i][j] === 0 && this.map[i - 1][j] !== 0) {
-            this.map[i][j] = this.map[i - 1][j];
-            this.map[i - 1][j] = 0;
-
-            isDown = true;
-            isContinue = true;
+    let userInputProc = true;
+    
+    do {
+      userInputProc = true;
+      if (this.bfsQueue.length > 0) {
+        userInputProc = false;
+        const pointsLength = this.bfsQueue.length;
+        for (let i = 0; i < pointsLength; i++) {
+          const curPoint = this.bfsQueue.dequeue();
+          if (curPoint) {
+            for (let j = 0; j < direction4.length; j++) {
+              const nextPoint = Game.addPoint(curPoint, direction4[j]);
+              if (this.pointIsValid(nextPoint)) {
+                if (this.map[nextPoint.y][nextPoint.x] === this.removeBlockCode) {
+                  this.removeBlockCount += 1;
+                  this.map[nextPoint.y][nextPoint.x] = 0;
+                  this.bfsQueue.enqueue(nextPoint);
+                }
+              }
+            }
+          }
+        }
+      } else {
+        this.score += this.removeBlockCount * this.removeBlockCount;
+        this.removeBlockCount = 0;
+        for (let i = this.maxBlockRow - 1; i > 0; i--) {
+          for (let j = 0; j < this.maxBlockColumn; j++) {
+            if (this.map[i][j] === 0 && this.map[i - 1][j] !== 0) {
+              this.map[i][j] = this.map[i - 1][j];
+              this.map[i - 1][j] = 0;
+              userInputProc = false;
+            }
           }
         }
       }
-
-      // if (this.animationEffect && isDown) {
-      //   this.draw(1);
-      // }
+    } while (this.animationEffect === false && (this.removeBlockCount > 0 || userInputProc === false));
+    
+    if (this.removeBlockCount !== 0) {
+      this.onScoreChangeCallback?.(this.score + this.removeBlockCount * this.removeBlockCount);
     }
 
-    if (this.createBlock) {
-      this.newBlocks();
-      // const frame = this.animationEffect ? 5 : 1;
-      // this.draw(frame);
-      this.createBlock = false;
+    if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
+      
+      if (this.createBlock) {
+        this.newBlocks();
+        this.createBlock = false;
+        this.lastPos = { 'y': -1, 'x': -1 };
+      }
+    }
+    
+    if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
+      this.touchHistory.push(this.lastPos);
+      
+      this.removeBlockCode = this.map[this.lastPos.y][this.lastPos.x];
+      this.removeBlockCount = 1;
+      this.map[this.lastPos.y][this.lastPos.x] = 0;
+      this.bfsQueue.enqueue(this.lastPos);
+
+      this.touchCount += 1;
+      this.createBlock = true;
+    }
+    else
+    {
+      this.draw(1);
     }
 
-    window.requestAnimationFrame(this.gameProcLoop);
+    setTimeout(() => {
+      requestAnimationFrame(this.gameProcLoop);
+    }, 1000 / 30);
   };
 
   public startGame() {
@@ -328,7 +327,6 @@ export class Game {
     this.touchHistory = [];
     this.gameOver = false;
     this.createBlock = false;
-    this.gameID++;
 
     this.initialize();
     window.requestAnimationFrame(this.gameProcLoop);
