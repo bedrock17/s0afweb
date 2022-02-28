@@ -1,44 +1,43 @@
-import React, {
-  memo, useEffect, useRef, useState,
-} from 'react';
+import React, { useEffect, useRef } from 'react';
+import type { MutableRefObject } from 'react';
 
 import { Game } from '~/game';
 
+import { Canvas } from './styles';
+
 type Props = {
   animationEffect: boolean,
+  gameRef: MutableRefObject<Game | undefined>,
 };
 
 
-const GameCanvas = ({ animationEffect }: Props) => {
+const GameCanvas = ({ animationEffect, gameRef }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [game, setGame] = useState<Game | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) {
       return;
     }
 
-    setGame(new Game(canvasRef.current));
-  }, []);
+    gameRef.current = new Game(canvasRef.current);
 
-  useEffect(() => {
-    if (!game) {
+    if (!gameRef.current) {
       return;
     }
 
-    if (game) {
-      game.startGame();
-    }
-  }, [game]);
+
+    gameRef.current.startGame();
+  }, [gameRef]);
 
   useEffect(() => {
-    if (game) {
-      game.animationEffect = animationEffect;
+    if (!gameRef.current) {
+      return;
     }
-  }, [animationEffect, game]);
+    gameRef.current.animationEffect = animationEffect;
+  }, [animationEffect, gameRef]);
 
   return (
-    <canvas ref={canvasRef} width='245px' height='460px'/>
+    <Canvas ref={canvasRef} width='245px' height='460px'/>
   );
 };
 

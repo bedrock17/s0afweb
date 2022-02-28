@@ -35,9 +35,8 @@ export class Game {
   public score: number;
   public gameOver: boolean;
   public gameOverCallback: (() => void) | null;
-  public touchcount: number;
+  public touchCount: number;
   public animationEffect: boolean;
-  public displayScore: number;
   public lineHistory: string[] = [];
   public touchHistory: Point[] = [];
 
@@ -54,6 +53,8 @@ export class Game {
   private MAPPXWIDTH: number;
   private MAPPXHEIGHT: number;
 
+  private onScoreChangeCallback?: CallableFunction;
+
   private gameID: number; //게임 루프제어용
 
   private canvas: HTMLCanvasElement; //canvas
@@ -61,11 +62,10 @@ export class Game {
 
   constructor(canvas: HTMLCanvasElement) {
     this.score = 0;
-    this.touchcount = 0;
+    this.touchCount = 0;
     this.gameOver = false;
     this.gameOverCallback = null;
     this.lastPos = { 'y': -1, 'x': -1 };
-    this.displayScore = 0;
 
     this.map = [[]];
     this.blockMax = 3; //default
@@ -210,7 +210,8 @@ export class Game {
 
       if (this.animationEffect) { //블록을 지워나가는 과정을 보여주는 부분.
         if (depth < pos.depth) {
-          this.displayScore = this.score + count * count; //지우면서 점수 올라가는것을 보여줌
+          this.score += count * count; //지우면서 점수 올라가는것을 보여줌
+          this.onScoreChangeCallback?.(this.score);
           await this.draw(1);
           await sleep(33);
           depth = pos.depth;
@@ -287,15 +288,13 @@ export class Game {
 
       if (this.lastPos.x >= 0 && this.lastPos.y >= 0) {
         this.touchHistory.push(this.lastPos);
-        const count = await this.removeBlocks({
+        await this.removeBlocks({
           'i': this.lastPos.y,
           'j': this.lastPos.x,
           'depth': 0
         }, this.map[this.lastPos.y][this.lastPos.x]);
 
-        this.touchcount += 1;
-        this.score += count * count; //(count*count+count)/2 //점수 계산 식
-        this.displayScore = this.score;
+        this.touchCount += 1;
 
         this.lastPos = { 'y': -1, 'x': -1 };
         createBlock = true;
@@ -334,13 +333,16 @@ export class Game {
 
   public startGame() {
     this.score = 0;
-    this.displayScore = 0;
-    this.touchcount = 0;
+    this.touchCount = 0;
     this.lineHistory = [];
     this.touchHistory = [];
     this.gameOver = false;
     this.gameID++;
 
     void this.gameProcLoop(this.gameID);
+  }
+
+  public set onScoreChange(fn: CallableFunction) {
+    this.onScoreChangeCallback = fn;
   }
 }
