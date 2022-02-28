@@ -220,12 +220,7 @@ export class Game {
 
   private initialize(): void { //init game
     for (let i = 0; i < this.maxBlockRow; i++) {
-      if (typeof (this.map[i]) === 'undefined')
-        this.map[i] = [];
-
-      for (let j = 0; j < this.maxBlockColumn; j++) {
-        this.map[i][j] = 0;
-      }
+      this.map[i] = new Array(this.maxBlockColumn).fill(0);
     }
 
     this.newBlocks();
