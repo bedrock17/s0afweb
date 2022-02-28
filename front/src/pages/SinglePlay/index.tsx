@@ -23,7 +23,7 @@ const IndexPage = () => {
     }
 
     game.onScoreChange = setScore;
-  }, [gameRef]);
+  }, [gameRef, setScore]);
 
   return (
     <Wrapper>
