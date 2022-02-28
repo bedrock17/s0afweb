@@ -27,6 +27,7 @@ export const Title = memo(styled('h1', {
 }));
 
 export const Table = styled('table', {
+  width: '100%',
   borderCollapse: 'collapse',
 });
 
