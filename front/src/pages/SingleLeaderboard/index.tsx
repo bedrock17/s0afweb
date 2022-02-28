@@ -9,6 +9,8 @@ import {
 const SingleLeaderboardPage = () => {
   // TODO(blurfx): fetch leaderboard data from server
 
+  const formatNumber = Intl.NumberFormat('ko-KR').format;
+
   return (
     <Wrapper>
       <Title>Single Play Leaderboard</Title>
@@ -21,9 +23,9 @@ const SingleLeaderboardPage = () => {
         </TableRow>
         <TableRow>
           <Td name>Dummy</Td>
-          <Td>1234557</Td>
-          <Td>2134</Td>
-          <Td>{ (1234557 / 2134).toFixed(1)}</Td>
+          <Td>{ formatNumber(123433557) }</Td>
+          <Td>{ formatNumber(2134) }</Td>
+          <Td>{ formatNumber(parseFloat((123433557 / 2134).toFixed(1))) }</Td>
         </TableRow>
       </Table>
     </Wrapper>
