@@ -20,12 +20,6 @@ type Point = {
   y: number,
 };
 
-type MapPoint = {
-  i: number,
-  j: number,
-  depth: number,
-};
-
 const direction4: Point[] = [
   { x: 0, y: 1 },
   { x: 1, y: 0 },
@@ -186,7 +180,6 @@ export class Game {
             }
 
             return;
-
           }
         } else {
           this.map[i - 1][j] = this.map[i][j];
@@ -222,7 +215,7 @@ export class Game {
       return;
     }
 
-    this.lastPos = { 'y': row, 'x': column };
+    this.lastPos = { y: row, x: column };
   };
 
   private initialize(): void { //init game
@@ -242,9 +235,35 @@ export class Game {
     this.context.globalAlpha = 1;
   }
 
-  // 이곳에서 그리기 및 블록처리를 해준다.
-  private gameProcLoop = () => {
+  private removeSingleDepthBlocks() {
+    const pointsLength = this.bfsQueue.length;
+    for (let i = 0; i < pointsLength; i++) {
+      const curPoint = this.bfsQueue.dequeue();
 
+      if (!curPoint) {
+        continue;
+      }
+
+      for (const dir of direction4) {
+        const nextPoint = Game.addPoint(curPoint, dir);
+
+        if (!this.pointIsValid(nextPoint)) {
+          continue;
+        }
+
+        if (this.map[nextPoint.y][nextPoint.x] !== this.removeBlockCode) {
+          continue;
+        }
+
+        this.removeBlockCount += 1;
+        this.map[nextPoint.y][nextPoint.x] = 0;
+        this.bfsQueue.enqueue(nextPoint);
+      }
+    }
+  }
+
+  // 이곳에서 그리기 및 블록처리를 해준다.
+  private gameLoop = () => {
     if (this.gameOver) {
       return;
     }
@@ -255,48 +274,33 @@ export class Game {
       userInputProc = true;
       if (this.bfsQueue.length > 0) {
         userInputProc = false;
-        const pointsLength = this.bfsQueue.length;
-        for (let i = 0; i < pointsLength; i++) {
-          const curPoint = this.bfsQueue.dequeue();
-          if (curPoint) {
-            for (let j = 0; j < direction4.length; j++) {
-              const nextPoint = Game.addPoint(curPoint, direction4[j]);
-              if (this.pointIsValid(nextPoint)) {
-                if (this.map[nextPoint.y][nextPoint.x] === this.removeBlockCode) {
-                  this.removeBlockCount += 1;
-                  this.map[nextPoint.y][nextPoint.x] = 0;
-                  this.bfsQueue.enqueue(nextPoint);
-                }
-              }
-            }
-          }
-        }
+        this.removeSingleDepthBlocks();
       } else {
         this.score += this.removeBlockCount * this.removeBlockCount;
         this.removeBlockCount = 0;
-        for (let i = this.maxBlockRow - 1; i > 0; i--) {
-          for (let j = 0; j < this.maxBlockColumn; j++) {
-            if (this.map[i][j] === 0 && this.map[i - 1][j] !== 0) {
-              this.map[i][j] = this.map[i - 1][j];
-              this.map[i - 1][j] = 0;
+        for (let y = this.maxBlockRow - 1; y > 0; y--) {
+          for (let x = 0; x < this.maxBlockColumn; x++) {
+            if (this.map[y][x] === 0 && this.map[y - 1][x] !== 0) {
+              this.map[y][x] = this.map[y - 1][x];
+              this.map[y - 1][x] = 0;
               userInputProc = false;
             }
           }
         }
       }
-    } while (this.animationEffect === false && (this.removeBlockCount > 0 || userInputProc === false));
+    } while (!this.animationEffect && (this.removeBlockCount > 0 || !userInputProc));
 
+    const displayScore = this.score + this.removeBlockCount * this.removeBlockCount;
     if (this.removeBlockCount !== 0) {
-      this.onScoreChangeCallback?.(this.score + this.removeBlockCount * this.removeBlockCount);
+      this.onScoreChangeCallback?.(displayScore);
     }
 
     if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
-
       if (this.createBlock) {
-        this.onScoreChangeCallback?.(this.score + this.removeBlockCount * this.removeBlockCount);
+        this.onScoreChangeCallback?.(displayScore);
         this.newBlocks();
         this.createBlock = false;
-        this.lastPos = { 'y': -1, 'x': -1 };
+        this.lastPos = { y: -1, x: -1 };
       }
     }
 
@@ -316,7 +320,7 @@ export class Game {
     }
 
     setTimeout(() => {
-      requestAnimationFrame(this.gameProcLoop);
+      requestAnimationFrame(this.gameLoop);
     }, 1000 / 30);
   };
 
@@ -329,7 +333,7 @@ export class Game {
     this.createBlock = false;
 
     this.initialize();
-    window.requestAnimationFrame(this.gameProcLoop);
+    window.requestAnimationFrame(this.gameLoop);
   }
 
   public set onScoreChange(fn: CallableFunction) {
