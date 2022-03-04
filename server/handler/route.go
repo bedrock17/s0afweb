@@ -1,8 +1,11 @@
 package handler
 
-import "github.com/labstack/echo/v4"
+import (
+	"github.com/bedrock17/s0afweb/server"
+)
 
-func InitV1Handler(e *echo.Echo) {
+func InitV1Handler(server *server.Server) {
+	e := server.Echo
 	e.GET("v1/leaderboard", GetLeaderboardV1)
 	e.POST("v1/leaderboard", PostLeaderboardV1)
 }

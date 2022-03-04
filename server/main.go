@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/bedrock17/s0afweb/handler"
 	"github.com/bedrock17/s0afweb/models"
+	"github.com/bedrock17/s0afweb/server"
 	"github.com/labstack/echo/v4"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -17,7 +18,7 @@ func main() {
 	}
 	models.Migrate(db)
 
-	e := echo.New()
-	handler.InitV1Handler(e)
-	e.Logger.Fatal(e.Start(":8080"))
+	serverContext := server.Init(db)
+	handler.InitV1Handler(serverContext)
+	echo.Logger.Fatal(serverContext.Run(":8080"))
 }
