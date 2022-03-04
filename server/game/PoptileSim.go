@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/bedrock17/s0afweb/model"
+	"github.com/bedrock17/s0afweb/models"
 )
 
 type PoptileGame struct {
@@ -16,7 +16,7 @@ type PoptileGame struct {
 	gameMap [][]int
 
 	gameHistroty [][]int
-	touchHistory []model.Pos
+	touchHistory []models.Point
 }
 
 func (self *PoptileGame) IsGameEnd() bool {

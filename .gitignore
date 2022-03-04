@@ -22,5 +22,6 @@ yarn-error.log*
 *.sw?
 
 test
-jsondb/*
+db.sqlite
 s0afweb*
+
