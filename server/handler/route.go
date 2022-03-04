@@ -5,7 +5,9 @@ import (
 )
 
 func InitV1Handler(server *server.Server) {
+	leaderboardHandler := MakeLeaderboardHandler(server)
+
 	e := server.Echo
-	e.GET("v1/leaderboard", GetLeaderboardV1)
-	e.POST("v1/leaderboard", PostLeaderboardV1)
+	e.GET("v1/leaderboard", leaderboardHandler.GetLeaderboardV1)
+	e.POST("v1/leaderboard", leaderboardHandler.PostLeaderboardV1)
 }
