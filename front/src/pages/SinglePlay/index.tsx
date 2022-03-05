@@ -23,6 +23,9 @@ const IndexPage = () => {
     }
 
     game.onScoreChange = setScore;
+    game.gameOverCallback = () => {
+      // TODO: implement
+    };
   }, [gameRef, setScore]);
 
   return (

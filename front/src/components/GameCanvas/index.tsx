@@ -4,7 +4,7 @@ import type { MutableRefObject } from 'react';
 import { Game } from '~/game';
 
 import { Canvas } from './styles';
-import axios from 'axios';
+import { Seed } from '~/api';
 
 type Props = {
   animationEffect: boolean,
@@ -26,8 +26,7 @@ const GameCanvas = ({ animationEffect, gameRef }: Props) => {
       return;
     }
 
-    axios.get<APIResponse<number>>('/api/v1/seed').then(({ data }) => {
-      const seed = data.data;
+    Seed.get().then((seed) => {
       gameRef.current!.startGame(seed);
     });
 

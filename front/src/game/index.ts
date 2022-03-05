@@ -14,7 +14,7 @@ class Queue<T> {
   }
 }
 
-type Point = {
+export type Point = {
   x: number,
   y: number,
 };
