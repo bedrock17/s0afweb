@@ -4,8 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/bedrock17/s0afweb/models"
-	"github.com/taylorza/go-lfsr"
+	"time"
 )
+
+type XORShift struct {
+	seed  uint64
+	state uint64
+}
+
+func (x *XORShift) Next() uint64 {
+	x.state ^= x.state << 13
+	x.state ^= x.state >> 7
+	x.state ^= x.state << 17
+	return x.state
+}
 
 type popTileGame struct {
 	score      int
@@ -15,10 +27,16 @@ type popTileGame struct {
 	rows    int
 	gameMap [][]int
 
-	LFSRSeed uint64
+	RandomSeed uint64
 
 	touchHistory []models.Point
 }
+
+type popTileSeedInfo struct {
+	CreatedTime time.Time
+}
+
+var seedCount uint64 = 19980130
 
 func isValidRange(p models.Point, maxColumns, maxRows int) bool {
 	if 0 <= p.X && p.X < maxColumns {
@@ -64,7 +82,7 @@ func (g *popTileGame) SetGameParameter(width, height int, seed uint64, touchHist
 	g.columns = width
 	g.rows = height
 
-	g.LFSRSeed = seed
+	g.RandomSeed = seed
 	g.touchHistory = touchHistory
 }
 
@@ -100,7 +118,7 @@ func (g *popTileGame) removeBlocks(p models.Point, blockCode int) int {
 	return count
 }
 
-func (g *popTileGame) dropBlicks() {
+func (g *popTileGame) dropBlocks() {
 	isContinue := true
 	for isContinue {
 		isContinue = false
@@ -119,22 +137,19 @@ func (g *popTileGame) dropBlicks() {
 
 func (g *popTileGame) SimulationGame() int {
 
-	l := lfsr.NewLfsr64(g.LFSRSeed)
+	random := XORShift{g.RandomSeed, g.RandomSeed}
 
 	for i := 0; i < len(g.touchHistory); i++ {
 		var line []int = make([]int, g.columns)
 		for j := 0; j < g.columns; j++ {
-			v, _ := l.Next()
-			if v%4 == 3 {
-				v, _ = l.Next()
-			}
+			v := random.Next()
 			line[j] = int((v % 3) + 1)
 		}
 		g.makeBlocks(line)
 		pos := g.touchHistory[i]
 		count := g.removeBlocks(pos, g.gameMap[pos.Y][pos.X])
 		g.score += count * count
-		g.dropBlicks()
+		g.dropBlocks()
 	}
 
 	return g.score

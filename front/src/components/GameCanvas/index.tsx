@@ -25,8 +25,7 @@ const GameCanvas = ({ animationEffect, gameRef }: Props) => {
       return;
     }
 
-
-    gameRef.current.startGame();
+    gameRef.current.startGame(0);
     return () => {
       gameRef.current = undefined;
     };

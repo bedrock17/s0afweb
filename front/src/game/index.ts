@@ -1,6 +1,5 @@
-function randInt(min: number, max: number, count: number) {
-  return (Math.floor(Math.random() * (max - min + 1)) + count) % (max - min + 1) + min;
-}
+
+import XORShift from './xorshift';
 
 class Queue<T> {
   list: T[] = [];
@@ -60,6 +59,8 @@ export class Game {
   private removeBlockCode = 0;
   private removeBlockCount = 0;
 
+  private random?: XORShift;
+
   constructor(canvas: HTMLCanvasElement) {
     this.score = 0;
     this.touchCount = 0;
@@ -75,7 +76,7 @@ export class Game {
     this.BWIDTH = 31; //block width
     this.BHEIGHT = 31; //block height
     this.OUTLINE_PIXEL = 0;
-    this.MAPPXWIDTH = 800; //canvas widlth
+    this.MAPPXWIDTH = 800; //canvas width
     this.MAPPXHEIGHT = 800; //canvas height
 
     //option
@@ -119,6 +120,10 @@ export class Game {
       }
     }
     return false;
+  }
+
+  private set seed(seed: number) {
+    this.random = new XORShift(seed);
   }
 
   private set colors(colors: string[]) {
@@ -186,7 +191,11 @@ export class Game {
         }
 
         if (i === this.maxBlockRow - 1) {
-          this.map[i][j] = (randInt(1, this.blockMax, this.score) + j) % this.blockMax + 1;
+          const randomValue = this.random?.next();
+          if (randomValue !== undefined) {
+
+            this.map[i][j] = Number((randomValue) % BigInt(this.blockMax) + 1n);
+          }
         }
       }
 
@@ -319,7 +328,7 @@ export class Game {
     }, 1000 / 30);
   };
 
-  public startGame() {
+  public startGame(seed: number) {
     this.score = 0;
     this.touchCount = 0;
     this.lineHistory = [];
@@ -327,7 +336,9 @@ export class Game {
     this.gameOver = false;
     this.createBlock = false;
 
+    this.seed = seed;
     this.initialize();
+
     window.requestAnimationFrame(this.gameLoop);
   }
 
