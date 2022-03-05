@@ -68,7 +68,7 @@ func (g *popTileGame) SetGameParameter(width, height int, seed uint64, touchHist
 	g.touchHistory = touchHistory
 }
 
-var direction4 []models.Point = []models.Point{
+var direction4 = []models.Point{
 	{X: 0, Y: 1},
 	{X: 1, Y: 0},
 	{X: -1, Y: 0},
@@ -100,7 +100,7 @@ func (g *popTileGame) removeBlocks(p models.Point, blockCode int) int {
 	return count
 }
 
-func (g *popTileGame) dropBlicks() {
+func (g *popTileGame) dropBlocks() {
 	isContinue := true
 	for isContinue {
 		isContinue = false
@@ -134,7 +134,7 @@ func (g *popTileGame) SimulationGame() int {
 		pos := g.touchHistory[i]
 		count := g.removeBlocks(pos, g.gameMap[pos.Y][pos.X])
 		g.score += count * count
-		g.dropBlicks()
+		g.dropBlocks()
 	}
 
 	return g.score
