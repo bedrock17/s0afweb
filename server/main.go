@@ -21,5 +21,5 @@ func main() {
 
 	e := echo.New()
 	handler.InitV1Handler(e)
-	echo.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8080"))
 }
