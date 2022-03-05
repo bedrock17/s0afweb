@@ -86,7 +86,7 @@ func (g *popTileGame) SetGameParameter(width, height int, seed uint64, touchHist
 	g.touchHistory = touchHistory
 }
 
-var direction4 []models.Point = []models.Point{
+var direction4 = []models.Point{
 	{X: 0, Y: 1},
 	{X: 1, Y: 0},
 	{X: -1, Y: 0},
@@ -155,7 +155,7 @@ func (g *popTileGame) SimulationGame() int {
 	return g.score
 }
 
-func GameValidChceck(data *models.Leaderboard) bool {
+func Validate(data *models.Leaderboard) bool {
 
 	valid := false
 	score := 0

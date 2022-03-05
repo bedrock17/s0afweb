@@ -9,6 +9,8 @@ type Point struct {
 	Y int
 }
 
+// Leaderboard Information of leaderboard
+// @Description leaderboard model
 type Leaderboard struct {
 	gorm.Model
 	Username     string `json:"username" validate:"required_with_all,max=32"`

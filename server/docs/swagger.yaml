@@ -1,0 +1,104 @@
+basePath: /v1
+definitions:
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  handler.BaseHttpResponse:
+    type: object
+  models.Leaderboard:
+    description: leaderboard model
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      score:
+        type: integer
+      seed:
+        type: integer
+      touch_history:
+        type: string
+      touches:
+        type: integer
+      updatedAt:
+        type: string
+      username:
+        maxLength: 32
+        type: string
+    required:
+    - username
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: bedrook@gmail.com
+    name: seokhwan
+    url: https://github.com/bedrock17
+  description: Poptile Game Server
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Poptile!
+  version: "1.0"
+paths:
+  /leaderboard:
+    get:
+      consumes:
+      - application/json
+      description: Get current leaderboards
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handler.BaseHttpResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.BaseHttpResponse'
+      summary: Get leaderboards
+      tags:
+      - Leaderboard Endpoints
+    post:
+      consumes:
+      - application/json
+      description: Register new leaderboard
+      parameters:
+      - description: Leaderboard Information (all required)
+        in: body
+        name: contest
+        required: true
+        schema:
+          $ref: '#/definitions/models.Leaderboard'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.BaseHttpResponse'
+        "406":
+          description: Not Acceptable
+          schema:
+            $ref: '#/definitions/handler.BaseHttpResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.BaseHttpResponse'
+      summary: Post leaderboard
+      tags:
+      - Leaderboard Endpoints
+swagger: "2.0"
