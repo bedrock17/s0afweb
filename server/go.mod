@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/labstack/echo/v4 v4.7.0
+	github.com/taylorza/go-lfsr v0.0.0-20210919045824-7ec2b93980f9
 	gorm.io/driver/sqlite v1.3.1
 	gorm.io/gorm v1.23.2
 )
