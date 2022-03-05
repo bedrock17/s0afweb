@@ -10,6 +10,8 @@ type BaseResponse struct {
 	err  error
 }
 
+// BaseHttpResponse Base HTTP response
+// @Description Default HTTP response object
 type BaseHttpResponse struct {
 	data  interface{}
 	error error
