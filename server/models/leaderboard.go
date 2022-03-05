@@ -17,5 +17,5 @@ type Leaderboard struct {
 	Score        int    `json:"score" validate:"required;numeric"`
 	Touches      int    `json:"touches" validate:"required;numeric"`
 	TouchHistory string `json:"touch_history" gorm:"type:text" validate:"required,json"`
-	Seed         uint64 `json:"seed" validate:"required;numeric"`
+	Seed         int32  `json:"seed" validate:"required;numeric"`
 }

@@ -1,23 +1,24 @@
 class XORShift {
-  private seed: bigint;
-  private state: bigint;
+  private seed: number;
+  private state: number;
 
   constructor(seed: number) {
     while (seed === 0) {
       seed = Date.now() & 0xffffffff;
     }
 
-    this.seed = BigInt(seed);
-    this.state = BigInt(seed);
+    this.seed = seed;
+    this.state = seed;
   }
 
-  public next(): bigint {
+  public next(): number {
     let s = this.state;
-
-    s = BigInt.asUintN(64, s ^ s << 13n);
-    s = BigInt.asUintN(64, s ^ s >> 7n);
-    s = BigInt.asUintN(64, s ^ s << 17n);
-
+    s = s ^ s << 13;
+    s = s ^ s >> 17;
+    s = s ^ s << 5;
+    if (s < 0) {
+      s += 2147483647;
+    }
     this.state = s;
     return this.state;
   }

@@ -193,8 +193,7 @@ export class Game {
         if (i === this.maxBlockRow - 1) {
           const randomValue = this.random?.next();
           if (randomValue !== undefined) {
-
-            this.map[i][j] = Number((randomValue) % BigInt(this.blockMax) + 1n);
+            this.map[i][j] = randomValue % this.blockMax + 1;
           }
         }
       }

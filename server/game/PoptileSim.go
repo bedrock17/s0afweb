@@ -8,14 +8,19 @@ import (
 )
 
 type XORShift struct {
-	seed  uint64
-	state uint64
+	seed  int32
+	state int32
 }
 
-func (x *XORShift) Next() uint64 {
+func (x *XORShift) Next() int32 {
 	x.state ^= x.state << 13
-	x.state ^= x.state >> 7
-	x.state ^= x.state << 17
+	x.state ^= x.state >> 17
+	x.state ^= x.state << 5
+
+	if x.state < 0 {
+		x.state += 2147483647
+	}
+
 	return x.state
 }
 
@@ -27,7 +32,7 @@ type popTileGame struct {
 	rows    int
 	gameMap [][]int
 
-	RandomSeed uint64
+	RandomSeed int32
 
 	touchHistory []models.Point
 }
@@ -76,7 +81,7 @@ func (g *popTileGame) InitMap(width, height int) {
 	}
 }
 
-func (g *popTileGame) SetGameParameter(width, height int, seed uint64, touchHistory []models.Point) {
+func (g *popTileGame) SetGameParameter(width, height int, seed int32, touchHistory []models.Point) {
 	g.columns = width
 	g.rows = height
 
