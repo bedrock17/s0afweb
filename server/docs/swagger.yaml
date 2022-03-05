@@ -7,6 +7,21 @@ definitions:
       error:
         type: string
     type: object
+  handler.LeaderboardResponse:
+    properties:
+      score:
+        type: integer
+      touches:
+        type: integer
+      username:
+        maxLength: 32
+        minLength: 1
+        type: string
+    required:
+    - score
+    - touches
+    - username
+    type: object
   models.Leaderboard:
     description: leaderboard model
     properties:
@@ -54,16 +69,14 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              allOf:
-              - $ref: '#/definitions/handler.BaseHttpResponse'
-              - properties:
-                  data:
-                    items:
-                      $ref: '#/definitions/models.Leaderboard'
-                    type: array
-                type: object
-            type: array
+            allOf:
+            - $ref: '#/definitions/handler.BaseHttpResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/handler.LeaderboardResponse'
+                  type: array
+              type: object
         "500":
           description: Internal Server Error
           schema:

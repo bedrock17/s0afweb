@@ -10,13 +10,19 @@ import (
 	"net/http"
 )
 
+type LeaderboardResponse struct {
+	Username string `json:"username" validate:"required,min=1,max=32"`
+	Score    int    `json:"score" validate:"required,numeric"`
+	Touches  int    `json:"touches" validate:"required,numeric"`
+}
+
 // GetLeaderboardV1   godoc
 // @Summary      Get leaderboards
 // @Description  Get current leaderboards
 // @Tags         Leaderboard Endpoints
 // @Accept       json
 // @Produce      json
-// @Success      200	{array}		BaseHttpResponse{data=[]models.Leaderboard}
+// @Success      200	{object}	BaseHttpResponse{data=[]LeaderboardResponse}
 // @Failure      500	{object}	BaseHttpResponse{error=string}
 // @Router       /leaderboard [get]
 func GetLeaderboardV1(c echo.Context) BaseResponse {
@@ -27,9 +33,18 @@ func GetLeaderboardV1(c echo.Context) BaseResponse {
 		code = http.StatusInternalServerError
 	}
 
+	var leaderboardsResponse []LeaderboardResponse
+	for _, e := range leaderboards {
+		leaderboardsResponse = append(leaderboardsResponse, LeaderboardResponse{
+			Username: e.Username,
+			Score:    e.Score,
+			Touches:  e.Touches,
+		})
+	}
+
 	return BaseResponse{
 		code,
-		leaderboards,
+		leaderboardsResponse,
 		err,
 	}
 }

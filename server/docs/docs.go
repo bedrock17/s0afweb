@@ -42,25 +42,22 @@ const docTemplate_swagger = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/definitions/handler.BaseHttpResponse"
-                                    },
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "data": {
-                                                "type": "array",
-                                                "items": {
-                                                    "$ref": "#/definitions/models.Leaderboard"
-                                                }
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.BaseHttpResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/handler.LeaderboardResponse"
                                             }
                                         }
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     },
                     "500": {
@@ -211,6 +208,27 @@ const docTemplate_swagger = `{
                 "data": {},
                 "error": {
                     "type": "string"
+                }
+            }
+        },
+        "handler.LeaderboardResponse": {
+            "type": "object",
+            "required": [
+                "score",
+                "touches",
+                "username"
+            ],
+            "properties": {
+                "score": {
+                    "type": "integer"
+                },
+                "touches": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 1
                 }
             }
         },
