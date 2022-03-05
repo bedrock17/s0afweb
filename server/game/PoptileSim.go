@@ -36,8 +36,6 @@ type popTileSeedInfo struct {
 	CreatedTime time.Time
 }
 
-var seedCount uint64 = 19980130
-
 func isValidRange(p models.Point, maxColumns, maxRows int) bool {
 	if 0 <= p.X && p.X < maxColumns {
 		if 0 <= p.Y && p.Y < maxRows {
