@@ -140,7 +140,7 @@ func (g *popTileGame) SimulationGame() int {
 	return g.score
 }
 
-func GameValidChceck(data *models.Leaderboard) bool {
+func Validate(data *models.Leaderboard) bool {
 
 	valid := false
 	score := 0

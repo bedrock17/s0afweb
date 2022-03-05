@@ -5,9 +5,9 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"math"
 	"math/big"
 	"net/http"
-	"time"
 )
 
 // GetSinglePlaySeedV1   godoc
@@ -20,7 +20,7 @@ import (
 // @Failure      500	{object}	echo.HTTPError
 // @Router       /v1/leaderboard [get]
 func GetSinglePlaySeedV1(c echo.Context) BaseResponse {
-	seed, err := rand.Int(rand.Reader, big.NewInt(time.Now().UnixNano()))
+	seed, err := rand.Int(rand.Reader, big.NewInt(math.MaxUint64))
 	if err != nil {
 		return BaseResponse{
 			http.StatusInternalServerError,
