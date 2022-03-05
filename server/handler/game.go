@@ -2,6 +2,8 @@ package handler
 
 import (
 	"crypto/rand"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"math/big"
 	"net/http"
@@ -18,7 +20,7 @@ import (
 // @Failure      500	{object}	echo.HTTPError
 // @Router       /v1/leaderboard [get]
 func GetSinglePlaySeedV1(c echo.Context) BaseResponse {
-	bigInt, err := rand.Int(rand.Reader, big.NewInt(time.Now().UnixNano()))
+	seed, err := rand.Int(rand.Reader, big.NewInt(time.Now().UnixNano()))
 	if err != nil {
 		return BaseResponse{
 			http.StatusInternalServerError,
@@ -26,10 +28,25 @@ func GetSinglePlaySeedV1(c echo.Context) BaseResponse {
 			err,
 		}
 	}
+	sess, err := session.Get("session", c)
+	if err != nil {
+		return BaseResponse{
+			http.StatusInternalServerError,
+			nil,
+			err,
+		}
+	}
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+	}
+	sess.Values["seed"] = seed
+	sess.Save(c.Request(), c.Response())
 
 	return BaseResponse{
 		http.StatusOK,
-		bigInt,
+		seed,
 		err,
 	}
 }
