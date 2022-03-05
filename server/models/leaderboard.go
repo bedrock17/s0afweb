@@ -13,9 +13,9 @@ type Point struct {
 // @Description leaderboard model
 type Leaderboard struct {
 	gorm.Model
-	Username     string `json:"username" validate:"required,max=32"`
+	Username     string `json:"username" validate:"required_with_all,max=32"`
 	Score        int    `json:"score" validate:"required;numeric"`
 	Touches      int    `json:"touches" validate:"required;numeric"`
-	TouchHistory string `json:"touch_history" gorm:"type:text"`
+	TouchHistory string `json:"touch_history" gorm:"type:text" validate:"required,json"`
 	Seed         uint64 `json:"seed" validate:"required;numeric"`
 }

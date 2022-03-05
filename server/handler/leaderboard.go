@@ -44,9 +44,9 @@ func GetLeaderboardV1(c echo.Context) BaseResponse {
 // @Failure      500	{object}	BaseHttpResponse
 // @Router       /leaderboard [post]
 func PostLeaderboardV1(c echo.Context) BaseResponse {
-	var leaderboard models.Leaderboard
+	leaderboard := new(models.Leaderboard)
 
-	if err := (&echo.DefaultBinder{}).BindBody(c, &leaderboard); err != nil {
+	if err := c.Bind(leaderboard); err != nil {
 		return BaseResponse{
 			http.StatusBadRequest,
 			nil,
@@ -54,35 +54,26 @@ func PostLeaderboardV1(c echo.Context) BaseResponse {
 		}
 	}
 
-	// TODO: Use validator or another way
-	if leaderboard.Username == "" {
+	if err := c.Validate(leaderboard); err != nil {
 		return BaseResponse{
-			http.StatusNotAcceptable,
+			http.StatusBadRequest,
 			nil,
-			nil,
+			err,
 		}
 	}
 
 	// TODO: Validate leaderboard score with seed and touch history
-	// if not valid, return http.StatusForbidden
-
+	//       if not valid, return http.StatusForbidden
 	repo := dao.GetRepository().Leaderboard()
-	err := repo.Create(leaderboard)
-
+	err := repo.Create(*leaderboard)
+	code := http.StatusCreated
 	if err != nil {
-		// TODO: Use validator or another way
-		if leaderboard.Username == "" {
-			return BaseResponse{
-				http.StatusInternalServerError,
-				nil,
-				err,
-			}
-		}
+		code = http.StatusInternalServerError
 	}
 
 	return BaseResponse{
-		http.StatusCreated,
+		code,
 		nil,
-		nil,
+		err,
 	}
 }

@@ -3,6 +3,7 @@ module github.com/bedrock17/s0afweb
 go 1.17
 
 require (
+	github.com/go-playground/validator/v10 v10.10.0
 	github.com/labstack/echo/v4 v4.7.0
 	github.com/taylorza/go-lfsr v0.0.0-20210919045824-7ec2b93980f9
 	gorm.io/driver/sqlite v1.3.1
@@ -12,9 +13,12 @@ require (
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/go-openapi/swag v0.21.1 // indirect
+	github.com/go-playground/locales v0.14.0 // indirect
+	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
+	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.12 // indirect
