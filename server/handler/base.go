@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 type BaseResponse struct {
@@ -23,4 +25,15 @@ func BaseHandler(handler func(echo.Context) BaseResponse) func(c echo.Context) e
 			error: resp.err,
 		})
 	}
+}
+
+type RequestValidator struct {
+	Validator *validator.Validate
+}
+
+func (v *RequestValidator) Validate(i interface{}) error {
+	if err := v.Validator.Struct(i); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return nil
 }
