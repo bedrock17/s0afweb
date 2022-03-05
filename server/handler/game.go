@@ -42,7 +42,13 @@ func GetSinglePlaySeedV1(c echo.Context) BaseResponse {
 		HttpOnly: true,
 	}
 	sess.Values["seed"] = seed
-	sess.Save(c.Request(), c.Response())
+	if err := sess.Save(c.Request(), c.Response()); err != nil {
+		return BaseResponse{
+			http.StatusInternalServerError,
+			nil,
+			err,
+		}
+	}
 
 	return BaseResponse{
 		http.StatusOK,
