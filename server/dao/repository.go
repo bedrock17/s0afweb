@@ -29,5 +29,5 @@ func GetRepository() Repository {
 }
 
 func (r *repositoryImpl) Leaderboard() sql.LeaderboardRepository {
-	return r.Leaderboard()
+	return r.leaderboard
 }
