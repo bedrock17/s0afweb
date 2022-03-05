@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/bedrock17/s0afweb/dao"
 	"github.com/bedrock17/s0afweb/handler"
 	"github.com/bedrock17/s0afweb/models"
-	"github.com/bedrock17/s0afweb/server"
 	"github.com/labstack/echo/v4"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -17,8 +17,9 @@ func main() {
 		panic("failed to connect database")
 	}
 	models.Migrate(db)
+	dao.InitRepository(db)
 
-	serverContext := server.Init(db)
-	handler.InitV1Handler(serverContext)
-	echo.Logger.Fatal(serverContext.Run(":8080"))
+	e := echo.New()
+	handler.InitV1Handler(e)
+	echo.Logger.Fatal(e.Start(":8080"))
 }

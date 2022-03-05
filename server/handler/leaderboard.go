@@ -1,19 +1,11 @@
 package handler
 
 import (
+	"github.com/bedrock17/s0afweb/dao"
 	"github.com/bedrock17/s0afweb/models"
-	"github.com/bedrock17/s0afweb/server"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
-
-type LeaderboardHandler struct {
-	server *server.Server
-}
-
-func MakeLeaderboardHandler(server *server.Server) *LeaderboardHandler {
-	return &LeaderboardHandler{server: server}
-}
 
 // GetLeaderboardV1   godoc
 // @Summary      Get leaderboards
@@ -24,18 +16,19 @@ func MakeLeaderboardHandler(server *server.Server) *LeaderboardHandler {
 // @Success      200	{array}		models.Leaderboard
 // @Failure      500	{object}	echo.HTTPError
 // @Router       /v1/leaderboard [get]
-func (l *LeaderboardHandler) GetLeaderboardV1(c echo.Context) error {
-	var leaderboards []models.Leaderboard
-
-	result := l.server.DB.
-		Order("score desc, touches asc, username asc").
-		Find(&leaderboards)
-
-	if result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, result.Error.Error())
+func GetLeaderboardV1(c echo.Context) BaseResponse {
+	repo := dao.GetRepository().Leaderboard()
+	leaderboards, err := repo.GetAll()
+	code := http.StatusOK
+	if err != nil {
+		code = http.StatusInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, leaderboards)
+	return BaseResponse{
+		code,
+		leaderboards,
+		err,
+	}
 }
 
 // PostLeaderboardV1   godoc
@@ -49,27 +42,46 @@ func (l *LeaderboardHandler) GetLeaderboardV1(c echo.Context) error {
 // @Failure      400	{object}	echo.HTTPError
 // @Failure      500	{object}	echo.HTTPError
 // @Router       /v1/leaderboard [post]
-func (l *LeaderboardHandler) PostLeaderboardV1(c echo.Context) error {
+func PostLeaderboardV1(c echo.Context) BaseResponse {
 	var leaderboard models.Leaderboard
 
 	if err := (&echo.DefaultBinder{}).BindBody(c, &leaderboard); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return BaseResponse{
+			http.StatusBadRequest,
+			nil,
+			err,
+		}
 	}
 
 	// TODO: Use validator or another way
 	if leaderboard.Username == "" {
-		return c.JSON(http.StatusNotAcceptable, nil)
+		return BaseResponse{
+			http.StatusNotAcceptable,
+			nil,
+			nil,
+		}
 	}
 
 	// TODO: Validate leaderboard score with seed and touch history
 	// if not valid, return http.StatusForbidden
 
-	result := l.server.DB.
-		Create(&leaderboard)
+	repo := dao.GetRepository().Leaderboard()
+	err := repo.Create(leaderboard)
 
-	if result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, result.Error.Error())
+	if err != nil {
+		// TODO: Use validator or another way
+		if leaderboard.Username == "" {
+			return BaseResponse{
+				http.StatusInternalServerError,
+				nil,
+				err,
+			}
+		}
 	}
 
-	return c.JSON(http.StatusCreated, nil)
+	return BaseResponse{
+		http.StatusCreated,
+		nil,
+		nil,
+	}
 }
