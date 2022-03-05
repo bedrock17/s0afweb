@@ -14,7 +14,7 @@ import (
 // @Tags         Game SinglePlay Endpoints
 // @Accept       json
 // @Produce      json
-// @Success      200	{number}	i64
+// @Success      200	{number}	uint32
 // @Failure      500	{object}	echo.HTTPError
 // @Router       /v1/leaderboard [get]
 func GetSinglePlaySeedV1(c echo.Context) BaseResponse {
