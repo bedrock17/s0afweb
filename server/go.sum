@@ -333,8 +333,6 @@ github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2/go.mod h1:lKJPbtWzJ9J
 github.com/swaggo/swag v1.7.9/go.mod h1:gZ+TJ2w/Ve1RwQsA2IRoSOTidHz6DX+PIG8GWvbnoLU=
 github.com/swaggo/swag v1.8.0 h1:80NNhvpJcuItNpBDqgJwDuKlMmaZ/OATOzhG3bhcM3w=
 github.com/swaggo/swag v1.8.0/go.mod h1:gZ+TJ2w/Ve1RwQsA2IRoSOTidHz6DX+PIG8GWvbnoLU=
-github.com/taylorza/go-lfsr v0.0.0-20210919045824-7ec2b93980f9 h1:sXfcie8dIScZ7tDChgzB4K8v2M+5n07k3oDh5VCnn5I=
-github.com/taylorza/go-lfsr v0.0.0-20210919045824-7ec2b93980f9/go.mod h1:QodK8vOqrmnXBcaE9HaAWuaNhhqkQpwvZEjx2/NjOV8=
 github.com/uber/jaeger-client-go v2.30.0+incompatible/go.mod h1:WVhlPFC8FDjOFMMWRy2pZqQJSXxYSwNYOkTr/Z6d3Kk=
 github.com/uber/jaeger-lib v2.4.1+incompatible/go.mod h1:ComeNDZlWwrWnDv8aPp0Ba6+uUTzImX/AauajbLI56U=
 github.com/urfave/cli/v2 v2.3.0/go.mod h1:LJmUH05zAU44vOAcrfzZQKsZbVcdbOG8rtL3/XcUArI=

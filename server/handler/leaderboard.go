@@ -16,8 +16,8 @@ import (
 // @Tags         Leaderboard Endpoints
 // @Accept       json
 // @Produce      json
-// @Success      200	{array}		BaseHttpResponse
-// @Failure      500	{object}	BaseHttpResponse
+// @Success      200	{array}		BaseHttpResponse{data=[]models.Leaderboard}
+// @Failure      500	{object}	BaseHttpResponse{error=string}
 // @Router       /leaderboard [get]
 func GetLeaderboardV1(c echo.Context) BaseResponse {
 	repo := dao.GetRepository().Leaderboard()
@@ -40,11 +40,10 @@ func GetLeaderboardV1(c echo.Context) BaseResponse {
 // @Tags         Leaderboard Endpoints
 // @Accept       json
 // @Produce      json
-// @Param        contest	body	models.Leaderboard	true	"Leaderboard Information (all required)"
+// @Param        data	body	models.Leaderboard	true	"Leaderboard Information (all required)"
 // @Success      201	{object}	nil
-// @Failure      400	{object}	BaseHttpResponse
-// @Failure      406	{object}	BaseHttpResponse
-// @Failure      500	{object}	BaseHttpResponse
+// @Failure      400	{object}	BaseHttpResponse{error=string}
+// @Failure      500	{object}	BaseHttpResponse{error=string}
 // @Router       /leaderboard [post]
 func PostLeaderboardV1(c echo.Context) BaseResponse {
 	leaderboard := new(models.Leaderboard)

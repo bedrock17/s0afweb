@@ -7,24 +7,30 @@ import (
 )
 
 type BaseResponse struct {
-	code int
-	data interface{}
-	err  error
+	Code  int
+	Data  interface{}
+	Error error
 }
 
 // BaseHttpResponse Base HTTP response
 // @Description Default HTTP response object
 type BaseHttpResponse struct {
 	Data  interface{} `json:"data"`
-	Error error       `json:"error"`
+	Error string      `json:"error"`
 }
 
 func BaseHandler(handler func(echo.Context) BaseResponse) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		resp := handler(c)
-		return c.JSON(resp.code, &BaseHttpResponse{
-			Data:  resp.data,
-			Error: resp.err,
+
+		err := ""
+		if resp.Error != nil {
+			err = resp.Error.Error()
+		}
+
+		return c.JSON(resp.Code, BaseHttpResponse{
+			Data:  resp.Data,
+			Error: err,
 		})
 	}
 }

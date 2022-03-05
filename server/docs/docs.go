@@ -44,14 +44,41 @@ const docTemplate_swagger = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/handler.BaseHttpResponse"
+                                "allOf": [
+                                    {
+                                        "$ref": "#/definitions/handler.BaseHttpResponse"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "data": {
+                                                "type": "array",
+                                                "items": {
+                                                    "$ref": "#/definitions/models.Leaderboard"
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.BaseHttpResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.BaseHttpResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -71,7 +98,7 @@ const docTemplate_swagger = `{
                 "parameters": [
                     {
                         "description": "Leaderboard Information (all required)",
-                        "name": "contest",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -86,19 +113,90 @@ const docTemplate_swagger = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/handler.BaseHttpResponse"
-                        }
-                    },
-                    "406": {
-                        "description": "Not Acceptable",
-                        "schema": {
-                            "$ref": "#/definitions/handler.BaseHttpResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.BaseHttpResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/handler.BaseHttpResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.BaseHttpResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/seed": {
+            "get": {
+                "description": "Get Single play game seed",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Game SinglePlay Endpoints"
+                ],
+                "summary": "Get Single play game seed",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.BaseHttpResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.BaseHttpResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -106,37 +204,27 @@ const docTemplate_swagger = `{
         }
     },
     "definitions": {
-        "gorm.DeletedAt": {
+        "handler.BaseHttpResponse": {
+            "description": "Default HTTP response object",
             "type": "object",
             "properties": {
-                "time": {
+                "data": {},
+                "error": {
                     "type": "string"
-                },
-                "valid": {
-                    "description": "Valid is true if Time is not NULL",
-                    "type": "boolean"
                 }
             }
-        },
-        "handler.BaseHttpResponse": {
-            "type": "object"
         },
         "models.Leaderboard": {
             "description": "leaderboard model",
             "type": "object",
             "required": [
+                "score",
+                "seed",
+                "touch_history",
+                "touches",
                 "username"
             ],
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
                 "score": {
                     "type": "integer"
                 },
@@ -149,12 +237,10 @@ const docTemplate_swagger = `{
                 "touches": {
                     "type": "integer"
                 },
-                "updatedAt": {
-                    "type": "string"
-                },
                 "username": {
                     "type": "string",
-                    "maxLength": 32
+                    "maxLength": 32,
+                    "minLength": 1
                 }
             }
         }
