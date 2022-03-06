@@ -3,6 +3,7 @@ package sql
 import (
 	"github.com/bedrock17/s0afweb/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type LeaderboardRepository interface {
@@ -20,7 +21,9 @@ func New(db *gorm.DB) LeaderboardRepository {
 }
 
 func (r *leaderboardRepositoryImpl) Create(data models.Leaderboard) error {
-	result := r.db.Create(&data)
+	result := r.db.
+		Clauses(clause.OnConflict{UpdateAll: true}).
+		Create(&data)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -31,6 +34,7 @@ func (r *leaderboardRepositoryImpl) GetAll() ([]models.Leaderboard, error) {
 	var leaderboards []models.Leaderboard
 	result := r.db.
 		Order("score desc, touches asc, username asc").
+		Limit(200).
 		Find(&leaderboards)
 	if result.Error != nil {
 		return nil, result.Error
