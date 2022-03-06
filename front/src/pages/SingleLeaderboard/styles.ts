@@ -62,7 +62,7 @@ const HyperKeyframe = keyframes({
     textShadow: '0 0 8px rgba(255,0,0,0.1)',
   },
   '66%': {
-    color: '#0af',
+    color: '$blue',
     textShadow: '0 0 8px rgba(0,170,255,0.1)',
   },
   '100%': {
@@ -106,10 +106,10 @@ export const Td = styled('td', {
         color: 'red',
       },
       orange: {
-        color: '#ff8c00',
+        color: '$orange',
       },
       violet: {
-        color: '#a0a',
+        color: '$purple',
       },
       blue: {
         color: 'blue',
