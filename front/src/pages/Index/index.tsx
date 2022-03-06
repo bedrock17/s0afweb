@@ -17,15 +17,20 @@ const IndexPage = () => {
     setName(e.target.value);
   };
 
+  let SoloPlayButton = <Button color={'blue'}>Solo Play</Button>;
+  if (name.length === 0) {
+    SoloPlayButton = <Button color={'blue'} disabled>Solo Play</Button>;
+  }
+
   return (
     <Wrapper>
-      <Title>Poptile</Title>
+      <Title>POPTILE</Title>
       <Switch checked={animationEffect} onChange={setAnimationEffect}>
         애니메이션 효과
       </Switch>
-      <Input type={'text'} placeholder={'사용자 이름'} value={name} onChange={onNameChange} />
+      <Input type={'text'} placeholder={'사용자 이름을 입력해주세요.'} value={name} onChange={onNameChange} />
       <Link to={'/single'}>
-        <Button color={'blue'}>Solo Play</Button>
+        { SoloPlayButton }
       </Link>
       <Button color={'blue'} disabled>Online Play</Button>
     </Wrapper>
