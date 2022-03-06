@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Leaderboard, LeaderboardItem } from '~/api';
 
@@ -15,11 +15,14 @@ type Leaderboard = {
 
 const SingleLeaderboardPage = () => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
-  Leaderboard.get()
-    .then((res: LeaderboardItem[]) => {
-      setLeaderboard(res);
-    });
-  
+
+  useEffect(() => {
+    Leaderboard.get()
+      .then((res: LeaderboardItem[]) => {
+        setLeaderboard(res);
+      });
+  }, [])
+
 
   const formatNumber = Intl.NumberFormat('ko-KR').format;
 
