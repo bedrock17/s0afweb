@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { Game } from '~/game';
 
@@ -19,6 +19,8 @@ const GameCanvas = ({ animationEffect, gameRef }: Props) => {
     if (!canvasRef.current) {
       return;
     }
+
+    canvasRef.current.onselectstart = () => false;
 
     gameRef.current = new Game(canvasRef.current);
 
