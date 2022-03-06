@@ -8,7 +8,9 @@ const Footer = () => {
   return (
     <Container>
       <Title>Sponsor</Title>
-      <img src={talalgo} alt='Talalgo' />
+      <a href={'https://panty.run'}>
+        <img src={talalgo} alt='Talalgo' />
+      </a>
     </Container>
   );
 };
