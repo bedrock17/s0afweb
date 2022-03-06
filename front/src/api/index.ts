@@ -1,5 +1,4 @@
 import axios from 'axios';
-import type { Point } from '~/game';
 
 const request = axios.create({
   baseURL: '/api',
@@ -25,11 +24,13 @@ type LeaderboardPayload = LeaderboardItem & {
 
 export const Leaderboard = {
   get: async () => {
-    const { data } = await request.get<APIResponse<LeaderboardItem[]>>('/v1/leaderboard')
+    const { data } = await request.get<APIResponse<LeaderboardItem[]>>('/v1/leaderboard');
     return data.data;
   },
   post: async (payload: LeaderboardPayload) => {
     const { data } = await request.post<APIResponse<null>>('/v1/leaderboard', payload);
     return data.data;
   }
-}
+};
+
+export type { LeaderboardItem };

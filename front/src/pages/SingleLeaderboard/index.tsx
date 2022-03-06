@@ -1,5 +1,7 @@
-import axios from 'axios';
+
 import React, { useState } from 'react';
+
+import { Leaderboard, LeaderboardItem } from '~/api';
 
 import {
   Table, TableRow,
@@ -7,22 +9,17 @@ import {
   Th, Title, Wrapper,
 } from './styles';
 
-type Item = {
-  UserName: string,
-  Score: number,
-  TouchCount: number,
-};
-
 type Leaderboard = {
-  RankList: Item[],
+  RankList: LeaderboardItem[],
 };
 
 const SingleLeaderboardPage = () => {
-  const [leaderboard, setLeaderboard] = useState<Item[]>([]);
-  axios.get<Leaderboard>('/api/poptilerank')
-    .then((res) => {
-      setLeaderboard(res.data.RankList);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
+  Leaderboard.get()
+    .then((res: LeaderboardItem[]) => {
+      setLeaderboard(res);
     });
+  
 
   const formatNumber = Intl.NumberFormat('ko-KR').format;
 
@@ -36,18 +33,18 @@ const SingleLeaderboardPage = () => {
           <Th>Touches</Th>
           <Th>Score per touch</Th>
         </TableRow>
-        <TableRow>
+        <>
           {
             leaderboard.map((item) => (
-              <TableRow key={item.UserName}>
-                <Td>{item.UserName}</Td>
-                <Td>{formatNumber(item.Score)}</Td>
-                <Td>{formatNumber(item.TouchCount)}</Td>
-                <Td>{formatNumber(parseFloat((item.Score / item.TouchCount).toFixed(1)))}</Td>
+              <TableRow key={item.username}>
+                <Td>{item.username}</Td>
+                <Td>{formatNumber(item.score)}</Td>
+                <Td>{formatNumber(item.touches)}</Td>
+                <Td>{formatNumber(parseFloat((item.score / item.touches).toFixed(1)))}</Td>
               </TableRow>
             ))
           }
-        </TableRow>
+        </>
       </Table>
     </Wrapper>
   );
