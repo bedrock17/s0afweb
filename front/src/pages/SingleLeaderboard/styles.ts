@@ -89,6 +89,7 @@ export const Td = styled('td', {
         maxWidth: rem(140),
 
         fontWeight: 700,
+        overflowWrap: 'anywhere',
       }
     },
     color: {
