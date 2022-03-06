@@ -6,6 +6,7 @@ import Layout from './layout';
 import IndexPage from './pages/Index';
 import SingleLeaderboardPage from './pages/SingleLeaderboard';
 import SinglePlayPage from './pages/SinglePlay';
+import SinglePlayResultPage from './pages/SinglePlayResult';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path={'/'} element={<IndexPage />} />
         <Route path={'/single'} element={<SinglePlayPage />} />
         <Route path={'/single/leaderboard'} element={<SingleLeaderboardPage />} />
+        <Route path={'/single/result'} element={<SinglePlayResultPage />} />
       </Routes>
     </Layout>
   );

@@ -1,4 +1,7 @@
 import React, { useEffect, useRef } from 'react';
+import {
+  Navigate, Route, Routes, useNavigate
+} from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { Leaderboard } from '~/api';
@@ -11,12 +14,12 @@ import type { Game } from '~/game';
 
 import { Wrapper } from './styles';
 
-
-const IndexPage = () => {
+const SinglePlayPage = () => {
   const username = useRecoilValue(gameUsernameState);
   const gameRef = useRef<Game>();
   const [score, setScore] = useRecoilState(gameScoreState);
   const [animationEffect, setAnimationEffect] = useRecoilState(gameAnimationEffectState);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const game = gameRef.current;
@@ -33,10 +36,16 @@ const IndexPage = () => {
         touch_history: JSON.stringify(game.touchHistory),
         seed: game.seed,
       }).then(() => {
-        // TODO: 업로드후 현재 본인의 등수와 앞선 사람 정보 보여줄 것
+        navigate('/single/result');
       });
     };
   }, [gameRef, setScore, username]);
+
+  if (username.length === 0) {
+    return <Routes>
+      <Route path='/' element={<Navigate replace to='/'/>} />
+    </Routes>;
+  }
 
   return (
     <Wrapper>
@@ -50,4 +59,4 @@ const IndexPage = () => {
   );
 };
 
-export default IndexPage;
+export default SinglePlayPage;
