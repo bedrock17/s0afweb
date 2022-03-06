@@ -18,7 +18,7 @@ import (
 // @Failure      500	{object}	BaseHttpResponse{error=string}
 // @Router       /seed [get]
 func GetSinglePlaySeedV1(c echo.Context) BaseResponse {
-	seed := rand.Int31()
+	seed := rand.Int31()%2147483646 + 1
 	sess, err := session.Get("session", c)
 	if err != nil {
 		return BaseResponse{

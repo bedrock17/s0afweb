@@ -88,7 +88,7 @@ func PostLeaderboardV1(c echo.Context) BaseResponse {
 		}
 	}
 	seed := sess.Values["seed"]
-	seed = seed.(uint64)
+	seed = seed.(int32)
 	if leaderboard.Seed != seed {
 		return BaseResponse{
 			http.StatusBadRequest,
