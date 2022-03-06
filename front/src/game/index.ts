@@ -124,7 +124,7 @@ export class Game {
     return false;
   }
 
-  private set seed(seed: number) {
+  public set seed(seed: number) {
     this._seed = seed;
     this.random = new XORShift(seed);
   }
