@@ -36,7 +36,7 @@ const IndexPage = () => {
         // TODO: 업로드후 현재 본인의 등수와 앞선 사람 정보 보여줄 것
       });
     };
-  }, [gameRef, setScore]);
+  }, [gameRef, setScore, username]);
 
   return (
     <Wrapper>

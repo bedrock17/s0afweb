@@ -6,7 +6,7 @@ const request = axios.create({
 
 export const Seed = {
   get: async () => {
-    const { data } = await request.get<APIResponse<number>>('/v1/seed')
+    const { data } = await request.get<APIResponse<number>>('/v1/seed');
     return data.data;
   },
 };

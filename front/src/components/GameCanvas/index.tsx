@@ -1,10 +1,10 @@
 import type { MutableRefObject } from 'react';
 import React, { useEffect, useRef } from 'react';
 
+import { Seed } from '~/api';
 import { Game } from '~/game';
 
 import { Canvas } from './styles';
-import { Seed } from '~/api';
 
 type Props = {
   animationEffect: boolean,

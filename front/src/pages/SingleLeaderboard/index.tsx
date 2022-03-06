@@ -21,7 +21,7 @@ const SingleLeaderboardPage = () => {
       .then((res: LeaderboardItem[]) => {
         setLeaderboard(res);
       });
-  }, [])
+  }, []);
 
 
   const formatNumber = Intl.NumberFormat('ko-KR').format;

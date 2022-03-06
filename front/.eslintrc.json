@@ -184,7 +184,8 @@
   "overrides": [
     {
       "files": [
-        "vite-env.d.ts"
+        "vite-env.d.ts",
+        "**/*.d.ts"
       ],
       "rules": {
         "import/unambiguous": "off"
