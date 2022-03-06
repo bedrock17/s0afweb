@@ -51,7 +51,7 @@ func GetLeaderboardV1(c echo.Context) BaseResponse {
 
 // PostLeaderboardV1   godoc
 // @Summary      Post leaderboard
-// @Description  Register new leaderboard
+// @Description  Register new score (if username exists, update score)
 // @Tags         Leaderboard Endpoints
 // @Accept       json
 // @Produce      json

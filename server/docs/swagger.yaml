@@ -92,7 +92,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Register new leaderboard
+      description: Register new score (if username exists, update score)
       parameters:
       - description: Leaderboard Information (all required)
         in: body

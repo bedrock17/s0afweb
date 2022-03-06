@@ -81,7 +81,7 @@ const docTemplate_swagger = `{
                 }
             },
             "post": {
-                "description": "Register new leaderboard",
+                "description": "Register new score (if username exists, update score)",
                 "consumes": [
                     "application/json"
                 ],
