@@ -35,10 +35,12 @@ export class Game {
   public animationEffect: boolean;
   public lineHistory: string[] = [];
   public touchHistory: Point[] = [];
+  public random?: XORShift;
 
   private createBlock = false;
   private lastPos: Point;
   private _colors: string[];
+  private _seed: number;
 
   private blockMax: number;
   private map: number[][];
@@ -58,8 +60,6 @@ export class Game {
   private bfsQueue: Queue<Point>;
   private removeBlockCode = 0;
   private removeBlockCount = 0;
-
-  private random?: XORShift;
 
   constructor(canvas: HTMLCanvasElement) {
     this.score = 0;
@@ -98,6 +98,8 @@ export class Game {
       '(0, 255, 171)',
     ];
 
+    this._seed = 0;
+
     this.bfsQueue = new Queue<Point>();
   }
 
@@ -123,7 +125,12 @@ export class Game {
   }
 
   private set seed(seed: number) {
+    this._seed = seed;
     this.random = new XORShift(seed);
+  }
+
+  public get seed() {
+    return this._seed;
   }
 
   private set colors(colors: string[]) {

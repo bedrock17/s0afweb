@@ -10,18 +10,18 @@ export const Seed = {
     const { data } = await request.get<APIResponse<number>>('/v1/seed')
     return data.data;
   },
-}
+};
 
 type LeaderboardItem = {
   username: string,
   score: number,
   touches: number,
-}
+};
 
 type LeaderboardPayload = LeaderboardItem & {
-  touch_history: Point[],
-  seed: number;
-}
+  touch_history: string, // JSON.stringify(Point[])
+  seed: number,
+};
 
 export const Leaderboard = {
   get: async () => {
