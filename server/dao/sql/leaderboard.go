@@ -45,7 +45,6 @@ func (r *leaderboardRepositoryImpl) GetAll() ([]models.Leaderboard, error) {
 	var leaderboards []models.Leaderboard
 	result := r.db.
 		Order("score desc, touches asc, created_at asc").
-		Limit(200).
 		Find(&leaderboards)
 	if result.Error != nil {
 		return nil, result.Error
