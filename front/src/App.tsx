@@ -13,9 +13,9 @@ function App() {
     <Layout>
       <Routes>
         <Route path={'/'} element={<IndexPage />} />
-        <Route path={'/single'} element={<SinglePlayPage />} />
         <Route path={'/single/leaderboard'} element={<SingleLeaderboardPage />} />
         <Route path={'/single/result'} element={<SinglePlayResultPage />} />
+        <Route path={'/single/*'} element={<SinglePlayPage />} />
       </Routes>
     </Layout>
   );
