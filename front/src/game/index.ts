@@ -146,7 +146,7 @@ export class Game {
     this.maxBlockColumn = size.width;
     this.maxBlockRow = size.height;
 
-    this.MAPPXWIDTH = this.maxBlockColumn * this.BWIDTH; //canvas widlth
+    this.MAPPXWIDTH = this.maxBlockColumn * this.BWIDTH; //canvas width
     this.MAPPXHEIGHT = this.maxBlockRow * this.BHEIGHT; //canvas height
   }
 
