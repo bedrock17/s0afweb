@@ -5,6 +5,7 @@ import React, {
 } from 'react';
 
 import { Leaderboard, LeaderboardItem } from '~/api';
+import Button from '~/components/Button';
 import { useInfiniteScroll } from '~/hooks/useInfiniteScroll';
 
 import {
@@ -12,6 +13,7 @@ import {
   Td,
   Th, Title, Wrapper,
 } from './styles';
+import {Link} from "react-router-dom";
 
 type NameColor = Stitches.VariantProps<typeof Td>['color'];
 
@@ -47,8 +49,6 @@ const SingleLeaderboardPage = () => {
     }
   }, [page, setPage, totalPages]));
 
-  console.log(page);
-
   useEffect(() => {
     Leaderboard.get()
       .then((res: LeaderboardItem[]) => {
@@ -60,6 +60,14 @@ const SingleLeaderboardPage = () => {
 
   return (
     <Wrapper>
+      <div>
+        <Link to={'/single'}>
+          <Button color={'blue'} >Retry</Button>
+        </Link>
+        <Link to={'/'}>
+          <Button color={'cyan'}>Home</Button>
+        </Link>
+      </div>
       <Title>Single Play Leaderboard</Title>
       <Table>
         <tbody>
