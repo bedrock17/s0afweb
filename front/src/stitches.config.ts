@@ -13,6 +13,7 @@ export const { styled, keyframes } = createStitches({
       black: '#000',
 
       blue: '#0095ff',
+      cyan: '#03a89e',
       green: '#329f59',
       orange: '#ff8c00',
       purple: '#a0a',

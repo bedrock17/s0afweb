@@ -116,7 +116,7 @@ export const Td = styled('td', {
         color: 'blue',
       },
       cyan: {
-        color: '03a89e',
+        color: '$cyan',
       },
       green: {
         color: 'green',
