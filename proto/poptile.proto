@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package poptile;
 
-option go_package = "server/models";
+option go_package = "server/proto";
 
 message touch {
   message point {
@@ -10,8 +10,8 @@ message touch {
     int64 y = 2;
   }
   string username = 1;
-  int64 i = 2;
-  point p = 3;
+  int64 index = 2;
+  point location = 3;
 }
 
 message result {
