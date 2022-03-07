@@ -23,6 +23,8 @@ const SinglePlayPage = () => {
 
   useEffect(() => {
     const game = gameRef.current;
+    setScore(0);
+
     if (!game) {
       return;
     }
