@@ -20,11 +20,6 @@ const IndexPage = () => {
     setName(e.target.value);
   };
 
-  let SoloPlayButton = <Button color={'blue'}>Solo Play</Button>;
-  if (name.length === 0) {
-    SoloPlayButton = <Button color={'blue'} disabled>Solo Play</Button>;
-  }
-
   useEffect(() => {
     setName(storedName);
   }, [setName, storedName]);
@@ -36,9 +31,14 @@ const IndexPage = () => {
         애니메이션 효과
       </Switch>
       <Input type={'text'} placeholder={'사용자 이름을 입력해주세요.'} value={name} onChange={onNameChange} />
-      <Link to={'/single'}>
-        { SoloPlayButton }
-      </Link>
+      <div>
+        <Link to={'/single'}>
+          <Button color={'blue'} disabled={name.length === 0}>Solo Play</Button>
+        </Link>
+        <Link to={'/single/leaderboard'}>
+          <Button color={'cyan'}>Leaderboard</Button>
+        </Link>
+      </div>
       <Button color={'blue'} disabled>Online Play</Button>
     </Wrapper>
   );

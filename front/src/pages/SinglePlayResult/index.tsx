@@ -26,7 +26,7 @@ const SinglePlayResultPage = () => {
         <Button color={'blue'}>Retry</Button>
       </Link>
       <Link to={'/single/leaderboard'}>
-        <Button color={'blue'}>Leader Board</Button>
+        <Button color={'blue'}>Leaderboard</Button>
       </Link>
     </Wrapper>
   );

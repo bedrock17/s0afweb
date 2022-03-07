@@ -43,6 +43,13 @@ const Container = styled('button', {
           backgroundColor: '$blue',
         }
       },
+      cyan: {
+        color: '$cyan',
+
+        '&:not([disabled]):hover': {
+          backgroundColor: '$cyan',
+        }
+      }
     }
   },
 });
