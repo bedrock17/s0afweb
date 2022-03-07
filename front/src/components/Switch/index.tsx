@@ -1,5 +1,4 @@
 import React, { memo, PropsWithChildren } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
 
 import {
   Container, Label, Thumb, Wrapper
@@ -8,7 +7,7 @@ import {
 
 type Props = PropsWithChildren<{
   checked: boolean,
-  onChange: Dispatch<SetStateAction<boolean>>,
+  onChange: (value: boolean) => void,
 }>;
 
 const Switch = ({ checked, onChange, children }: Props) => {

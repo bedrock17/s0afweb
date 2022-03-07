@@ -14,6 +14,12 @@ const IndexPage = () => {
   const [name, setName] = useRecoilState(gameUsernameState);
   const [animationEffect, setAnimationEffect] = useRecoilState(gameAnimationEffectState);
   const [storedName, setStoredName] = useLocalStorage('username', '');
+  const [storedAnimationEffect, setStoredAnimationEffect] = useLocalStorage('animationEffect', true);
+
+  const onAnimationEffectChange = (value: boolean) => {
+    setStoredAnimationEffect(value);
+    setAnimationEffect(value);
+  };
 
   const onNameChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     setStoredName(e.target.value);
@@ -22,12 +28,13 @@ const IndexPage = () => {
 
   useEffect(() => {
     setName(storedName);
+    setAnimationEffect(storedAnimationEffect);
   }, [setName, storedName]);
 
   return (
     <Wrapper>
       <Title>POPTILE</Title>
-      <Switch checked={animationEffect} onChange={setAnimationEffect}>
+      <Switch checked={animationEffect} onChange={onAnimationEffectChange}>
         애니메이션 효과
       </Switch>
       <Input type={'text'} placeholder={'사용자 이름을 입력해주세요.'} value={name} onChange={onNameChange} />
