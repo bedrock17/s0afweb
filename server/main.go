@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -39,6 +40,7 @@ func main() {
 
 	e := echo.New()
 	secret := "CGvGMij3&NVxp5wdYZcrU36!8*tDK8gT8SvGD*&qYkc2E$Ks*wEwrR^4%m*8eu#VA%F!WcFUAWV#PcvSP7bTD%uFMUt%aRQ9DQk#tv#mC3ApKq^W^FFsisT*%DGKS&G6"
+	e.Use(middleware.Logger())
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(secret))))
 	e.Validator = &handler.RequestValidator{
 		Validator: validator.New(),
