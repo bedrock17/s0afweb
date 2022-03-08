@@ -1,11 +1,7 @@
 .DS_Store
-node_modules
-
 # local env files
 .env.local
 .env.*.local
-
-static
 
 # Log files
 npm-debug.log*
@@ -15,13 +11,8 @@ yarn-error.log*
 # Editor directories and files
 .idea
 .vscode
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
 
-test
 db.sqlite
 s0afweb*
+poptile-server
 

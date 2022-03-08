@@ -1,0 +1,203 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "plugins": [
+    "import",
+    "react",
+    "react-hooks",
+    "jsx-a11y",
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "plugin:import/recommended",
+    "plugin:import/typescript",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "no-unused-vars": "off",
+    "no-use-before-define": "off",
+    "max-len": [
+      "warn",
+      {
+        "code": 120,
+        "tabWidth": 2
+      }
+    ],
+    "indent": [
+      "error",
+      2
+    ],
+    "import/no-self-import": "error",
+    "import/no-cycle": "error",
+    "import/no-useless-path-segments": "error",
+    "import/unambiguous": "error",
+    "import/no-amd": "error",
+    "import/no-deprecated": "error",
+    "import/no-mutable-exports": "error",
+    "import/no-nodejs-modules": "error",
+    "import/no-duplicates": "error",
+    "import/first": "error",
+    "import/newline-after-import": "error",
+    "import/extensions": "off",
+    "import/prefer-default-export": "off",
+    "import/order": [
+      "error",
+      {
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        },
+        "groups": [
+          "builtin",
+          "external",
+          [
+            "parent", "internal"
+          ],
+          "sibling",
+          [
+            "unknown", "index", "object"
+          ]
+        ],
+        "pathGroups": [
+          {
+            "pattern": "~/**",
+            "group": "internal"
+          }
+        ],
+        "newlines-between": "always"
+      }
+    ],
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-quotes": [
+      "error",
+      "prefer-single"
+    ],
+    "keyword-spacing": "error",
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
+    "array-bracket-newline": ["error", "consistent"],
+    "arrow-spacing": ["error", { "before": true, "after": true }],
+    "array-element-newline": ["off", { "multiline": true, "minItems": 3 }],
+    "object-curly-spacing": ["error", "always"],
+    "object-curly-newline": [
+      "error",
+      {
+        "ObjectExpression": {
+          "consistent": true
+        },
+        "ObjectPattern": {
+          "consistent": true
+        },
+        "ImportDeclaration": {
+          "multiline": true,
+          "minProperties": 3
+        },
+        "ExportDeclaration": {
+          "multiline": true,
+          "minProperties": 3
+        }
+      }
+    ],
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [
+          ".tsx"
+        ]
+      }
+    ],
+    "no-console": [
+      "error",
+      {
+        "allow": [
+          "warn",
+          "error"
+        ]
+      }
+    ],
+    "react/no-unescaped-entities": "warn",
+    "react/prop-types": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/require-default-props": "off",
+    "semi": "off",
+    "space-before-blocks": "error",
+    "no-shadow": "off",
+    "space-infix-ops": "error",
+    "eol-last": ["error", "always"],
+    "@typescript-eslint/no-shadow": [
+      "error"
+    ],
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/semi": ["error"],
+    "@typescript-eslint/member-delimiter-style": [
+      "error",
+      {
+        "multiline": {
+          "delimiter": "comma",
+          "requireLast": true
+        },
+        "singleline": {
+          "delimiter": "comma",
+          "requireLast": false
+        },
+        "overrides": {
+          "interface": {
+            "multiline": {
+              "delimiter": "semi"
+            }
+          }
+        }
+      }
+    ],
+    "@typescript-eslint/type-annotation-spacing": [
+      "error",
+      {
+        "before": false,
+        "after": true,
+        "overrides": {
+          "colon": {
+            "before": false,
+            "after": true
+          },
+          "arrow": {
+            "before": true,
+            "after": true
+          }
+        }
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "vite-env.d.ts",
+        "**/*.d.ts"
+      ],
+      "rules": {
+        "import/unambiguous": "off"
+      }
+    }
+  ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    },
+    "import/resolver": {
+      "typescript": {}
+    }
+  }
+}

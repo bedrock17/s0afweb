@@ -1,0 +1,158 @@
+basePath: /v1
+definitions:
+  handler.BaseHttpResponse:
+    description: Default HTTP response object
+    properties:
+      data: {}
+      error:
+        type: string
+    type: object
+  handler.LeaderboardResponse:
+    properties:
+      score:
+        type: integer
+      touches:
+        type: integer
+      username:
+        maxLength: 32
+        minLength: 1
+        type: string
+    required:
+    - score
+    - touches
+    - username
+    type: object
+  models.Leaderboard:
+    description: leaderboard model
+    properties:
+      score:
+        type: integer
+      seed:
+        type: integer
+      touch_history:
+        type: string
+      touches:
+        type: integer
+      username:
+        maxLength: 32
+        minLength: 1
+        type: string
+    required:
+    - score
+    - seed
+    - touch_history
+    - touches
+    - username
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: bedrook@gmail.com
+    name: seokhwan
+    url: https://github.com/bedrock17
+  description: Poptile Game Server
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Poptile!
+  version: "1.0"
+paths:
+  /leaderboard:
+    get:
+      consumes:
+      - application/json
+      description: Get current leaderboards
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.BaseHttpResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/handler.LeaderboardResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.BaseHttpResponse'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get leaderboards
+      tags:
+      - Leaderboard Endpoints
+    post:
+      consumes:
+      - application/json
+      description: Register new score (if username exists, update score)
+      parameters:
+      - description: Leaderboard Information (all required)
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/models.Leaderboard'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.BaseHttpResponse'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.BaseHttpResponse'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Post leaderboard
+      tags:
+      - Leaderboard Endpoints
+  /seed:
+    get:
+      consumes:
+      - application/json
+      description: Get Single play game seed
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.BaseHttpResponse'
+            - properties:
+                data:
+                  type: integer
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.BaseHttpResponse'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get Single play game seed
+      tags:
+      - Game SinglePlay Endpoints
+swagger: "2.0"

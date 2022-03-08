@@ -1,0 +1,13 @@
+version: '3'
+services:
+  server:
+    build: server/
+    ports:
+      - "8080"
+    working_dir: /
+    volumes:
+      - "./server/db.sqlite:/db.sqlite"
+  nginx:
+    build: front/
+    ports:
+      - "80:80"
