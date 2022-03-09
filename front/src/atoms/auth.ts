@@ -1,8 +1,6 @@
 import { atom } from 'recoil';
 
-type UserState = undefined | unknown;
-
-export const userState = atom<UserState>({
+export const userState = atom<UserProfile | undefined>({
   key: 'userState',
   default: undefined,
 });

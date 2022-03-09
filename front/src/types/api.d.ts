@@ -7,3 +7,8 @@ type GoogleAuthValidate = {
   email: string,
   name: string,
 };
+
+type UserProfile = {
+  username: string,
+  tag: string,
+};

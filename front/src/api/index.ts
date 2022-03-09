@@ -5,15 +5,9 @@ const request = axios.create({
 });
 
 export const Auth = {
-  google: {
-    validate: async (idToken: string) => {
-      const { data } = await request.post<APIResponse<GoogleAuthValidate>>('/v1/auth/google', { id_token: idToken });
-      return data.data;
-    }
-  },
-  status: {
+  profile: {
     get: async () => {
-      const { data } = await request.get<APIResponse<AuthStatus>>('/v1/auth/status');
+      const { data } = await request.get<APIResponse<UserProfile>>('/v1/auth/profile');
       return data.data;
     }
   },

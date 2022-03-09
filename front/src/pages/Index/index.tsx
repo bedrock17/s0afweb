@@ -1,8 +1,8 @@
 import React, { useEffect, useLayoutEffect } from 'react';
-import GoogleLogin from 'react-google-login';
 import { Link } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 
+import { Auth } from '~/api';
 import { userState } from '~/atoms/auth';
 import { gameAnimationEffectState, gameUsernameState } from '~/atoms/game';
 import Button from '~/components/Button';
@@ -14,7 +14,7 @@ import { Title, Wrapper } from './styles';
 
 const IndexPage = () => {
   const [name, setName] = useRecoilState(gameUsernameState);
-  const user = useRecoilValue(userState);
+  const [user, setUser] = useRecoilState(userState);
   const [animationEffect, setAnimationEffect] = useRecoilState(gameAnimationEffectState);
   const [storedName, setStoredName] = useLocalStorage('username', '');
   const [storedAnimationEffect, setStoredAnimationEffect] = useLocalStorage('animationEffect', true);
@@ -35,8 +35,8 @@ const IndexPage = () => {
   }, [setName, storedName]);
 
   useLayoutEffect(() => {
-
-  }, []);
+    Auth.profile.get().then(setUser).catch(() => setUser(undefined));
+  }, [setUser]);
 
   return (
     <Wrapper>

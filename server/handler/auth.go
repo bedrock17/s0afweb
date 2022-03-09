@@ -19,11 +19,11 @@ type GoogleUserValidateResponse struct {
 	Name  string `json:"name"`
 }
 
-func RedirectGoogleSignIn(c echo.Context) error {
+func RedirectGoogleSignInV1(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, auth.GetGoogleSignInUrl(c))
 }
 
-func GoogleSignInCallback(c echo.Context) error {
+func GoogleSignInCallbackV1(c echo.Context) error {
 	// google auth
 	state := c.QueryParam("code")
 	code := c.FormValue("code")
@@ -61,8 +61,45 @@ func GoogleSignInCallback(c echo.Context) error {
 		MaxAge:   86400 * 7,
 		HttpOnly: true,
 	}
+	sess.Values["username"] = user.Username
 	sess.Values["tag"] = user.Tag
 	sess.Save(c.Request(), c.Response())
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/")
+}
+
+type UserInfoResponse struct {
+	Username string `json:"username"`
+	Tag      string `json:"tag"`
+}
+
+func GetUserInfoV1(c echo.Context) BaseResponse {
+	sess, err := session.Get("session", c)
+	if err != nil {
+		return BaseResponse{
+			http.StatusInternalServerError,
+			nil,
+			err,
+		}
+	}
+
+	username := sess.Values["username"]
+	tag := sess.Values["tag"]
+
+	if tag == nil || username == nil {
+		return BaseResponse{
+			http.StatusUnauthorized,
+			nil,
+			nil,
+		}
+	}
+
+	return BaseResponse{
+		http.StatusOK,
+		UserInfoResponse{
+			Username: username.(string),
+			Tag:      tag.(string),
+		},
+		nil,
+	}
 }
