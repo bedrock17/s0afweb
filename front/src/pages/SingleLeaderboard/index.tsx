@@ -72,6 +72,7 @@ const SingleLeaderboardPage = () => {
       <Table>
         <tbody>
           <TableRow>
+            <Th>#</Th>
             <Th>Name</Th>
             <Th>Score</Th>
             <Th>Touches</Th>
@@ -81,6 +82,7 @@ const SingleLeaderboardPage = () => {
             {
               leaderboard.slice(0, itemPerPage * page).map((item, index) => (
                 <TableRow key={item.username}>
+                  <Td> {index + 1} </Td>
                   <Td color={(index === 0 ? 'hyper' : getColor(item.score))} name>{item.username}</Td>
                   <Td>{formatNumber(item.score)}</Td>
                   <Td>{formatNumber(item.touches)}</Td>
