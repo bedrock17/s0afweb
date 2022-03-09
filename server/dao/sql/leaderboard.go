@@ -6,7 +6,7 @@ import (
 )
 
 type LeaderboardRepository interface {
-	Create(data models.Leaderboard) error
+	CreateOrUpdate(data models.Leaderboard) error
 
 	GetAll() ([]models.Leaderboard, error)
 }
@@ -15,11 +15,11 @@ type leaderboardRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func New(db *gorm.DB) LeaderboardRepository {
+func NewLeaderboardRepository(db *gorm.DB) LeaderboardRepository {
 	return &leaderboardRepositoryImpl{db: db}
 }
 
-func (r *leaderboardRepositoryImpl) Create(data models.Leaderboard) error {
+func (r *leaderboardRepositoryImpl) CreateOrUpdate(data models.Leaderboard) error {
 	var leaderboard models.Leaderboard
 
 	result := r.db.FirstOrCreate(&leaderboard, models.Leaderboard{Username: data.Username})

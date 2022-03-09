@@ -107,7 +107,7 @@ func PostLeaderboardV1(c echo.Context) BaseResponse {
 	}
 
 	repo := dao.GetRepository().Leaderboard()
-	err = repo.Create(*leaderboard)
+	err = repo.CreateOrUpdate(*leaderboard)
 	code := http.StatusCreated
 	if err != nil {
 		code = http.StatusInternalServerError

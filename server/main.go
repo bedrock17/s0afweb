@@ -7,6 +7,7 @@ import (
 	"github.com/bedrock17/s0afweb/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -29,6 +30,11 @@ import (
 // @host localhost:8080
 // @BasePath /v1
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		panic("failed to load .env file")
+	}
+
 	db, err := gorm.Open(sqlite.Open("db.sqlite"), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})

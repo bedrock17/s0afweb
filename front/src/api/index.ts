@@ -4,6 +4,21 @@ const request = axios.create({
   baseURL: '/api',
 });
 
+export const Auth = {
+  google: {
+    validate: async (idToken: string) => {
+      const { data } = await request.post<APIResponse<GoogleAuthValidate>>('/v1/auth/google', { id_token: idToken });
+      return data.data;
+    }
+  },
+  status: {
+    get: async () => {
+      const { data } = await request.get<APIResponse<AuthStatus>>('/v1/auth/status');
+      return data.data;
+    }
+  },
+};
+
 export const Seed = {
   get: async () => {
     const { data } = await request.get<APIResponse<number>>('/v1/seed');
