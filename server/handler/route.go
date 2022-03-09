@@ -9,6 +9,7 @@ func InitV1Handler(e *echo.Echo) {
 	e.GET("v1/auth/google", RedirectGoogleSignInV1)
 	e.GET("v1/auth/google/callback", GoogleSignInCallbackV1)
 	e.GET("v1/auth/profile", BaseHandler(GetUserInfoV1))
+	e.GET("v1/auth/logout", LogoutV1)
 
 	e.GET("v1/seed", BaseHandler(GetSinglePlaySeedV1))
 

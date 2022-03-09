@@ -103,3 +103,18 @@ func GetUserInfoV1(c echo.Context) BaseResponse {
 		nil,
 	}
 }
+
+func LogoutV1(c echo.Context) error {
+	sess, err := session.Get("session", c)
+	if err != nil {
+		// TODO: add error message context
+		return c.Redirect(http.StatusTemporaryRedirect, "/")
+	}
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	}
+	sess.Save(c.Request(), c.Response())
+	return c.Redirect(http.StatusTemporaryRedirect, "/")
+}
