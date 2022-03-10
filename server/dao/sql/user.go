@@ -21,15 +21,8 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 func (r *userRepositoryImpl) GetOrCreate(user *models.User) error {
-	tag := auth.GenerateRandomString(6)
-
-	result := r.db.FirstOrCreate(&user, models.User{
-		Provider:   user.Provider,
-		ExternalId: user.ExternalId,
-		Username:   tag,
-		Tag:        tag,
-	})
-
+	userId := auth.GenerateRandomString(6)
+	result := r.db.Where(&user).Attrs(models.User{UserId: userId}).FirstOrCreate(&user)
 	return result.Error
 }
 

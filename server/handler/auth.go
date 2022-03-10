@@ -61,16 +61,14 @@ func GoogleSignInCallbackV1(c echo.Context) error {
 		MaxAge:   86400 * 7,
 		HttpOnly: true,
 	}
-	sess.Values["username"] = user.Username
-	sess.Values["tag"] = user.Tag
+	sess.Values["userId"] = user.UserId
 	sess.Save(c.Request(), c.Response())
 
 	return c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
 type UserInfoResponse struct {
-	Username string `json:"username"`
-	Tag      string `json:"tag"`
+	UserId string `json:"user_id"`
 }
 
 func GetUserInfoV1(c echo.Context) BaseResponse {
@@ -83,10 +81,9 @@ func GetUserInfoV1(c echo.Context) BaseResponse {
 		}
 	}
 
-	username := sess.Values["username"]
-	tag := sess.Values["tag"]
+	userId := sess.Values["userId"]
 
-	if tag == nil || username == nil {
+	if userId == nil {
 		return BaseResponse{
 			http.StatusUnauthorized,
 			nil,
@@ -97,8 +94,7 @@ func GetUserInfoV1(c echo.Context) BaseResponse {
 	return BaseResponse{
 		http.StatusOK,
 		UserInfoResponse{
-			Username: username.(string),
-			Tag:      tag.(string),
+			UserId: userId.(string),
 		},
 		nil,
 	}
