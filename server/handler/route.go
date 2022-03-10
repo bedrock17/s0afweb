@@ -13,6 +13,8 @@ func InitV1Handler(e *echo.Echo) {
 
 	e.GET("v1/seed", BaseHandler(GetSinglePlaySeedV1))
 
+	e.POST("v1/room", BaseHandler(CreateGameRoomV1))
+
 	e.GET("v1/leaderboard", BaseHandler(GetLeaderboardV1))
 	e.POST("v1/leaderboard", BaseHandler(PostLeaderboardV1))
 

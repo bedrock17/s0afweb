@@ -5,6 +5,7 @@ import (
 	_ "github.com/bedrock17/s0afweb/docs"
 	"github.com/bedrock17/s0afweb/handler"
 	"github.com/bedrock17/s0afweb/models"
+	"github.com/bedrock17/s0afweb/service"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
@@ -43,6 +44,7 @@ func main() {
 	}
 	models.Migrate(db)
 	dao.InitRepository(db)
+	service.InitService()
 
 	e := echo.New()
 	secret := "CGvGMij3&NVxp5wdYZcrU36!8*tDK8gT8SvGD*&qYkc2E$Ks*wEwrR^4%m*8eu#VA%F!WcFUAWV#PcvSP7bTD%uFMUt%aRQ9DQk#tv#mC3ApKq^W^FFsisT*%DGKS&G6"

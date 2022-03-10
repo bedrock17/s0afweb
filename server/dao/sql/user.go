@@ -2,7 +2,7 @@ package sql
 
 import (
 	"github.com/bedrock17/s0afweb/models"
-	"github.com/bedrock17/s0afweb/service/auth"
+	"github.com/bedrock17/s0afweb/utils"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +21,7 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 func (r *userRepositoryImpl) GetOrCreate(user *models.User) error {
-	userId := auth.GenerateRandomString(6)
+	userId := utils.GenerateRandomString(6)
 	result := r.db.Where(&user).Attrs(models.User{UserId: userId}).FirstOrCreate(&user)
 	return result.Error
 }
