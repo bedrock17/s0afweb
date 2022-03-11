@@ -11,5 +11,5 @@ type CreateGameRoomV1Response struct {
 
 func CreateGameRoom(request game.CreateRoomConfig) {
 	gameRoomManager := service.GetService().GameRoomManager()
-	room := gameRoomManager.NewRoom(request)
+	gameRoomManager.NewRoom(request)
 }
