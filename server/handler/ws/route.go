@@ -63,6 +63,14 @@ func WebSocketHandlerV1(c echo.Context) error {
 			} else {
 				data = err.Error()
 			}
+		case game.GetRoomConfigRequestType:
+			roomId := request.Data.(uint)
+			room, ok := GetRoomConfig(roomId)
+			if ok {
+				data = room
+			} else {
+				data = nil
+			}
 		}
 		respBytes, _ := json.Marshal(game.WebSocketResponse{
 			Type: request.Type,

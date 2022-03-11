@@ -10,8 +10,9 @@ type Dynamic interface {
 }
 
 const (
-	CreateRoomRequestType WebSocketRequestType = "create_room"
-	JoinRoomRequestType   WebSocketRequestType = "join_room"
+	CreateRoomRequestType    WebSocketRequestType = "create_room"
+	JoinRoomRequestType      WebSocketRequestType = "join_room"
+	GetRoomConfigRequestType WebSocketRequestType = "room_config"
 )
 
 type WebSocketRequest struct {
