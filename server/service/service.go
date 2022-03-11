@@ -12,11 +12,13 @@ type Service interface {
 
 type serviceImpl struct {
 	gameRoomManager game.RoomManager
+	userManager     game.UserManager
 }
 
 func InitService() {
 	service = &serviceImpl{
 		gameRoomManager: game.NewRoomManager(),
+		userManager:     game.NewUserManager(),
 	}
 }
 
@@ -26,4 +28,8 @@ func GetService() Service {
 
 func (s *serviceImpl) GameRoomManager() game.RoomManager {
 	return s.gameRoomManager
+}
+
+func (s *serviceImpl) UserManager() game.UserManager {
+	return s.userManager
 }

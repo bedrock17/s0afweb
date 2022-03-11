@@ -39,9 +39,14 @@ func WebSocketHandlerV1(c echo.Context) error {
 			return err
 		}
 
-		userId := sess.Values["userId"]
-		if userId == nil {
+		rawUserId := sess.Values["userId"]
+		if rawUserId == nil {
 			return errors.New("invalid session")
+		}
+
+		userId := rawUserId.(string)
+		if userId == "" {
+			return errors.New("invalid userId on session")
 		}
 
 		request := new(game.WebSocketRequest)
@@ -54,6 +59,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 		switch request.Type {
 		case game.CreateRoomRequestType:
 			config := request.Data.(*game.CreateRoomConfig)
+			config.Master = userId
 			data = CreateGameRoom(*config)
 		case game.JoinRoomRequestType:
 			roomId := request.Data.(uint)
@@ -64,10 +70,12 @@ func WebSocketHandlerV1(c echo.Context) error {
 				data = err.Error()
 			}
 		}
+
 		respBytes, _ := json.Marshal(game.WebSocketResponse{
 			Type: request.Type,
 			Data: data,
 		})
+
 		ws.WriteMessage(websocket.TextMessage, respBytes)
 	}
 
