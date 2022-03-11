@@ -1,21 +1,22 @@
 package game
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type WebSocketRequestType string
+
+type Dynamic interface {
+}
 
 const (
 	CreateRoomRequestType WebSocketRequestType = "create_room"
 	JoinRoomRequestType   WebSocketRequestType = "join_room"
 )
 
-type baseRequest struct {
-	Type WebSocketRequestType `json:"type"`
-}
-
 type WebSocketRequest struct {
 	Type WebSocketRequestType `json:"type"`
-	Data interface{}          `json:"data"`
+	Data Dynamic              `json:"data"`
 }
 
 type WebSocketResponse struct {
@@ -23,18 +24,22 @@ type WebSocketResponse struct {
 	Data interface{}          `json:"data"`
 }
 
-func (d *WebSocketRequest) UnmarshalJSON(data []byte) error {
-	var t baseRequest
+func (b *WebSocketRequest) UnmarshalJSON(data []byte) error {
+	var t struct {
+		Type string `json:"type"`
+	}
+
 	if err := json.Unmarshal(data, &t); err != nil {
 		return err
 	}
 
 	switch t.Type {
-	case CreateRoomRequestType:
-		d.Data = new(CreateRoomConfig)
-	case JoinRoomRequestType:
-		d.Data = new(uint)
+	case "create_room":
+		b.Data = new(CreateRoomConfig)
+	case "join_room":
+		b.Data = new(uint)
 	}
-	return json.Unmarshal(data, d.Data)
 
+	type tmp WebSocketRequest // avoids infinite recursion
+	return json.Unmarshal(data, (*tmp)(b))
 }

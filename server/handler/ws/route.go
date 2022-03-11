@@ -38,11 +38,6 @@ func WebSocketHandlerV1(c echo.Context) error {
 			break
 		}
 
-		request := new(game.WebSocketRequest)
-		if err := json.Unmarshal(message, request); err != nil {
-			panic(err)
-		}
-
 		// validate session
 		sess, err := session.Get("session", c)
 		if err != nil {
@@ -54,11 +49,17 @@ func WebSocketHandlerV1(c echo.Context) error {
 			return errors.New("invalid session")
 		}
 
+		request := new(game.WebSocketRequest)
+		if err := json.Unmarshal(message, request); err != nil {
+			panic(err)
+		}
+
 		var data interface{}
+
 		switch request.Type {
 		case game.CreateRoomRequestType:
-			config := request.Data.(game.CreateRoomConfig)
-			data = CreateGameRoom(config)
+			config := request.Data.(*game.CreateRoomConfig)
+			data = CreateGameRoom(*config)
 		case game.JoinRoomRequestType:
 			roomId := request.Data.(uint)
 			err := JoinGameRoom(roomId, ws)
