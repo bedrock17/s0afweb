@@ -12,6 +12,7 @@ type Dynamic interface {
 const (
 	CreateRoomRequestType            WebSocketRequestType = "create_room"
 	JoinRoomRequestType              WebSocketRequestType = "join_room"
+	GetRoomConfigRequestType         WebSocketRequestType = "room_config"
 	GetRoomsRequestType              WebSocketRequestType = "get_rooms"
 	StartGameRequestType             WebSocketRequestType = "start_game"
 	ExitGameRequestType              WebSocketRequestType = "exit_game"
@@ -39,9 +40,10 @@ func (b *WebSocketRequest) UnmarshalJSON(data []byte) error {
 	}
 
 	switch t.Type {
-	case "create_room":
+	case string(CreateRoomRequestType):
 		b.Data = new(CreateRoomConfig)
-	case "join_room":
+	case string(JoinRoomRequestType):
+	case string(GetRoomConfigRequestType):
 		b.Data = new(uint)
 	}
 
