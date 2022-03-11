@@ -19,3 +19,8 @@ func JoinGameRoom(roomId uint, client *websocket.Conn) error {
 	gameRoomManager := service.GetService().GameRoomManager()
 	return gameRoomManager.JoinRoom(roomId, client)
 }
+
+func GetRoomConfig(roomId uint) (game.Room, bool) {
+	gameRoomManager := service.GetService().GameRoomManager()
+	return gameRoomManager.Get(roomId)
+}

@@ -31,6 +31,7 @@ const (
 type RoomManager interface {
 	NewRoom(config CreateRoomConfig) Room
 	JoinRoom(roomId uint, client *websocket.Conn) error
+	Get(roomId uint) (Room, bool)
 }
 
 type RoomManagerImpl struct {
@@ -63,6 +64,11 @@ func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig) Room {
 	}
 
 	return m.rooms[id]
+}
+
+func (m *RoomManagerImpl) Get(roomId uint) (Room, bool) {
+	room, ok := m.rooms[roomId]
+	return room, ok
 }
 
 func (m *RoomManagerImpl) JoinRoom(roomId uint, client *websocket.Conn) error {
