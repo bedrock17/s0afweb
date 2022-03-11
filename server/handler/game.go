@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"github.com/bedrock17/s0afweb/service"
-	"github.com/bedrock17/s0afweb/service/game"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -47,37 +45,5 @@ func GetSinglePlaySeedV1(c echo.Context) BaseResponse {
 		http.StatusOK,
 		seed,
 		err,
-	}
-}
-
-type CreateGameRoomV1Response struct {
-	game.Room
-}
-
-func CreateGameRoomV1(c echo.Context) BaseResponse {
-	request := new(game.CreateRoomConfig)
-
-	if err := c.Bind(request); err != nil {
-		return BaseResponse{
-			http.StatusBadRequest,
-			nil,
-			err,
-		}
-	}
-
-	if err := c.Validate(request); err != nil {
-		return BaseResponse{
-			http.StatusBadRequest,
-			nil,
-			err,
-		}
-	}
-
-	gameRoomManager := service.GetService().GameRoomManager()
-	room := gameRoomManager.NewRoom(*request)
-	return BaseResponse{
-		http.StatusOK,
-		room,
-		nil,
 	}
 }
