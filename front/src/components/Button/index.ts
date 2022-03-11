@@ -36,6 +36,13 @@ const Container = styled('button', {
 
   variants: {
     color: {
+      orange: {
+        color: '$orange',
+
+        '&:not([disabled]):hover': {
+          backgroundColor: '$orange',
+        }
+      },
       blue: {
         color: '$blue',
 

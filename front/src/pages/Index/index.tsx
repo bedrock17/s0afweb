@@ -55,7 +55,9 @@ const IndexPage = () => {
       </div>
       {
         user ?  (
-          <Button color={'blue'} disabled>Online Play</Button>
+          <Link to={'/online/'}>
+            <Button color={'orange'}>Online Play</Button>
+          </Link>
         ) : (
           <a href={'/api/v1/auth/google'}>
             <Button color={'blue'}>Login</Button>

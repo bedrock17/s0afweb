@@ -26,11 +26,6 @@ func WebSocketHandlerV1(c echo.Context) error {
 	defer ws.Close()
 
 	for {
-		err := ws.WriteMessage(websocket.TextMessage, []byte("Hello, Client!"))
-		if err != nil {
-			c.Logger().Error(err)
-		}
-
 		// Read
 		_, message, err := ws.ReadMessage()
 		if err != nil {
