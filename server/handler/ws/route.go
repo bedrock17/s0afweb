@@ -54,11 +54,25 @@ func WebSocketHandlerV1(c echo.Context) error {
 			return errors.New("invalid session")
 		}
 
+		var data interface{}
 		switch request.Type {
 		case game.CreateRoomRequestType:
 			config := request.Data.(game.CreateRoomConfig)
-			CreateGameRoom(config)
+			data = CreateGameRoom(config)
+		case game.JoinRoomRequestType:
+			roomId := request.Data.(uint)
+			err := JoinGameRoom(roomId, ws)
+			if err == nil {
+				data = roomId
+			} else {
+				data = err.Error()
+			}
 		}
+		respBytes, _ := json.Marshal(game.WebSocketResponse{
+			Type: request.Type,
+			Data: data,
+		})
+		ws.WriteMessage(websocket.TextMessage, respBytes)
 	}
 
 	return nil

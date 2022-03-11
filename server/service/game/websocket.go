@@ -6,6 +6,7 @@ type WebSocketRequestType string
 
 const (
 	CreateRoomRequestType WebSocketRequestType = "create_room"
+	JoinRoomRequestType   WebSocketRequestType = "join_room"
 )
 
 type baseRequest struct {
@@ -13,8 +14,13 @@ type baseRequest struct {
 }
 
 type WebSocketRequest struct {
-	baseRequest
-	Data interface{} `json:"data"`
+	Type WebSocketRequestType `json:"type"`
+	Data interface{}          `json:"data"`
+}
+
+type WebSocketResponse struct {
+	Type WebSocketRequestType `json:"type"`
+	Data interface{}          `json:"data"`
 }
 
 func (d *WebSocketRequest) UnmarshalJSON(data []byte) error {
@@ -26,6 +32,8 @@ func (d *WebSocketRequest) UnmarshalJSON(data []byte) error {
 	switch t.Type {
 	case CreateRoomRequestType:
 		d.Data = new(CreateRoomConfig)
+	case JoinRoomRequestType:
+		d.Data = new(uint)
 	}
 	return json.Unmarshal(data, d.Data)
 

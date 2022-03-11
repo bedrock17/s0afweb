@@ -3,13 +3,19 @@ package ws
 import (
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
+	"github.com/gorilla/websocket"
 )
 
 type CreateGameRoomV1Response struct {
 	game.Room
 }
 
-func CreateGameRoom(request game.CreateRoomConfig) {
+func CreateGameRoom(config game.CreateRoomConfig) game.Room {
 	gameRoomManager := service.GetService().GameRoomManager()
-	gameRoomManager.NewRoom(request)
+	return gameRoomManager.NewRoom(config)
+}
+
+func JoinGameRoom(roomId uint, client *websocket.Conn) error {
+	gameRoomManager := service.GetService().GameRoomManager()
+	return gameRoomManager.JoinRoom(roomId, client)
 }

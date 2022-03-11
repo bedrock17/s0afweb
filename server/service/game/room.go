@@ -1,7 +1,8 @@
 package game
 
 import (
-	"golang.org/x/net/websocket"
+	"errors"
+	"github.com/gorilla/websocket"
 	"sync"
 )
 
@@ -27,6 +28,7 @@ const (
 
 type RoomManager interface {
 	NewRoom(config CreateRoomConfig) Room
+	JoinRoom(roomId uint, client *websocket.Conn) error
 }
 
 type RoomManagerImpl struct {
@@ -58,4 +60,21 @@ func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig) Room {
 	}
 
 	return m.rooms[id]
+}
+
+func (m *RoomManagerImpl) JoinRoom(roomId uint, client *websocket.Conn) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	room, ok := m.rooms[roomId]
+	if !ok {
+		return errors.New("invalid room id")
+	}
+
+	if len(room.Clients) == room.Capacity {
+		return errors.New("no player slot left")
+	}
+
+	room.Clients = append(room.Clients, client)
+	return nil
 }
