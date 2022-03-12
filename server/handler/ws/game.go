@@ -6,7 +6,19 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func StartGame(roomId uint, client *websocket.Conn) (game.Room, error) {
+func StartGame(client *websocket.Conn, roomId uint) ([]game.WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
-	return gameRoomManager.StartGame(roomId, client)
+	room, err := gameRoomManager.StartGame(roomId, client)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := game.WSResponse{
+		Connections: room.Clients,
+		Payload: game.WSPayload{
+			Type: game.StartGameMessageType,
+			Data: room.GameStartedAt,
+		},
+	}
+	return []game.WSResponse{resp}, nil
 }

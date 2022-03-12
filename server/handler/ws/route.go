@@ -33,7 +33,6 @@ func WebSocketHandlerV1(c echo.Context) error {
 
 	for {
 		// Read
-		skipResponse := false
 		_, message, err := ws.ReadMessage()
 		if err != nil {
 			c.Logger().Error(err)
@@ -60,70 +59,47 @@ func WebSocketHandlerV1(c echo.Context) error {
 			userManager.SetUser(game.User{Id: userId, RoomId: 0}, ws)
 		}
 
-		request := new(game.WebSocketRequest)
+		request := new(game.WSRequest)
 		if err := json.Unmarshal(message, request); err != nil {
 			panic(err)
 		}
 
-		var data interface{}
+		var responses []game.WSResponse
 
 		switch request.Type {
-		case game.CreateRoomRequestType:
+		case game.CreateRoomMessageType:
 			config := request.Data.(*game.CreateRoomConfig)
 			config.Master = userId
-			if room, err := CreateGameRoom(*config, ws); err == nil {
-				data = room
-			} else {
-				data = err.Error()
-			}
-		case game.JoinRoomRequestType:
+			responses, err = CreateGameRoom(ws, *config)
+		case game.JoinRoomMessageType:
 			roomId := request.Data.(uint)
-			if err := JoinGameRoom(roomId, ws); err == nil {
-				data = roomId
-			} else {
-				data = err.Error()
-			}
-		case game.GetRoomConfigRequestType:
+			responses, err = JoinGameRoom(ws, roomId)
+		case game.GetRoomConfigMessageType:
 			roomId := request.Data.(uint)
-			room, ok := GetRoomConfig(roomId)
-			if ok {
-				data = room
-			} else {
-				data = nil
-			}
-		case game.ExitRoomRequestType:
+			responses, err = GetRoomConfig(ws, roomId)
+		case game.ExitRoomMessageType:
 			roomId := request.Data.(uint)
-			if err := ExitGameRoom(roomId, ws); err == nil {
-				data = roomId
-			} else {
-				data = err.Error()
-			}
-		case game.StartGameRequestType:
+			responses, err = ExitGameRoom(ws, roomId)
+		case game.StartGameMessageType:
 			roomId := request.Data.(uint)
-			room, err := StartGame(roomId, ws)
-			if err == nil {
-				skipResponse = true
-				for _, client := range room.Clients {
-					respBytes, _ := json.Marshal(game.WebSocketResponse{
-						Type: request.Type,
-						Data: room.GameStartedAt,
-					})
-					client.WriteMessage(websocket.TextMessage, respBytes)
+			responses, err = StartGame(ws, roomId)
+		}
+
+		if err != nil {
+			respBytes, _ := json.Marshal(game.WSPayload{
+				Type: request.Type,
+				Data: err.Error(),
+			})
+
+			ws.WriteMessage(websocket.TextMessage, respBytes)
+		} else {
+			for _, resp := range responses {
+				for _, conn := range resp.Connections {
+					respBytes, _ := json.Marshal(resp.Payload)
+					conn.WriteMessage(websocket.TextMessage, respBytes)
 				}
-			} else {
-				data = err
 			}
 		}
-
-		if skipResponse {
-			continue
-		}
-		respBytes, _ := json.Marshal(game.WebSocketResponse{
-			Type: request.Type,
-			Data: data,
-		})
-
-		ws.WriteMessage(websocket.TextMessage, respBytes)
 	}
 
 	return nil
