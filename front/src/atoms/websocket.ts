@@ -8,6 +8,6 @@ export const websocketState = atom<PopTileWebsocket|null>({
 });
 
 export const roomIDState = atom({
-  key: 'websocket',
+  key: 'roomIDState',
   default: 0,
 });
