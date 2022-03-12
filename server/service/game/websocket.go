@@ -6,9 +6,6 @@ import (
 
 type WebSocketRequestType string
 
-type Dynamic interface {
-}
-
 const (
 	CreateRoomRequestType            WebSocketRequestType = "create_room"
 	JoinRoomRequestType              WebSocketRequestType = "join_room"
@@ -22,7 +19,7 @@ const (
 
 type WebSocketRequest struct {
 	Type WebSocketRequestType `json:"type"`
-	Data Dynamic              `json:"data"`
+	Data interface{}          `json:"data"`
 }
 
 type WebSocketResponse struct {
