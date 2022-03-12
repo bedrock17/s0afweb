@@ -41,7 +41,7 @@ const SinglePlayPage = () => {
         navigate('/single/result');
       });
     };
-  }, [gameRef, setScore, username]);
+  }, [gameRef, navigate, setScore, username]);
 
   if (username.length === 0) {
     return <Routes>

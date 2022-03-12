@@ -32,7 +32,7 @@ const IndexPage = () => {
   useEffect(() => {
     setName(storedName);
     setAnimationEffect(storedAnimationEffect);
-  }, [setName, storedName]);
+  }, [setAnimationEffect, setName, storedAnimationEffect, storedName]);
 
   useLayoutEffect(() => {
     Auth.profile.get().then(setUser).catch(() => setUser(undefined));

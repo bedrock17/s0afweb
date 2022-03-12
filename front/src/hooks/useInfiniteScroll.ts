@@ -16,5 +16,5 @@ export const useInfiniteScroll = (
       setLastLoadTime(currentTime);
       callback();
     }
-  }, [shouldLoadMore, callback]);
+  }, [shouldLoadMore, callback, lastLoadTime]);
 };
