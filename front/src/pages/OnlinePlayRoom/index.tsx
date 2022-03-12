@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 
 import { roomIDState, websocketState } from '~/atoms/websocket';
 import Button from '~/components/Button';
-import { messageType } from '~/ws/websocket';
+import {createPopTileWebsocket, messageType} from '~/ws/websocket';
 
 import { Wrapper } from './styles';
 
 const OnlinePlay = () => {
-  const websocket = useRecoilValue(websocketState);
+  const [websocket, setWebsocket] = useRecoilState(websocketState);
   const [roomID, setRoomID] = useRecoilState(roomIDState);
   const navigate = useNavigate();
 
@@ -31,7 +31,24 @@ const OnlinePlay = () => {
         data: roomNumber,
       };
 
-      websocket?.ws?.send(JSON.stringify(msg));
+      let curWebsocket = websocket;
+      if (!curWebsocket) {
+        const popTileWebsocket = createPopTileWebsocket();
+        setWebsocket(popTileWebsocket);
+        if (popTileWebsocket) {
+          curWebsocket = popTileWebsocket;
+        }
+      }
+
+
+      if (curWebsocket) {
+        if (curWebsocket.ws) {
+          curWebsocket.ws.onopen = (() => {
+            curWebsocket?.ws?.send(JSON.stringify(msg));
+          });
+        }
+      }
+
     }
 
 
