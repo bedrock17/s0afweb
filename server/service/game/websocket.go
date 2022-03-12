@@ -8,15 +8,14 @@ import (
 type WSMessageType string
 
 const (
-	CreateRoomMessageType            WSMessageType = "create_room"
-	JoinRoomMessageType              WSMessageType = "join_room"
-	GetRoomConfigMessageType         WSMessageType = "room_config"
-	ExitRoomMessageType              WSMessageType = "exit_room"
-	GetRoomsMessageType              WSMessageType = "get_rooms"
-	StartGameMessageType             WSMessageType = "start_game"
-	FinishGameMessageType            WSMessageType = "finish_game"
-	BroadcastCurrentScoreMessageType WSMessageType = "current_score"
-	BroadcastFinalScoreMessageType   WSMessageType = "final_score"
+	CreateRoomMessageType    WSMessageType = "create_room"
+	JoinRoomMessageType      WSMessageType = "join_room"
+	GetRoomConfigMessageType WSMessageType = "room_config"
+	ExitRoomMessageType      WSMessageType = "exit_room"
+	GetRoomsMessageType      WSMessageType = "get_rooms"
+	StartGameMessageType     WSMessageType = "start_game"
+	FinishGameMessageType    WSMessageType = "finish_game"
+	TouchMessageType         WSMessageType = "touch_tile"
 )
 
 type WSRequest struct {

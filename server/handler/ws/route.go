@@ -90,6 +90,9 @@ func WebSocketHandlerV1(c echo.Context) error {
 		case game.StartGameMessageType:
 			roomId := uint(request.Data.(float64))
 			responses, err = StartGame(ws, roomId)
+		case game.TouchMessageType:
+			touch := request.Data.(*game.TouchRequest)
+			responses, err = TouchTile(ws, *touch)
 		}
 
 		if err != nil {

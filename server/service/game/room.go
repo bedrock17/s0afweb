@@ -8,6 +8,17 @@ import (
 	"time"
 )
 
+type TouchRequest struct {
+	X uint `json:"x" validate:"required,numeric"`
+	Y uint `json:"y" validate:"required,numeric"`
+}
+
+type TouchResponse struct {
+	UserID string `json:"user_id"`
+	X      uint   `json:"x"`
+	Y      uint   `json:"y"`
+}
+
 type CreateRoomConfig struct {
 	Capacity int    `json:"capacity"  validate:"required,numeric,min=2,max=16"`
 	PlayTime int32  `json:"play_time" validate:"required,numeric,min=10,max=300"`
