@@ -1,5 +1,15 @@
 
-export const createPopTileWebsocket = (): WebSocket => {
+export const messageType = {
+  createRoom: 'create_room',
+  joinRoom: 'join_room',
+};
+
+export class PopTileWebsocket {
+  ws: WebSocket | undefined;
+  messageHandle: Record<string, (msg: WebsocketMessage<WebsocketMessageData>) => void> = {};
+}
+
+export const createPopTileWebsocket = (): PopTileWebsocket => {
 
   const l = window.location;
   const url = ((l.protocol === 'https:') ? 'wss://' : 'ws://') + l.host + l.pathname + '/v1/ws';
@@ -10,6 +20,8 @@ export const createPopTileWebsocket = (): WebSocket => {
   } else {
     websocket = new WebSocket(url);
   }
+  const popTileWebsocket = new PopTileWebsocket();
+
   websocket.onopen = () => {
     // eslint-disable-next-line no-console
     console.log('open');
@@ -23,8 +35,18 @@ export const createPopTileWebsocket = (): WebSocket => {
   websocket.onmessage = (msg) => {
     // eslint-disable-next-line no-console
     console.log('onmessage', msg.data);
+
+    const serverMessage: WebsocketMessage<WebsocketMessageData> = JSON.parse(msg.data);
+
+    if (serverMessage.type in popTileWebsocket.messageHandle) {
+      popTileWebsocket.messageHandle[serverMessage.type](serverMessage);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log('Unknown message type');
+    }
+
   };
 
-  return websocket;
+  popTileWebsocket.ws = websocket;
+  return popTileWebsocket;
 };
-

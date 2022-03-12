@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 import OnlinePlay from '~/pages/OnlinePlay';
+import OnlinePlayRoom from '~/pages/OnlinePlayRoom';
 
 import Layout from './layout';
 import IndexPage from './pages/Index';
@@ -18,6 +19,7 @@ function App() {
         <Route path={'/single/result'} element={<SinglePlayResultPage />} />
         <Route path={'/single/*'} element={<SinglePlayPage />} />
         <Route path={'/online/*'} element={<OnlinePlay />} />
+        <Route path={'/online/room'} element={<OnlinePlayRoom />} />
       </Routes>
     </Layout>
   );

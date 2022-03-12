@@ -1,6 +1,13 @@
 import { atom } from 'recoil';
 
-export const websocketState = atom<WebSocket|null>({
+import { PopTileWebsocket } from '~/ws/websocket';
+
+export const websocketState = atom<PopTileWebsocket|null>({
   key: 'websocket',
   default: null,
+});
+
+export const roomIDState = atom({
+  key: 'websocket',
+  default: 0,
 });

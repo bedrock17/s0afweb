@@ -1,38 +1,49 @@
 import React, { useEffect } from 'react';
-import { useRecoilState } from 'recoil';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
-import { websocketState } from '~/atoms/websocket';
+import { roomIDState, websocketState } from '~/atoms/websocket';
 import Button from '~/components/Button';
-import { createPopTileWebsocket } from '~/ws/websocket';
+import { createPopTileWebsocket, messageType } from '~/ws/websocket';
 
 import { Wrapper } from './styles';
 
 const OnlinePlay = () => {
   const [websocket, setWebsocket] = useRecoilState(websocketState);
+  const setRoomID = useSetRecoilState(roomIDState);
+  const navigate = useNavigate();
 
   useEffect(() => {
 
-    const ws = createPopTileWebsocket();
-    setWebsocket(ws);
+    const popTileWebsocket = createPopTileWebsocket();
+    if (popTileWebsocket.messageHandle) {
+      popTileWebsocket.messageHandle[messageType.createRoom] = (msg: WebsocketMessage<WebsocketMessageData>) => {
+        const room = msg as WebsocketMessage<Room>;
+        setRoomID(room.data.id);
+
+        navigate('/online/room#' + room.data.id);
+      };
+    }
+    setWebsocket(popTileWebsocket);
 
   }, []);
 
   const onClickCreateRoom = () => {
     const message: WebsocketMessage<CreateRoom> = {
-      type: 'create_room',
+      type: messageType.createRoom,
       data: {
         capacity: 10,
-        game_time: 180,
+        play_time: 180,
       }
     };
 
-    websocket?.send(JSON.stringify(message));
+    websocket?.ws?.send(JSON.stringify(message));
 
   };
 
   return (
     <Wrapper>
-      <Button color={'blue'} onClick={onClickCreateRoom}>
+      <Button color={'blue'} onClick={onClickCreateRoom} disabled={websocket === null}>
         Create Room
       </Button>
     </Wrapper>
