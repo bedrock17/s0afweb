@@ -46,6 +46,11 @@ func JoinGameRoom(client *websocket.Conn, roomId uint) ([]game.WSResponse, error
 
 func ExitGameRoom(client *websocket.Conn, roomId uint) ([]game.WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
+	userManager := service.GetService().UserManager()
+	user, err := userManager.GetUser(client)
+	if err != nil {
+		return nil, err
+	}
 	if err := gameRoomManager.ExitRoom(client, roomId); err != nil {
 		return nil, err
 	}
@@ -54,7 +59,7 @@ func ExitGameRoom(client *websocket.Conn, roomId uint) ([]game.WSResponse, error
 		Connections: room.Clients,
 		Payload: game.WSPayload{
 			Type: game.ExitRoomMessageType,
-			Data: roomId,
+			Data: user.Id,
 		},
 	}
 	return []game.WSResponse{resp}, nil
