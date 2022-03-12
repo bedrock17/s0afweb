@@ -52,7 +52,7 @@ func (m *UserManagerImpl) JoinRoom(user User, client *websocket.Conn) error {
 	defer m.mu.Unlock()
 
 	if _, ok := m.state[client]; !ok {
-		return errors.New("already joined")
+		return errors.New("user not found")
 	}
 
 	m.state[client] = User{
