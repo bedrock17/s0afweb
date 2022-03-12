@@ -25,8 +25,15 @@ func WebSocketHandlerV1(c echo.Context) error {
 		return err
 	}
 	userManager := service.GetService().UserManager()
+	gameRoomManager := service.GetService().GameRoomManager()
 
 	defer func() {
+		user, err := userManager.GetUser(ws)
+		if err == nil {
+			if user.RoomId > 0 {
+				gameRoomManager.ExitRoom(user.RoomId, ws)
+			}
+		}
 		userManager.RemoveUser(ws)
 		ws.Close()
 	}()
