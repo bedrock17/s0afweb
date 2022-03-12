@@ -22,13 +22,12 @@ func CreateGameRoom(config game.CreateRoomConfig, client *websocket.Conn) (game.
 		return game.Room{}, errors.New("user is already in the room")
 	}
 	room := gameRoomManager.NewRoom(config)
-	err = gameRoomManager.JoinRoom(room.Id, client)
-	if err != nil {
-		return game.Room{}, errors.New("failed to join the room")
+	if err := gameRoomManager.JoinRoom(room.Id, client); err != nil {
+		return game.Room{}, err
 	}
-	err = userManager.JoinRoom(user, client)
-	if err != nil {
-		return game.Room{}, errors.New("failed to join the room")
+
+	if err := userManager.JoinRoom(user, client); err != nil {
+		return game.Room{}, err
 	}
 	// TODO: 입장에 실패했을때 방 제거
 	return room, nil
@@ -36,7 +35,23 @@ func CreateGameRoom(config game.CreateRoomConfig, client *websocket.Conn) (game.
 
 func JoinGameRoom(roomId uint, client *websocket.Conn) error {
 	gameRoomManager := service.GetService().GameRoomManager()
-	return gameRoomManager.JoinRoom(roomId, client)
+	userManager := service.GetService().UserManager()
+	user, err := userManager.GetUser(client)
+	if err != nil {
+		return err
+	}
+	if user.RoomId == 0 {
+		return errors.New("cannot find user")
+	}
+
+	if err := userManager.JoinRoom(user, client); err != nil {
+		return err
+	}
+	if err := gameRoomManager.JoinRoom(roomId, client); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func GetRoomConfig(roomId uint) (game.Room, bool) {
