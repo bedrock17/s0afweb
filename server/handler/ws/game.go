@@ -36,7 +36,9 @@ func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]game.WSRespon
 	if !ok {
 		return nil, errors.New("invalid room id")
 	}
-	clients := make([]*websocket.Conn, 0)
+
+	index, clients := 0, make([]*websocket.Conn, len(room.Clients)-1)
+
 	for _, client := range room.Clients {
 		participant, err := userManager.GetUser(client)
 		if err != nil {
@@ -45,7 +47,8 @@ func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]game.WSRespon
 		if participant.Id == user.Id {
 			continue
 		}
-		clients = append(clients, client)
+		clients[index] = client
+		index += 1
 	}
 
 	resp := game.WSResponse{

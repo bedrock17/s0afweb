@@ -33,13 +33,14 @@ func GetLeaderboardV1(c echo.Context) BaseResponse {
 		code = http.StatusInternalServerError
 	}
 
-	var leaderboardsResponse []LeaderboardResponse
-	for _, e := range leaderboards {
-		leaderboardsResponse = append(leaderboardsResponse, LeaderboardResponse{
+	leaderboardsResponse := make([]LeaderboardResponse, len(leaderboards))
+
+	for i, e := range leaderboards {
+		leaderboardsResponse[i] = LeaderboardResponse{
 			Username: e.Username,
 			Score:    e.Score,
 			Touches:  e.Touches,
-		})
+		}
 	}
 
 	return BaseResponse{

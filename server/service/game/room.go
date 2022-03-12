@@ -130,8 +130,9 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 	}
 
 	m.userManager.SetUser(client, User{user.Id, 0})
-	newClients := make([]*websocket.Conn, 0)
-	newUsers := make([]User, 0)
+	index := 0
+	newClients := make([]*websocket.Conn, len(room.Clients)-1)
+	newUsers := make([]User, len(room.Clients)-1)
 	for _, client := range room.Clients {
 		u, err := m.userManager.GetUser(client)
 		if err != nil {
@@ -140,8 +141,8 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 		if u.Id == user.Id {
 			continue
 		}
-		newClients = append(newClients, client)
-		newUsers = append(newUsers, u)
+		newClients[index] = client
+		newUsers[index] = u
 	}
 	if len(room.Clients) > 1 {
 		// 방장인 경우 새로운 방장을 랜덤으로 선택
