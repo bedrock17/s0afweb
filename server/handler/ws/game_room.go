@@ -11,6 +11,20 @@ type CreateGameRoomV1Response struct {
 	game.Room
 }
 
+func GetRooms(client *websocket.Conn) ([]game.WSResponse, error) {
+	gameRoomManager := service.GetService().GameRoomManager()
+	rooms := gameRoomManager.Gets()
+
+	resp := game.WSResponse{
+		Connections: []*websocket.Conn{client},
+		Payload: game.WSPayload{
+			Type: game.GetRoomsMessageType,
+			Data: rooms,
+		},
+	}
+	return []game.WSResponse{resp}, nil
+}
+
 func CreateGameRoom(client *websocket.Conn, config game.CreateRoomConfig) ([]game.WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	room := gameRoomManager.NewRoom(config)

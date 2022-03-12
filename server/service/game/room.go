@@ -47,6 +47,7 @@ type RoomManager interface {
 	JoinRoom(client *websocket.Conn, roomId uint) error
 	ExitRoom(client *websocket.Conn, roomId uint) error
 	Get(roomId uint) (Room, bool)
+	Gets() []Room
 	StartGame(client *websocket.Conn, roomId uint) (Room, error)
 }
 
@@ -89,6 +90,14 @@ func (m *RoomManagerImpl) Get(roomId uint) (Room, bool) {
 	return room, ok
 }
 
+func (m *RoomManagerImpl) Gets() []Room {
+	var rooms []Room
+	for _, value := range m.rooms {
+		rooms = append(rooms, value)
+	}
+	return rooms
+}
+
 func (m *RoomManagerImpl) JoinRoom(client *websocket.Conn, roomId uint) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -123,8 +132,7 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 		return errors.New("invalid room id")
 	}
 
-	userManager := m.userManager
-	user, err := userManager.GetUser(client)
+	user, err := m.userManager.GetUser(client)
 	if err != nil {
 		return err
 	}
@@ -156,7 +164,7 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 			m.rooms[roomId] = room
 		}
 	} else {
-		// 방의 마지막 유저인겨우 방 제거
+		// 방의 마지막 유저인 경우 방 제거
 		delete(m.rooms, roomId)
 	}
 

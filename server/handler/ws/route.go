@@ -74,6 +74,8 @@ func WebSocketHandlerV1(c echo.Context) error {
 		var responses []game.WSResponse
 
 		switch request.Type {
+		case game.GetRoomsMessageType:
+			responses, err = GetRooms(ws)
 		case game.CreateRoomMessageType:
 			config := request.Data.(*game.CreateRoomConfig)
 			config.Master = userId

@@ -47,6 +47,8 @@ func (b *WSRequest) UnmarshalJSON(data []byte) error {
 		b.Data = new(CreateRoomConfig)
 	case string(JoinRoomMessageType):
 	case string(GetRoomConfigMessageType):
+	case string(ExitRoomMessageType):
+	case string(StartGameMessageType):
 		b.Data = new(uint)
 	}
 
