@@ -33,6 +33,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 
 	for {
 		// Read
+		skipResponse := false
 		_, message, err := ws.ReadMessage()
 		if err != nil {
 			c.Logger().Error(err)
@@ -97,8 +98,26 @@ func WebSocketHandlerV1(c echo.Context) error {
 			} else {
 				data = err.Error()
 			}
+		case game.StartGameRequestType:
+			roomId := request.Data.(uint)
+			room, err := StartGame(roomId, ws)
+			if err == nil {
+				skipResponse = true
+				for _, client := range room.Clients {
+					respBytes, _ := json.Marshal(game.WebSocketResponse{
+						Type: request.Type,
+						Data: room.GameStartedAt,
+					})
+					client.WriteMessage(websocket.TextMessage, respBytes)
+				}
+			} else {
+				data = err
+			}
 		}
 
+		if skipResponse {
+			continue
+		}
 		respBytes, _ := json.Marshal(game.WebSocketResponse{
 			Type: request.Type,
 			Data: data,

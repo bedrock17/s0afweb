@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/websocket"
 	"math/rand"
 	"sync"
+	"time"
 )
 
 type CreateRoomConfig struct {
@@ -16,12 +17,13 @@ type CreateRoomConfig struct {
 type RoomStatus int
 
 type Room struct {
-	Id       uint              `json:"id"`
-	Clients  []*websocket.Conn `json:"-"`
-	Capacity int               `json:"capacity"`
-	PlayTime int32             `json:"play_time"`
-	Status   RoomStatus        `json:"status"`
-	Master   string            `json:"master"`
+	Id            uint              `json:"id"`
+	Clients       []*websocket.Conn `json:"-"`
+	Capacity      int               `json:"capacity"`
+	PlayTime      int32             `json:"play_time"`
+	Status        RoomStatus        `json:"status"`
+	Master        string            `json:"master"`
+	GameStartedAt int64             `json:"game_started_at"`
 }
 
 const (
@@ -34,6 +36,7 @@ type RoomManager interface {
 	JoinRoom(roomId uint, client *websocket.Conn) error
 	ExitRoom(roomId uint, client *websocket.Conn) error
 	Get(roomId uint) (Room, bool)
+	StartGame(roomId uint, client *websocket.Conn) (Room, error)
 }
 
 type RoomManagerImpl struct {
@@ -146,4 +149,37 @@ func (m *RoomManagerImpl) ExitRoom(roomId uint, client *websocket.Conn) error {
 	}
 
 	return nil
+}
+
+func (m *RoomManagerImpl) StartGame(roomId uint, client *websocket.Conn) (Room, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	room, ok := m.Get(roomId)
+	if !ok {
+		return Room{}, errors.New("invalid room id")
+	}
+
+	if room.Status == RoomStatusInGame {
+		return Room{}, errors.New("game already started")
+	}
+
+	if len(room.Clients) <= 1 {
+		return Room{}, errors.New("can't start the game alone")
+	}
+
+	user, err := m.userManager.GetUser(client)
+	if err != nil {
+		return Room{}, err
+	}
+
+	if user.Id != room.Master {
+		return Room{}, errors.New("only master can start the game")
+	}
+
+	startedAt := time.Now().UnixMilli()
+	room.Status = RoomStatusInGame
+	room.GameStartedAt = startedAt
+	m.rooms[roomId] = room
+	return m.rooms[roomId], nil
 }
