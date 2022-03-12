@@ -51,7 +51,7 @@ func (m *UserManagerImpl) JoinRoom(user User, client *websocket.Conn) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	if _, ok := m.state[client]; ok == true {
+	if _, ok := m.state[client]; !ok {
 		return errors.New("already joined")
 	}
 
