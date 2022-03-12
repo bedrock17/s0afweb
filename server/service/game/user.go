@@ -12,7 +12,7 @@ type User struct {
 }
 
 type UserManager interface {
-	SetUser(user User, client *websocket.Conn)
+	SetUser(client *websocket.Conn, user User)
 	RemoveUser(client *websocket.Conn)
 	GetUser(client *websocket.Conn) (User, error)
 }
@@ -28,7 +28,7 @@ func NewUserManager() UserManager {
 	}
 }
 
-func (m *UserManagerImpl) SetUser(user User, client *websocket.Conn) {
+func (m *UserManagerImpl) SetUser(client *websocket.Conn, user User) {
 	m.state[client] = user
 }
 

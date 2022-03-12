@@ -8,7 +8,7 @@ import (
 
 func StartGame(client *websocket.Conn, roomId uint) ([]game.WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
-	room, err := gameRoomManager.StartGame(roomId, client)
+	room, err := gameRoomManager.StartGame(client, roomId)
 	if err != nil {
 		return nil, err
 	}

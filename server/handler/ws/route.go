@@ -31,7 +31,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 		user, err := userManager.GetUser(ws)
 		if err == nil {
 			if user.RoomId > 0 {
-				gameRoomManager.ExitRoom(user.RoomId, ws)
+				gameRoomManager.ExitRoom(ws, user.RoomId)
 			}
 		}
 		userManager.RemoveUser(ws)
@@ -63,7 +63,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 		}
 
 		if _, err := userManager.GetUser(ws); err != nil {
-			userManager.SetUser(game.User{Id: userId, RoomId: 0}, ws)
+			userManager.SetUser(ws, game.User{Id: userId, RoomId: 0})
 		}
 
 		request := new(game.WSRequest)

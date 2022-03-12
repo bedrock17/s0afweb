@@ -33,10 +33,10 @@ const (
 
 type RoomManager interface {
 	NewRoom(config CreateRoomConfig) Room
-	JoinRoom(roomId uint, client *websocket.Conn) error
-	ExitRoom(roomId uint, client *websocket.Conn) error
+	JoinRoom(client *websocket.Conn, roomId uint) error
+	ExitRoom(client *websocket.Conn, roomId uint) error
 	Get(roomId uint) (Room, bool)
-	StartGame(roomId uint, client *websocket.Conn) (Room, error)
+	StartGame(client *websocket.Conn, roomId uint) (Room, error)
 }
 
 type RoomManagerImpl struct {
@@ -78,7 +78,7 @@ func (m *RoomManagerImpl) Get(roomId uint) (Room, bool) {
 	return room, ok
 }
 
-func (m *RoomManagerImpl) JoinRoom(roomId uint, client *websocket.Conn) error {
+func (m *RoomManagerImpl) JoinRoom(client *websocket.Conn, roomId uint) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -98,12 +98,12 @@ func (m *RoomManagerImpl) JoinRoom(roomId uint, client *websocket.Conn) error {
 	if user.RoomId != 0 {
 		return errors.New("user is already in the room")
 	}
-	m.userManager.SetUser(User{user.Id, roomId}, client)
+	m.userManager.SetUser(client, User{user.Id, roomId})
 	room.Clients = append(room.Clients, client)
 	return nil
 }
 
-func (m *RoomManagerImpl) ExitRoom(roomId uint, client *websocket.Conn) error {
+func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -118,7 +118,7 @@ func (m *RoomManagerImpl) ExitRoom(roomId uint, client *websocket.Conn) error {
 		return err
 	}
 
-	m.userManager.SetUser(User{user.Id, 0}, client)
+	m.userManager.SetUser(client, User{user.Id, 0})
 	newClients := make([]*websocket.Conn, 0)
 	newUsers := make([]User, 0)
 	for _, client := range room.Clients {
@@ -151,7 +151,7 @@ func (m *RoomManagerImpl) ExitRoom(roomId uint, client *websocket.Conn) error {
 	return nil
 }
 
-func (m *RoomManagerImpl) StartGame(roomId uint, client *websocket.Conn) (Room, error) {
+func (m *RoomManagerImpl) StartGame(client *websocket.Conn, roomId uint) (Room, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
