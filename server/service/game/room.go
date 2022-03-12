@@ -2,6 +2,7 @@ package game
 
 import (
 	"errors"
+	"github.com/bedrock17/s0afweb/service"
 	"github.com/gorilla/websocket"
 	"sync"
 )
@@ -84,6 +85,17 @@ func (m *RoomManagerImpl) JoinRoom(roomId uint, client *websocket.Conn) error {
 		return errors.New("no player slot left")
 	}
 
+	userManager := service.GetService().UserManager()
+	user, err := userManager.GetUser(client)
+	if err != nil {
+		return err
+	}
+	if user.RoomId != 0 {
+		return errors.New("user is already in the room")
+	}
+	if err := userManager.JoinRoom(user, client); err != nil {
+		return err
+	}
 	room.Clients = append(room.Clients, client)
 	return nil
 }
