@@ -79,16 +79,16 @@ func WebSocketHandlerV1(c echo.Context) error {
 			config.Master = userId
 			responses, err = CreateGameRoom(ws, *config)
 		case game.JoinRoomMessageType:
-			roomId := request.Data.(uint)
+			roomId := uint(request.Data.(float64))
 			responses, err = JoinGameRoom(ws, roomId)
 		case game.GetRoomConfigMessageType:
-			roomId := request.Data.(uint)
+			roomId := uint(request.Data.(float64))
 			responses, err = GetRoomConfig(ws, roomId)
 		case game.ExitRoomMessageType:
-			roomId := request.Data.(uint)
+			roomId := uint(request.Data.(float64))
 			responses, err = ExitGameRoom(ws, roomId)
 		case game.StartGameMessageType:
-			roomId := request.Data.(uint)
+			roomId := uint(request.Data.(float64))
 			responses, err = StartGame(ws, roomId)
 		}
 
