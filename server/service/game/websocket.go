@@ -13,6 +13,7 @@ const (
 	ExitRoomRequestType              WebSocketRequestType = "exit_room"
 	GetRoomsRequestType              WebSocketRequestType = "get_rooms"
 	StartGameRequestType             WebSocketRequestType = "start_game"
+	FinishGameRequestType            WebSocketRequestType = "finish_game"
 	BroadcastCurrentScoreRequestType WebSocketRequestType = "current_score"
 	BroadcastFinalScoreRequestType   WebSocketRequestType = "final_score"
 )
