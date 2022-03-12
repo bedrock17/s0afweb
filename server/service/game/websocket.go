@@ -10,9 +10,9 @@ const (
 	CreateRoomRequestType            WebSocketRequestType = "create_room"
 	JoinRoomRequestType              WebSocketRequestType = "join_room"
 	GetRoomConfigRequestType         WebSocketRequestType = "room_config"
+	ExitRoomRequestType              WebSocketRequestType = "exit_room"
 	GetRoomsRequestType              WebSocketRequestType = "get_rooms"
 	StartGameRequestType             WebSocketRequestType = "start_game"
-	ExitGameRequestType              WebSocketRequestType = "exit_game"
 	BroadcastCurrentScoreRequestType WebSocketRequestType = "current_score"
 	BroadcastFinalScoreRequestType   WebSocketRequestType = "final_score"
 )

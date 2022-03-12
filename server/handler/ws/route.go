@@ -70,16 +70,14 @@ func WebSocketHandlerV1(c echo.Context) error {
 		case game.CreateRoomRequestType:
 			config := request.Data.(*game.CreateRoomConfig)
 			config.Master = userId
-			room, err := CreateGameRoom(*config, ws)
-			if err == nil {
+			if room, err := CreateGameRoom(*config, ws); err == nil {
 				data = room
 			} else {
 				data = err.Error()
 			}
 		case game.JoinRoomRequestType:
 			roomId := request.Data.(uint)
-			err := JoinGameRoom(roomId, ws)
-			if err == nil {
+			if err := JoinGameRoom(roomId, ws); err == nil {
 				data = roomId
 			} else {
 				data = err.Error()
@@ -91,6 +89,13 @@ func WebSocketHandlerV1(c echo.Context) error {
 				data = room
 			} else {
 				data = nil
+			}
+		case game.ExitRoomRequestType:
+			roomId := request.Data.(uint)
+			if err := ExitGameRoom(roomId, ws); err == nil {
+				data = roomId
+			} else {
+				data = err.Error()
 			}
 		}
 

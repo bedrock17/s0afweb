@@ -29,6 +29,15 @@ func JoinGameRoom(roomId uint, client *websocket.Conn) error {
 	return nil
 }
 
+func ExitGameRoom(roomId uint, client *websocket.Conn) error {
+	gameRoomManager := service.GetService().GameRoomManager()
+	if err := gameRoomManager.ExitRoom(roomId, client); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func GetRoomConfig(roomId uint) (game.Room, bool) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	return gameRoomManager.Get(roomId)

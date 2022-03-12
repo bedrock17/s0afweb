@@ -17,9 +17,10 @@ type serviceImpl struct {
 }
 
 func InitService() {
+	userManager := game.NewUserManager()
 	service = &serviceImpl{
-		gameRoomManager: game.NewRoomManager(),
-		userManager:     game.NewUserManager(),
+		gameRoomManager: game.NewRoomManager(userManager),
+		userManager:     userManager,
 	}
 }
 
