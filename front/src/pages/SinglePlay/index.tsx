@@ -11,6 +11,7 @@ import {
 import GameCanvas from '~/components/GameCanvas';
 import Switch from '~/components/Switch';
 import type { Game } from '~/game';
+import SinglePlayLayout from '~/layout/SinglePlayLayout';
 
 import { Wrapper } from './styles';
 
@@ -50,14 +51,16 @@ const SinglePlayPage = () => {
   }
 
   return (
-    <Wrapper>
-      { username }
-      <span>Score : { score }</span>
-      <Switch checked={animationEffect} onChange={setAnimationEffect}>
+    <SinglePlayLayout>
+      <Wrapper>
+        { username }
+        <span>Score : { score }</span>
+        <Switch checked={animationEffect} onChange={setAnimationEffect}>
         애니메이션 효과
-      </Switch>
-      <GameCanvas gameRef={gameRef} animationEffect={animationEffect} />
-    </Wrapper>
+        </Switch>
+        <GameCanvas gameRef={gameRef} animationEffect={animationEffect} />
+      </Wrapper>
+    </SinglePlayLayout>
   );
 };
 

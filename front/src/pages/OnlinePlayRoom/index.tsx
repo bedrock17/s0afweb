@@ -1,20 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 
 import { roomIDState, websocketState } from '~/atoms/websocket';
 import Button from '~/components/Button';
-import {createPopTileWebsocket, messageType} from '~/ws/websocket';
+import GameCanvas from '~/components/GameCanvas';
+import type { Game } from '~/game';
+import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
+import { createPopTileWebsocket, messageType } from '~/ws/websocket';
 
-import { Wrapper } from './styles';
+import {
+  OpponentContainer, OpponentName, OpponentWrapper, Wrapper 
+} from './styles';
 
 const OnlinePlay = () => {
   const [websocket, setWebsocket] = useRecoilState(websocketState);
   const [roomID, setRoomID] = useRecoilState(roomIDState);
+  const tempRef = useRef<Game>();
   const navigate = useNavigate();
 
   useEffect(() => {
-
     const roomNumberString = location.hash.replace('#', '');
 
     if (Number.isInteger(Number(roomNumberString)) === false) {
@@ -51,15 +56,31 @@ const OnlinePlay = () => {
 
     }
 
-
   }, []);
 
   return (
-    <Wrapper>
-      <Button color={'blue'} disabled>
+    <OnlinePlayLayout>
+      <Wrapper>
+        <OpponentWrapper>
+          <OpponentContainer>
+            <OpponentName>LongUserName123456</OpponentName>
+            <GameCanvas animationEffect={false} gameRef={tempRef} mini />
+          </OpponentContainer>
+          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
+          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
+          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
+          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
+          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
+          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
+        </OpponentWrapper>
+        { 'username' }
+        <span>Score : { '1234579' }</span>
+        <GameCanvas animationEffect={false} gameRef={tempRef} />
+        <Button color={'blue'} disabled>
         GameStart
-      </Button>
-    </Wrapper>
+        </Button>
+      </Wrapper>
+    </OnlinePlayLayout>
   );
 };
 

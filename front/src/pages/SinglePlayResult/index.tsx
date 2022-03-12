@@ -6,6 +6,7 @@ import { useRecoilValue } from 'recoil';
 
 import { gameScoreState, gameUsernameState } from '~/atoms/game';
 import Button from '~/components/Button';
+import SinglePlayLayout from '~/layout/SinglePlayLayout';
 
 import { Wrapper } from './styles';
 
@@ -20,15 +21,17 @@ const SinglePlayResultPage = () => {
   }
 
   return (
-    <Wrapper>
-      <h1> { score }</h1>
-      <Link to={'/single'}>
-        <Button color={'blue'}>Retry</Button>
-      </Link>
-      <Link to={'/single/leaderboard'}>
-        <Button color={'cyan'}>Leaderboard</Button>
-      </Link>
-    </Wrapper>
+    <SinglePlayLayout>
+      <Wrapper>
+        <h1> { score }</h1>
+        <Link to={'/single'}>
+          <Button color={'blue'}>Retry</Button>
+        </Link>
+        <Link to={'/single/leaderboard'}>
+          <Button color={'cyan'}>Leaderboard</Button>
+        </Link>
+      </Wrapper>
+    </SinglePlayLayout>
   );
 };
 

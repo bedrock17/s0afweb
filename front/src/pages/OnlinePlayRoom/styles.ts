@@ -13,3 +13,29 @@ export const Wrapper = styled('div', {
     maxWidth: rem(400),
   }
 });
+
+export const OpponentWrapper = styled('div', {
+  '&': {
+    display: 'flex',
+    gap: '1rem',
+    width: '100%',
+    paddingBottom: rem(16),
+    overflowX: 'scroll',
+  }
+});
+
+export const OpponentContainer = styled('div', {
+  width: '61px',
+});
+
+export const OpponentName = styled('span', {
+  '&': {
+    display: 'block',
+    width: '100%',
+    overflow: 'hidden',
+
+    fontSize: rem(12),
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+  }
+});

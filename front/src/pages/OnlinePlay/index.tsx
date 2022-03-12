@@ -4,6 +4,7 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import { roomIDState, websocketState } from '~/atoms/websocket';
 import Button from '~/components/Button';
+import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
 import { createPopTileWebsocket, messageType } from '~/ws/websocket';
 
 import { Wrapper } from './styles';
@@ -42,11 +43,13 @@ const OnlinePlay = () => {
   };
 
   return (
-    <Wrapper>
-      <Button color={'blue'} onClick={onClickCreateRoom} disabled={websocket === null}>
+    <OnlinePlayLayout>
+      <Wrapper>
+        <Button color={'blue'} onClick={onClickCreateRoom} disabled={websocket === null}>
         Create Room
-      </Button>
-    </Wrapper>
+        </Button>
+      </Wrapper>
+    </OnlinePlayLayout>
   );
 };
 

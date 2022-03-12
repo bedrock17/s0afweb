@@ -9,10 +9,11 @@ import { Canvas } from './styles';
 type Props = {
   animationEffect: boolean,
   gameRef: MutableRefObject<Game | undefined>,
+  mini?: boolean,
 };
 
 
-const GameCanvas = ({ animationEffect, gameRef }: Props) => {
+const GameCanvas = ({ animationEffect, gameRef, mini }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -44,8 +45,11 @@ const GameCanvas = ({ animationEffect, gameRef }: Props) => {
     gameRef.current.animationEffect = animationEffect;
   }, [animationEffect, gameRef]);
 
+  const width = mini ? '61px' : '245px';
+  const height = mini ? '115px' : '460px';
+
   return (
-    <Canvas ref={canvasRef} width='245px' height='460px'/>
+    <Canvas ref={canvasRef} width={width} height={height} />
   );
 };
 

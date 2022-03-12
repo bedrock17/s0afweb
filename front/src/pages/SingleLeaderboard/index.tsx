@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { Leaderboard, LeaderboardItem } from '~/api';
 import Button from '~/components/Button';
 import { useInfiniteScroll } from '~/hooks/useInfiniteScroll';
+import SinglePlayLayout from '~/layout/SinglePlayLayout';
 
 import {
   Table, TableRow,
@@ -59,40 +60,42 @@ const SingleLeaderboardPage = () => {
   const formatNumber = Intl.NumberFormat('ko-KR').format;
 
   return (
-    <Wrapper>
-      <div>
-        <Link to={'/single'}>
-          <Button color={'blue'} >Retry</Button>
-        </Link>
-        <Link to={'/'}>
-          <Button color={'cyan'}>Home</Button>
-        </Link>
-      </div>
-      <Title>Single Play Leaderboard</Title>
-      <Table>
-        <tbody>
-          <TableRow>
-            <Th>Name</Th>
-            <Th>Score</Th>
-            <Th>Touches</Th>
-            <Th>Score per touch</Th>
-          </TableRow>
-          <>
-            {
-              leaderboard.slice(0, itemPerPage * page).map((item, index) => (
-                <TableRow key={item.username}>
-                  <Td color={(index === 0 ? 'hyper' : getColor(item.score))} name>{item.username}</Td>
-                  <Td>{formatNumber(item.score)}</Td>
-                  <Td>{formatNumber(item.touches)}</Td>
-                  <Td>{formatNumber(parseFloat((item.score / item.touches).toFixed(1)))}</Td>
-                </TableRow>
-              ))
-            }
-          </>
-        </tbody>
-      </Table>
-      <div className={'infinite-scroll'} ref={infiniteScrollRef}/>
-    </Wrapper>
+    <SinglePlayLayout>
+      <Wrapper>
+        <div>
+          <Link to={'/single'}>
+            <Button color={'blue'} >Retry</Button>
+          </Link>
+          <Link to={'/'}>
+            <Button color={'cyan'}>Home</Button>
+          </Link>
+        </div>
+        <Title>Single Play Leaderboard</Title>
+        <Table>
+          <tbody>
+            <TableRow>
+              <Th>Name</Th>
+              <Th>Score</Th>
+              <Th>Touches</Th>
+              <Th>Score per touch</Th>
+            </TableRow>
+            <>
+              {
+                leaderboard.slice(0, itemPerPage * page).map((item, index) => (
+                  <TableRow key={item.username}>
+                    <Td color={(index === 0 ? 'hyper' : getColor(item.score))} name>{item.username}</Td>
+                    <Td>{formatNumber(item.score)}</Td>
+                    <Td>{formatNumber(item.touches)}</Td>
+                    <Td>{formatNumber(parseFloat((item.score / item.touches).toFixed(1)))}</Td>
+                  </TableRow>
+                ))
+              }
+            </>
+          </tbody>
+        </Table>
+        <div className={'infinite-scroll'} ref={infiniteScrollRef}/>
+      </Wrapper>
+    </SinglePlayLayout>
   );
 };
 
