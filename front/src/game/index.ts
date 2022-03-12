@@ -46,11 +46,9 @@ export class Game {
   private map: number[][];
   private maxBlockRow: number;
   private maxBlockColumn: number;
-  private BWIDTH: number;
-  private BHEIGHT: number;
-  private OUTLINE_PIXEL: number;
-  private MAPPXWIDTH: number;
-  private MAPPXHEIGHT: number;
+  private tileWidth: number;
+  private canvasWidth: number;
+  private canvasHeight: number;
 
   private onScoreChangeCallback?: CallableFunction;
 
@@ -61,7 +59,7 @@ export class Game {
   private removeBlockCode = 0;
   private removeBlockCount = 0;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, tileWidth = 31) {
     this.score = 0;
     this.touchCount = 0;
     this.gameOver = false;
@@ -73,11 +71,10 @@ export class Game {
 
     this.maxBlockRow = 15; //max map width
     this.maxBlockColumn = 8; //max map height
-    this.BWIDTH = 31; //block width
-    this.BHEIGHT = 31; //block height
-    this.OUTLINE_PIXEL = 0;
-    this.MAPPXWIDTH = 800; //canvas width
-    this.MAPPXHEIGHT = 800; //canvas height
+    this.tileWidth = tileWidth; //tile width
+
+    this.canvasWidth = this.maxBlockColumn * this.tileWidth; //canvas width
+    this.canvasHeight = this.maxBlockRow * this.tileWidth; //canvas height
 
     //option
     this.animationEffect = true;
@@ -146,32 +143,32 @@ export class Game {
     this.maxBlockColumn = size.width;
     this.maxBlockRow = size.height;
 
-    this.MAPPXWIDTH = this.maxBlockColumn * this.BWIDTH; //canvas width
-    this.MAPPXHEIGHT = this.maxBlockRow * this.BHEIGHT; //canvas height
+    this.canvasWidth = this.maxBlockColumn * this.tileWidth; //canvas width
+    this.canvasHeight = this.maxBlockRow * this.tileWidth; //canvas height
   }
 
   // animationFrame 인자로 넘어온 값 만큼 블록이 올라가는 과정을 프임별로 보여준다
   private draw(animationFrame: number) { //draw blocks and score
     this.context.fillStyle = 'rgb(255, 255, 255)';
-    this.context.fillRect(0, 0, this.MAPPXWIDTH, this.BHEIGHT);
+    this.context.fillRect(0, 0, this.canvasWidth, this.tileWidth);
 
     for (let animationIndex = 0; animationIndex < animationFrame; animationIndex++) {
 
       let yposFrameValue = 0;
       if (animationFrame > 1) {
-        yposFrameValue = (this.BHEIGHT * (animationFrame - animationIndex - 1)) / animationFrame;
+        yposFrameValue = (this.tileWidth * (animationFrame - animationIndex - 1)) / animationFrame;
 
       }
 
       for (let i = 0; i < this.maxBlockRow; i++) {
         for (let j = 0; j < this.maxBlockColumn; j++) {
-          const yPos = i * (this.BHEIGHT + this.OUTLINE_PIXEL);
-          const xPos = j * (this.BWIDTH + this.OUTLINE_PIXEL);
+          const yPos = i * this.tileWidth;
+          const xPos = j * this.tileWidth;
 
           const colorCode = this.colors[this.map[i][j]];
 
           this.context.fillStyle = 'rgb' + colorCode;
-          this.context.fillRect(xPos, yPos + yposFrameValue, this.BWIDTH, this.BHEIGHT);
+          this.context.fillRect(xPos, yPos + yposFrameValue, this.tileWidth, this.tileWidth);
         }
       }
     }
@@ -219,8 +216,8 @@ export class Game {
     const pos = Game.getMousePoint(this.canvas, e);
     const { x, y } = pos;
 
-    const column = Math.floor(x / (this.BWIDTH + this.OUTLINE_PIXEL));
-    const row = Math.floor(y / (this.BHEIGHT + this.OUTLINE_PIXEL));
+    const column = Math.floor(x / this.tileWidth);
+    const row = Math.floor(y / this.tileWidth);
 
     if (row >= this.maxBlockRow || column >= this.maxBlockColumn) {
       return;
@@ -241,7 +238,7 @@ export class Game {
     this.newBlocks();
     this.context.globalAlpha = 0.2;
     this.context.fillStyle = 'rgb(0, 171, 255)';
-    this.context.fillRect(0, 0, this.MAPPXWIDTH, this.MAPPXHEIGHT);
+    this.context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     this.context.globalAlpha = 1;
   }
 
