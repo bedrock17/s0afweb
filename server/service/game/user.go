@@ -15,8 +15,6 @@ type UserManager interface {
 	SetUser(user User, client *websocket.Conn)
 	RemoveUser(client *websocket.Conn)
 	GetUser(client *websocket.Conn) (User, error)
-	JoinRoom(user User, client *websocket.Conn) error
-	ExitRoom(client *websocket.Conn) error
 }
 
 type UserManagerImpl struct {
@@ -45,33 +43,4 @@ func (m *UserManagerImpl) GetUser(client *websocket.Conn) (User, error) {
 	}
 
 	return user, nil
-}
-
-func (m *UserManagerImpl) JoinRoom(user User, client *websocket.Conn) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if _, ok := m.state[client]; !ok {
-		return errors.New("user not found")
-	}
-
-	m.state[client] = User{
-		Id:     user.Id,
-		RoomId: user.RoomId,
-	}
-
-	return nil
-}
-
-func (m *UserManagerImpl) ExitRoom(client *websocket.Conn) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if _, ok := m.state[client]; ok == false {
-		return errors.New("joined nowhere")
-	}
-
-	delete(m.state, client)
-
-	return nil
 }

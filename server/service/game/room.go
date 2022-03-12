@@ -93,9 +93,7 @@ func (m *RoomManagerImpl) JoinRoom(roomId uint, client *websocket.Conn) error {
 	if user.RoomId != 0 {
 		return errors.New("user is already in the room")
 	}
-	if err := userManager.JoinRoom(user, client); err != nil {
-		return err
-	}
+	userManager.SetUser(User{user.Id, roomId}, client)
 	room.Clients = append(room.Clients, client)
 	return nil
 }
