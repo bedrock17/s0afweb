@@ -3,6 +3,7 @@ package ws
 import (
 	"encoding/json"
 	"errors"
+	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo-contrib/session"
@@ -23,7 +24,12 @@ func WebSocketHandlerV1(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer ws.Close()
+	userManager := service.GetService().UserManager()
+
+	defer func() {
+		userManager.RemoveUser(ws)
+		ws.Close()
+	}()
 
 	for {
 		// Read
@@ -47,6 +53,10 @@ func WebSocketHandlerV1(c echo.Context) error {
 		userId := rawUserId.(string)
 		if userId == "" {
 			return errors.New("invalid userId on session")
+		}
+
+		if _, err := userManager.GetUser(ws); err != nil {
+			userManager.SetUser(game.User{Id: userId, RoomId: 0}, ws)
 		}
 
 		request := new(game.WebSocketRequest)

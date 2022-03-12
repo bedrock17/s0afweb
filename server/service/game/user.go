@@ -12,6 +12,8 @@ type User struct {
 }
 
 type UserManager interface {
+	SetUser(user User, client *websocket.Conn)
+	RemoveUser(client *websocket.Conn)
 	GetUser(client *websocket.Conn) (User, error)
 	JoinRoom(user User, client *websocket.Conn) error
 	ExitRoom(client *websocket.Conn) error
@@ -26,6 +28,14 @@ func NewUserManager() UserManager {
 	return &UserManagerImpl{
 		state: make(map[*websocket.Conn]User),
 	}
+}
+
+func (m *UserManagerImpl) SetUser(user User, client *websocket.Conn) {
+	m.state[client] = user
+}
+
+func (m *UserManagerImpl) RemoveUser(client *websocket.Conn) {
+	delete(m.state, client)
 }
 
 func (m *UserManagerImpl) GetUser(client *websocket.Conn) (User, error) {
