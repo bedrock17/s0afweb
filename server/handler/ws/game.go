@@ -65,3 +65,34 @@ func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]game.WSRespon
 
 	return []game.WSResponse{resp}, nil
 }
+
+func FinishGame(client *websocket.Conn, result game.Result) ([]game.WSResponse, error) {
+	gameRoomManager := service.GetService().GameRoomManager()
+	userManager := service.GetService().UserManager()
+
+	user, err := userManager.GetUser(client)
+	if err != nil {
+		return nil, err
+	}
+
+	room, ok := gameRoomManager.Get(user.RoomId)
+	if !ok {
+		return nil, errors.New("invalid room id")
+	}
+
+	index, clients := 0, make([]*websocket.Conn, len(room.Clients)-1)
+
+	for _, client := range room.Clients {
+		participant, err := userManager.GetUser(client)
+		if err != nil {
+			return nil, err
+		}
+		if participant.Id == user.Id {
+			continue
+		}
+		clients[index] = client
+		index += 1
+	}
+
+	return []game.WSResponse{}, nil
+}
