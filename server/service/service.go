@@ -8,6 +8,7 @@ var service Service
 
 type Service interface {
 	GameRoomManager() game.RoomManager
+	UserManager() game.UserManager
 }
 
 type serviceImpl struct {

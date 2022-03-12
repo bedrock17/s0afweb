@@ -60,7 +60,12 @@ func WebSocketHandlerV1(c echo.Context) error {
 		case game.CreateRoomRequestType:
 			config := request.Data.(*game.CreateRoomConfig)
 			config.Master = userId
-			data = CreateGameRoom(*config)
+			room, err := CreateGameRoom(*config, ws)
+			if err == nil {
+				data = room
+			} else {
+				data = err.Error()
+			}
 		case game.JoinRoomRequestType:
 			roomId := request.Data.(uint)
 			err := JoinGameRoom(roomId, ws)

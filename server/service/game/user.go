@@ -2,7 +2,7 @@ package game
 
 import (
 	"errors"
-	"golang.org/x/net/websocket"
+	"github.com/gorilla/websocket"
 	"sync"
 )
 
