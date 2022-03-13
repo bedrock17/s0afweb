@@ -44,18 +44,19 @@ export class Game {
   private _colors: string[];
   private _seed: number;
 
+  private readonly map: number[][];
+  private readonly tileWidth: number;
+  private readonly canvas: HTMLCanvasElement; //canvas
+
   private blockMax: number;
-  private map: number[][];
   private maxBlockRow: number;
   private maxBlockColumn: number;
-  private tileWidth: number;
   private canvasWidth: number;
   private canvasHeight: number;
-  private recvedLineCount: number;
+  private receivedLineCount: number;
 
   private onScoreChangeCallback?: CallableFunction;
 
-  private canvas: HTMLCanvasElement; //canvas
   private context: CanvasRenderingContext2D; //canvas 2d
 
   private bfsQueue: Queue<Point>;
@@ -66,7 +67,7 @@ export class Game {
   constructor(canvas: HTMLCanvasElement, tileWidth = 31) {
     this.score = 0;
     this.touchCount = 0;
-    this.recvedLineCount = 0;
+    this.receivedLineCount = 0;
     this.gameOver = false;
     this.gameOverCallback = null;
     this.touchCallback = null;
@@ -128,7 +129,7 @@ export class Game {
   }
 
   public increaseLineCount() {
-    this.recvedLineCount += 1;
+    this.receivedLineCount += 1;
   }
 
   public set seed(seed: number) {
@@ -314,10 +315,10 @@ export class Game {
         this.onScoreChangeCallback?.(displayScore);
         this.newBlocks();
 
-        for (let i = 0; i < this.recvedLineCount; i++) {
+        for (let i = 0; i < this.receivedLineCount; i++) {
           this.newBlocks();
         }
-        this.recvedLineCount = 0;
+        this.receivedLineCount = 0;
 
         this.createBlock = false;
         this.lastPos = { y: -1, x: -1 };
@@ -351,7 +352,7 @@ export class Game {
   public startGame(seed: number) {
     this.score = 0;
     this.touchCount = 0;
-    this.recvedLineCount = 0;
+    this.receivedLineCount = 0;
     this.lineHistory = [];
     this.touchHistory = [];
     this.gameOver = false;
