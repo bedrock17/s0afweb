@@ -126,6 +126,8 @@ func (m *RoomManagerImpl) JoinRoom(client *websocket.Conn, roomId uint) error {
 	}
 	m.userManager.SetUser(client, User{user.Id, roomId})
 	room.Clients = append(room.Clients, client)
+	m.rooms[roomId] = room
+
 	return nil
 }
 
