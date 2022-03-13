@@ -31,6 +31,8 @@ export class Game {
   public score: number;
   public gameOver: boolean;
   public gameOverCallback: (() => void) | null;
+  public touchCallback: ((p: Point) => void) | null;
+
   public touchCount: number;
   public animationEffect: boolean;
   public lineHistory: string[] = [];
@@ -58,6 +60,7 @@ export class Game {
   private bfsQueue: Queue<Point>;
   private removeBlockCode = 0;
   private removeBlockCount = 0;
+
 
   constructor(canvas: HTMLCanvasElement, tileWidth = 31) {
     this.score = 0;
@@ -179,10 +182,7 @@ export class Game {
       for (let j = 0; j < this.maxBlockColumn; j++) {
         if (i === 0) {
           if (this.map[i][j] !== 0) {
-            //end
-            // console.log("end!!!")
             this.gameOver = true;
-            // this.startGame()
 
             if (this.gameOverCallback != null) {
               this.gameOverCallback();
@@ -313,6 +313,10 @@ export class Game {
 
     if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
       this.touchHistory.push(this.lastPos);
+
+      if (this.touchCallback) {
+        this.touchCallback(this.lastPos);
+      }
 
       this.removeBlockCode = this.map[this.lastPos.y][this.lastPos.x];
       this.removeBlockCount = 1;
