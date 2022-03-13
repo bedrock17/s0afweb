@@ -67,6 +67,7 @@ export class Game {
     this.touchCount = 0;
     this.gameOver = false;
     this.gameOverCallback = null;
+    this.touchCallback = null;
     this.lastPos = { 'y': -1, 'x': -1 };
 
     this.map = [[]];
