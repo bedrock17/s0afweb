@@ -4,7 +4,6 @@ import (
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
 	"github.com/gorilla/websocket"
-	"math/rand"
 )
 
 func StartGame(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
@@ -14,16 +13,14 @@ func StartGame(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 		return nil, err
 	}
 
-	startResponse := game.StartResponse{
-		GameStartedAt: room.GameStartedAt,
-		Seed:          rand.Int31()%2147483646 + 1,
-	}
-
 	resp := WSResponse{
 		Connections: room.Clients,
 		Payload: WSPayload{
 			Type: StartGameMessageType,
-			Data: startResponse,
+			Data: game.StartResponse{
+				GameStartedAt: room.GameStartedAt,
+				Seed:          room.Seed,
+			},
 		},
 	}
 

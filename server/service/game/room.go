@@ -46,6 +46,7 @@ type Room struct {
 	Status        RoomStatus        `json:"status"`
 	Master        string            `json:"master"`
 	GameStartedAt int64             `json:"game_started_at"`
+	Seed          int32             `json:"-"`
 }
 
 const (
@@ -218,6 +219,7 @@ func (m *RoomManagerImpl) StartGame(client *websocket.Conn, roomId uint) (Room, 
 	startedAt := time.Now().UnixMilli()
 	room.Status = RoomStatusInGame
 	room.GameStartedAt = startedAt
+	room.Seed = rand.Int31()%2147483646 + 1
 	m.rooms[roomId] = room
 	return m.rooms[roomId], nil
 }
