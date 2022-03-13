@@ -11,6 +11,7 @@ const (
 	CreateRoomMessageType    WSMessageType = "create_room"
 	JoinRoomMessageType      WSMessageType = "join_room"
 	GetRoomConfigMessageType WSMessageType = "room_config"
+	RoomUsersMessageType     WSMessageType = "room_users"
 	ExitRoomMessageType      WSMessageType = "exit_room"
 	GetRoomsMessageType      WSMessageType = "get_rooms"
 	StartGameMessageType     WSMessageType = "start_game"

@@ -11,6 +11,10 @@ type CreateGameRoomV1Response struct {
 	game.Room
 }
 
+type RoomUsersV1Response struct {
+	UserIds []string `json:"user_ids"`
+}
+
 func GetRooms(client *websocket.Conn) ([]game.WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	rooms := gameRoomManager.Gets()
@@ -53,14 +57,37 @@ func JoinGameRoom(client *websocket.Conn, roomId uint) ([]game.WSResponse, error
 		return nil, err
 	}
 	room, _ := gameRoomManager.Get(roomId)
-	resp := game.WSResponse{
+	joinResp := game.WSResponse{
 		Connections: room.Clients,
 		Payload: game.WSPayload{
 			Type: game.JoinRoomMessageType,
 			Data: user.Id,
 		},
 	}
-	return []game.WSResponse{resp}, nil
+	roomConfigResp := game.WSResponse{
+		Connections: []*websocket.Conn{client},
+		Payload: game.WSPayload{
+			Type: game.GetRoomConfigMessageType,
+			Data: room,
+		},
+	}
+	index := 0
+	users := make([]string, len(room.Clients))
+	for _, client := range room.Clients {
+		user, err := userManager.GetUser(client)
+		if err != nil {
+			continue
+		}
+		users[index] = user.Id
+	}
+	roomUsers := game.WSResponse{
+		Connections: []*websocket.Conn{client},
+		Payload: game.WSPayload{
+			Type: game.RoomUsersMessageType,
+			Data: RoomUsersV1Response{users},
+		},
+	}
+	return []game.WSResponse{joinResp, roomConfigResp, roomUsers}, nil
 }
 
 func ExitGameRoom(client *websocket.Conn, roomId uint) ([]game.WSResponse, error) {
