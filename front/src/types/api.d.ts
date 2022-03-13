@@ -1,3 +1,5 @@
+type UserID = string;
+
 type APIResponse<T> = {
   data: T,
   error: string | null,
@@ -9,6 +11,5 @@ type GoogleAuthValidate = {
 };
 
 type UserProfile = {
-  username: string,
-  tag: string,
+  user_id: UserID,
 };

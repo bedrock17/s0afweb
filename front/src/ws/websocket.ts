@@ -2,25 +2,30 @@
 export const messageType = {
   createRoom: 'create_room',
   joinRoom: 'join_room',
+  exitRoom: 'exit_room',
 };
 
 export class PopTileWebsocket {
-  ws: WebSocket | undefined;
+  ws: WebSocket;
   messageHandle: Record<string, (msg: WebsocketMessage<WebsocketMessageData>) => void> = {};
+
+  constructor(ws: WebSocket) {
+    this.ws = ws;
+  }
 }
 
-export const createPopTileWebsocket = (): PopTileWebsocket => {
 
+const createPopTileWebsocket = (): PopTileWebsocket => {
   const l = window.location;
   const url = ((l.protocol === 'https:') ? 'wss://' : 'ws://') + l.host + l.pathname + '/v1/ws';
 
-  let websocket: null | WebSocket = null;
+  let websocket: WebSocket;
   if (import.meta.env.DEV) {
     websocket = new WebSocket('ws://localhost:8080/v1/ws');
   } else {
     websocket = new WebSocket(url);
   }
-  const popTileWebsocket = new PopTileWebsocket();
+  const popTileWebsocket = new PopTileWebsocket(websocket);
 
   websocket.onopen = () => {
     // eslint-disable-next-line no-console
@@ -47,6 +52,12 @@ export const createPopTileWebsocket = (): PopTileWebsocket => {
 
   };
 
-  popTileWebsocket.ws = websocket;
   return popTileWebsocket;
+};
+
+let websocket: PopTileWebsocket;
+
+export const getWebsocketInstance = (): PopTileWebsocket => {
+  websocket = websocket ?? createPopTileWebsocket();
+  return websocket;
 };

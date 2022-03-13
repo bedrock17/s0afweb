@@ -145,22 +145,22 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 		return err
 	}
 
-	m.userManager.SetUser(client, User{user.Id, 0})
-	index := 0
-	newClients := make([]*websocket.Conn, len(room.Clients)-1)
-	newUsers := make([]User, len(room.Clients)-1)
-	for _, client := range room.Clients {
-		u, err := m.userManager.GetUser(client)
-		if err != nil {
-			return err
-		}
-		if u.Id == user.Id {
-			continue
-		}
-		newClients[index] = client
-		newUsers[index] = u
-	}
 	if len(room.Clients) > 1 {
+		index := 0
+		newClients := make([]*websocket.Conn, len(room.Clients)-1)
+		newUsers := make([]User, len(room.Clients)-1)
+		for _, client := range room.Clients {
+			u, err := m.userManager.GetUser(client)
+			if err != nil {
+				return err
+			}
+			if u.Id == user.Id {
+				continue
+			}
+			newClients[index] = client
+			newUsers[index] = u
+		}
+
 		// 방장인 경우 새로운 방장을 랜덤으로 선택
 		if room.Master == user.Id {
 			userLength := len(newUsers)
@@ -169,8 +169,10 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 			}
 			newMaster := newUsers[rand.Intn(userLength)]
 			room.Master = newMaster.Id
-			m.rooms[roomId] = room
 		}
+		room.Clients = newClients
+		m.userManager.SetUser(client, User{user.Id, 0})
+		m.rooms[roomId] = room
 	} else {
 		// 방의 마지막 유저인 경우 방 제거
 		delete(m.rooms, roomId)

@@ -1,32 +1,21 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState, useSetRecoilState } from 'recoil';
 
-import { roomIDState, websocketState } from '~/atoms/websocket';
 import Button from '~/components/Button';
 import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
-import { createPopTileWebsocket, messageType } from '~/ws/websocket';
+import { getWebsocketInstance, messageType } from '~/ws/websocket';
 
 import { Wrapper } from './styles';
 
 const OnlinePlay = () => {
-  const [websocket, setWebsocket] = useRecoilState(websocketState);
-  const setRoomID = useSetRecoilState(roomIDState);
   const navigate = useNavigate();
+  const websocket = getWebsocketInstance();
 
   useEffect(() => {
-
-    const popTileWebsocket = createPopTileWebsocket();
-    if (popTileWebsocket.messageHandle) {
-      popTileWebsocket.messageHandle[messageType.createRoom] = (msg: WebsocketMessage<WebsocketMessageData>) => {
-        const room = msg as WebsocketMessage<Room>;
-        setRoomID(room.data.id);
-
-        navigate('/online/room#' + room.data.id);
-      };
-    }
-    setWebsocket(popTileWebsocket);
-
+    websocket.messageHandle[messageType.createRoom] = (msg: WebsocketMessage<WebsocketMessageData>) => {
+      const room = msg as WebsocketMessage<Room>;
+      navigate('/online/room#' + room.data.id);
+    };
   }, []);
 
   const onClickCreateRoom = () => {

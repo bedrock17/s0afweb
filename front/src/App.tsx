@@ -1,8 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
-import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
-import SinglePlayLayout from '~/layout/SinglePlayLayout';
 import OnlinePlay from '~/pages/OnlinePlay';
 import OnlinePlayRoom from '~/pages/OnlinePlayRoom';
 

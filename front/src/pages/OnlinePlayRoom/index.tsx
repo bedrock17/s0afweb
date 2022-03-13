@@ -1,79 +1,139 @@
-import React, { useEffect, useRef } from 'react';
+import React, {
+  useEffect, useRef, useState
+} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 
-import { roomIDState, websocketState } from '~/atoms/websocket';
+import { userState } from '~/atoms/auth';
 import Button from '~/components/Button';
 import GameCanvas from '~/components/GameCanvas';
 import type { Game } from '~/game';
 import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
-import { createPopTileWebsocket, messageType } from '~/ws/websocket';
+import { getWebsocketInstance, messageType } from '~/ws/websocket';
 
 import {
-  OpponentContainer, OpponentName, OpponentWrapper, Wrapper 
+  OpponentContainer, OpponentName, OpponentWrapper, Wrapper
 } from './styles';
 
-const OnlinePlay = () => {
-  const [websocket, setWebsocket] = useRecoilState(websocketState);
-  const [roomID, setRoomID] = useRecoilState(roomIDState);
+type UserMappedCanvasRef = {
+  ref: React.MutableRefObject<Game | undefined>,
+  userId: UserID,
+};
+
+const getRoomId = (): number | undefined => {
+  const roomNumberString = location.hash.replace('#', '');
+  const roomNumber = Number(roomNumberString);
+
+  if (!Number.isInteger(roomNumber)) {
+    return undefined;
+  }
+
+  return roomNumber;
+};
+
+const OnlinePlayRoom = () => {
+  const user = useRecoilValue(userState);
+  const [opponentCanvasRefs, setOpponentCanvasRefs] = useState<UserMappedCanvasRef[]>([]);
   const tempRef = useRef<Game>();
   const navigate = useNavigate();
 
+  const exitRoom = (roomId: RoomId) => {
+    const websocket = getWebsocketInstance();
+    const payload: WebsocketMessage<RoomId> = {
+      type: messageType.exitRoom,
+      data: roomId,
+    };
+    websocket.ws.send(JSON.stringify(payload));
+  };
+
   useEffect(() => {
-    const roomNumberString = location.hash.replace('#', '');
+    if (!user) {
+      return;
+    }
 
-    if (Number.isInteger(Number(roomNumberString)) === false) {
+    const roomId = getRoomId();
+    if (!roomId) {
       navigate('/');
+      return;
     }
 
-    const roomNumber = Number(roomNumberString);
+    const msg: WebsocketMessage<RoomId> = {
+      type: messageType.joinRoom,
+      data: roomId,
+    };
+    const websocket = getWebsocketInstance();
 
-    setRoomID(roomNumber);
+    websocket.ws.onopen = (() => {
+      websocket.ws.send(JSON.stringify(msg));
+    });
 
-    if (roomID === 0) {
-      const msg: WebsocketMessage<RoomId> = {
+    websocket.messageHandle[messageType.joinRoom] = (data) => {
+      const response = data as WebsocketMessage<UserID>;
+      const userId = response.data;
+      if (userId === user?.user_id) {
+        return;
+      }
+      setOpponentCanvasRefs((prev) => [...prev, {
+        ref: { current: undefined },
+        userId,
+      }]);
+    };
+
+    websocket.messageHandle[messageType.exitRoom] = (data) => {
+      const response = data as WebsocketMessage<UserID>;
+      const userId = response.data;
+      if (userId === user?.user_id) {
+        return;
+      }
+      setOpponentCanvasRefs((prev) => prev.filter((ref) => ref.userId !== userId));
+    };
+  }, [user]);
+
+  useEffect(() => {
+    window?.addEventListener('hashchange', (e) => {
+      const oldRoomId = Number(e.oldURL.split('#')[1]);
+      const newRoomId = Number(e.newURL.split('#')[1]);
+
+      if (Number.isInteger(oldRoomId)) {
+        exitRoom(oldRoomId);
+      }
+
+      if (!Number.isInteger(newRoomId)) {
+        navigate('/');
+        return;
+      }
+
+      const payload: WebsocketMessage<RoomId> = {
         type: messageType.joinRoom,
-        data: roomNumber,
+        data: newRoomId,
       };
+      const websocket = getWebsocketInstance();
+      websocket.ws.send(JSON.stringify(payload));
+    });
 
-      let curWebsocket = websocket;
-      if (!curWebsocket) {
-        const popTileWebsocket = createPopTileWebsocket();
-        setWebsocket(popTileWebsocket);
-        if (popTileWebsocket) {
-          curWebsocket = popTileWebsocket;
-        }
+    return () => {
+      const roomId = getRoomId();
+      if (!roomId) {
+        return;
       }
-
-
-      if (curWebsocket) {
-        if (curWebsocket.ws) {
-          curWebsocket.ws.onopen = (() => {
-            curWebsocket?.ws?.send(JSON.stringify(msg));
-          });
-        }
-      }
-
-    }
-
+      exitRoom(roomId);
+    };
   }, []);
 
   return (
     <OnlinePlayLayout>
       <Wrapper>
         <OpponentWrapper>
-          <OpponentContainer>
-            <OpponentName>LongUserName123456</OpponentName>
-            <GameCanvas animationEffect={false} gameRef={tempRef} mini />
-          </OpponentContainer>
-          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
-          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
-          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
-          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
-          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
-          <GameCanvas animationEffect={false} gameRef={tempRef} mini />
+          {
+            opponentCanvasRefs.map((opponent) => (
+              <OpponentContainer key={opponent.userId}>
+                <OpponentName>{ opponent.userId }</OpponentName>
+                <GameCanvas animationEffect={false} gameRef={opponent.ref} mini />
+              </OpponentContainer>
+            ))
+          }
         </OpponentWrapper>
-        { 'username' }
+        { user?.user_id }
         <span>Score : { '1234579' }</span>
         <GameCanvas animationEffect={false} gameRef={tempRef} />
         <Button color={'blue'} disabled>
@@ -84,4 +144,4 @@ const OnlinePlay = () => {
   );
 };
 
-export default OnlinePlay;
+export default OnlinePlayRoom;

@@ -1,4 +1,3 @@
-
 type CreateRoom = {
   capacity: number,
   play_time: number,
@@ -12,10 +11,10 @@ type Room = {
   capacity: number,
   play_time: number,
   status: RoomStatus,
-  master: string,
+  master: UserID,
 };
 
-type WebsocketMessageData = (Room | CreateRoom | RoomId);
+type WebsocketMessageData = (Room | CreateRoom | RoomId | UserID);
 
 type WebsocketMessage<T> = {
   type: string,

@@ -3,6 +3,7 @@ package ws
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
 	"github.com/gorilla/websocket"
@@ -25,16 +26,14 @@ func WebSocketHandlerV1(c echo.Context) error {
 		return err
 	}
 	userManager := service.GetService().UserManager()
-	gameRoomManager := service.GetService().GameRoomManager()
 
 	defer func() {
 		user, err := userManager.GetUser(ws)
-		if err == nil {
-			if user.RoomId > 0 {
-				gameRoomManager.ExitRoom(ws, user.RoomId)
-			}
+		fmt.Println(user)
+		if err == nil && user.RoomId > 0 {
+			responses, err := ExitGameRoom(ws, user.RoomId)
+			sendMessage(ws, game.ExitRoomMessageType, responses, err)
 		}
-		userManager.RemoveUser(ws)
 		ws.Close()
 	}()
 
@@ -43,6 +42,9 @@ func WebSocketHandlerV1(c echo.Context) error {
 		_, message, err := ws.ReadMessage()
 		if err != nil {
 			c.Logger().Error(err)
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				break
+			}
 			break
 		}
 
@@ -100,22 +102,26 @@ func WebSocketHandlerV1(c echo.Context) error {
 			responses, err = FinishGame(ws, *result)
 		}
 
-		if err != nil {
-			respBytes, _ := json.Marshal(game.WSPayload{
-				Type: request.Type,
-				Data: err.Error(),
-			})
-
-			ws.WriteMessage(websocket.TextMessage, respBytes)
-		} else {
-			for _, resp := range responses {
-				for _, conn := range resp.Connections {
-					respBytes, _ := json.Marshal(resp.Payload)
-					conn.WriteMessage(websocket.TextMessage, respBytes)
-				}
-			}
-		}
+		sendMessage(ws, request.Type, responses, err)
 	}
 
 	return nil
+}
+
+func sendMessage(ws *websocket.Conn, reqType game.WSMessageType, responses []game.WSResponse, err error) {
+	if err != nil {
+		respBytes, _ := json.Marshal(game.WSPayload{
+			Type: reqType,
+			Data: err.Error(),
+		})
+
+		ws.WriteMessage(websocket.TextMessage, respBytes)
+	} else {
+		for _, resp := range responses {
+			for _, conn := range resp.Connections {
+				respBytes, _ := json.Marshal(resp.Payload)
+				conn.WriteMessage(websocket.TextMessage, respBytes)
+			}
+		}
+	}
 }

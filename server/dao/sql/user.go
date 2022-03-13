@@ -23,13 +23,13 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 func (r *userRepositoryImpl) GetOrCreate(user *models.User) error {
 	userId := utils.GenerateRandomString(6)
 	for {
-		result := r.db.Where(&models.User{UserId: userId}).First(nil)
+		result := r.db.Where(&models.User{UserID: userId}).First(nil)
 		if result.RowsAffected == 0 {
 			break
 		}
 	}
 
-	result := r.db.Where(&user).Attrs(models.User{UserId: userId}).FirstOrCreate(&user)
+	result := r.db.Where(&user).Attrs(models.User{UserID: userId}).FirstOrCreate(&user)
 	return result.Error
 }
 
