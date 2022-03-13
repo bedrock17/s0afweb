@@ -7,8 +7,11 @@ import { useRecoilValue } from 'recoil';
 import { userState } from '~/atoms/auth';
 import Button from '~/components/Button';
 import GameCanvas from '~/components/GameCanvas';
-import type { Game } from '~/game';
+import type { Game, Point } from '~/game';
 import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
+import {
+  GameStartResponse, RoomId, WebsocketMessage 
+} from '~/types/websocket';
 import { getWebsocketInstance, messageType } from '~/ws/websocket';
 
 import {
@@ -87,7 +90,37 @@ const OnlinePlayRoom = () => {
       }
       setOpponentCanvasRefs((prev) => prev.filter((ref) => ref.userId !== userId));
     };
-  }, [user]);
+
+    websocket.messageHandle[messageType.startGame] = (touchMessage) => {
+      const gameStartMessage = touchMessage.data as GameStartResponse;
+
+      opponentCanvasRefs.forEach((opponent) => {
+        opponent.ref.current?.startGame(gameStartMessage.seed);
+      });
+
+      tempRef.current?.startGame(gameStartMessage.seed);
+      if (tempRef.current) {
+        tempRef.current.touchCallback = (p: Point) => {
+          const touchRequest: WebsocketMessage<Point> = {
+            type: messageType.touch,
+            data: {
+              x: p.x,
+              y: p.y,
+            }
+          };
+          websocket.ws.send(JSON.stringify(touchRequest));
+        };
+      }
+    };
+
+    websocket.messageHandle[messageType.touch] = (touchMessage) => {
+      const touch = touchMessage.data as Point;
+      opponentCanvasRefs.forEach((opponent) => {
+        opponent.ref.current?.touch(touch);
+      });
+    };
+
+  }, [user, opponentCanvasRefs]);
 
   useEffect(() => {
     window?.addEventListener('hashchange', (e) => {
@@ -120,6 +153,19 @@ const OnlinePlayRoom = () => {
     };
   }, []);
 
+  const sendGameStart = () => {
+    const websocket = getWebsocketInstance();
+    const roomId = getRoomId();
+
+    if (roomId) {
+      const startMessage: WebsocketMessage<RoomId> = {
+        type: messageType.startGame,
+        data: roomId
+      };
+      websocket.ws.send(JSON.stringify(startMessage));
+    }
+  };
+
   return (
     <OnlinePlayLayout>
       <Wrapper>
@@ -136,7 +182,7 @@ const OnlinePlayRoom = () => {
         { user?.user_id }
         <span>Score : { '1234579' }</span>
         <GameCanvas animationEffect={false} gameRef={tempRef} />
-        <Button color={'blue'} disabled>
+        <Button color={'blue'} onClick={sendGameStart}>
         GameStart
         </Button>
       </Wrapper>

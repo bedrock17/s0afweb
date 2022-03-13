@@ -50,7 +50,7 @@ func (b *WSRequest) UnmarshalJSON(data []byte) error {
 	case string(GetRoomConfigMessageType):
 	case string(ExitRoomMessageType):
 	case string(StartGameMessageType):
-		b.Data = new(uint)
+
 	case string(TouchMessageType):
 		b.Data = new(TouchRequest)
 	case string(FinishGameMessageType):

@@ -4,7 +4,7 @@ import {
 } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-import { Leaderboard } from '~/api';
+import { Leaderboard, Seed } from '~/api';
 import {
   gameAnimationEffectState, gameScoreState, gameUsernameState
 } from '~/atoms/game';
@@ -29,6 +29,10 @@ const SinglePlayPage = () => {
     if (!game) {
       return;
     }
+
+    Seed.get().then((seed) => {
+      game.startGame(seed);
+    });
 
     game.onScoreChange = setScore;
     game.gameOverCallback = () => {

@@ -1,3 +1,5 @@
+import { Point } from '~/game';
+
 type CreateRoom = {
   capacity: number,
   play_time: number,
@@ -14,7 +16,13 @@ type Room = {
   master: UserID,
 };
 
-type WebsocketMessageData = (Room | CreateRoom | RoomId | UserID);
+type GameStartResponse = {
+  game_started_at: bigint,
+  seed: number,
+};
+
+
+type WebsocketMessageData = (Room | CreateRoom | RoomId | UserID | GameStartResponse | Point);
 
 type WebsocketMessage<T> = {
   type: string,

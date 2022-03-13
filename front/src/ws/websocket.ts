@@ -3,6 +3,10 @@ export const messageType = {
   createRoom: 'create_room',
   joinRoom: 'join_room',
   exitRoom: 'exit_room',
+  getRooms: 'get_rooms',
+  startGame: 'start_game',
+  finishGame: 'finish_game',
+  touch: 'touch_tile',
 };
 
 export class PopTileWebsocket {
@@ -13,7 +17,6 @@ export class PopTileWebsocket {
     this.ws = ws;
   }
 }
-
 
 const createPopTileWebsocket = (): PopTileWebsocket => {
   const l = window.location;

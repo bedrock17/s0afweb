@@ -33,6 +33,11 @@ type CreateRoomConfig struct {
 
 type RoomStatus int
 
+type StartResponse struct {
+	GameStartedAt int64 `json:"game_started_at"`
+	Seed          int32 `json:"seed"`
+}
+
 type Room struct {
 	Id            uint              `json:"id"`
 	Clients       []*websocket.Conn `json:"-"`
