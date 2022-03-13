@@ -2,8 +2,8 @@ package ws
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
 	"github.com/gorilla/websocket"
@@ -32,7 +32,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 		fmt.Println(user)
 		if err == nil && user.RoomId > 0 {
 			responses, err := ExitGameRoom(ws, user.RoomId)
-			sendMessage(ws, game.ExitRoomMessageType, responses, err)
+			sendMessage(ws, ExitRoomMessageType, responses, err)
 		}
 		ws.Close()
 	}()
@@ -55,49 +55,45 @@ func WebSocketHandlerV1(c echo.Context) error {
 		}
 
 		rawUserId := sess.Values["userId"]
-		if rawUserId == nil {
-			return errors.New("invalid session")
-		}
-
 		userId := rawUserId.(string)
-		if userId == "" {
-			return errors.New("invalid userId on session")
+		if rawUserId == nil || userId == "" {
+			return errors.InvalidSessionErr
 		}
 
 		if _, err := userManager.GetUser(ws); err != nil {
 			userManager.SetUser(ws, game.User{Id: userId, RoomId: 0})
 		}
 
-		request := new(game.WSRequest)
+		request := new(WSRequest)
 		if err := json.Unmarshal(message, request); err != nil {
 			panic(err)
 		}
 
-		var responses []game.WSResponse
+		var responses []WSResponse
 
 		switch request.Type {
-		case game.GetRoomsMessageType:
+		case GetRoomsMessageType:
 			responses, err = GetRooms(ws)
-		case game.CreateRoomMessageType:
+		case CreateRoomMessageType:
 			config := request.Data.(*game.CreateRoomConfig)
 			config.Master = userId
 			responses, err = CreateGameRoom(ws, *config)
-		case game.JoinRoomMessageType:
+		case JoinRoomMessageType:
 			roomId := uint(request.Data.(float64))
 			responses, err = JoinGameRoom(ws, roomId)
-		case game.GetRoomConfigMessageType:
+		case GetRoomConfigMessageType:
 			roomId := uint(request.Data.(float64))
 			responses, err = GetRoomConfig(ws, roomId)
-		case game.ExitRoomMessageType:
+		case ExitRoomMessageType:
 			roomId := uint(request.Data.(float64))
 			responses, err = ExitGameRoom(ws, roomId)
-		case game.StartGameMessageType:
+		case StartGameMessageType:
 			roomId := uint(request.Data.(float64))
 			responses, err = StartGame(ws, roomId)
-		case game.TouchMessageType:
+		case TouchMessageType:
 			touch := request.Data.(*game.TouchRequest)
 			responses, err = TouchTile(ws, *touch)
-		case game.FinishGameMessageType:
+		case FinishGameMessageType:
 			result := request.Data.(*game.Result)
 			responses, err = FinishGame(ws, *result)
 		}
@@ -108,11 +104,12 @@ func WebSocketHandlerV1(c echo.Context) error {
 	return nil
 }
 
-func sendMessage(ws *websocket.Conn, reqType game.WSMessageType, responses []game.WSResponse, err error) {
+func sendMessage(ws *websocket.Conn, reqType WSMessageType, responses []WSResponse, err error) {
 	if err != nil {
-		respBytes, _ := json.Marshal(game.WSPayload{
-			Type: reqType,
-			Data: err.Error(),
+		respBytes, _ := json.Marshal(WSPayload{
+			Type:  reqType,
+			Data:  nil,
+			Error: err.(errors.WSError).Id,
 		})
 
 		ws.WriteMessage(websocket.TextMessage, respBytes)

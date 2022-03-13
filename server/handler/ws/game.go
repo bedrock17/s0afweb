@@ -1,14 +1,13 @@
 package ws
 
 import (
-	"errors"
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
 	"github.com/gorilla/websocket"
 	"math/rand"
 )
 
-func StartGame(client *websocket.Conn, roomId uint) ([]game.WSResponse, error) {
+func StartGame(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	room, err := gameRoomManager.StartGame(client, roomId)
 	if err != nil {
@@ -20,27 +19,27 @@ func StartGame(client *websocket.Conn, roomId uint) ([]game.WSResponse, error) {
 		Seed:          rand.Int31()%2147483646 + 1,
 	}
 
-	resp := game.WSResponse{
+	resp := WSResponse{
 		Connections: room.Clients,
-		Payload: game.WSPayload{
-			Type: game.StartGameMessageType,
+		Payload: WSPayload{
+			Type: StartGameMessageType,
 			Data: startResponse,
 		},
 	}
 
-	return []game.WSResponse{resp}, nil
+	return []WSResponse{resp}, nil
 }
 
-func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]game.WSResponse, error) {
+func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 	user, err := userManager.GetUser(client)
 	if err != nil {
 		return nil, err
 	}
-	room, ok := gameRoomManager.Get(user.RoomId)
-	if !ok {
-		return nil, errors.New("invalid room id")
+	room, err := gameRoomManager.Get(user.RoomId)
+	if err != nil {
+		return nil, err
 	}
 
 	index, clients := 0, make([]*websocket.Conn, len(room.Clients)-1)
@@ -57,10 +56,10 @@ func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]game.WSRespon
 		index += 1
 	}
 
-	resp := game.WSResponse{
+	resp := WSResponse{
 		Connections: clients,
-		Payload: game.WSPayload{
-			Type: game.TouchMessageType,
+		Payload: WSPayload{
+			Type: TouchMessageType,
 			Data: game.TouchResponse{
 				UserID: user.Id,
 				X:      touch.X,
@@ -69,10 +68,10 @@ func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]game.WSRespon
 		},
 	}
 
-	return []game.WSResponse{resp}, nil
+	return []WSResponse{resp}, nil
 }
 
-func FinishGame(client *websocket.Conn, result game.Result) ([]game.WSResponse, error) {
+func FinishGame(client *websocket.Conn, result game.Result) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 
@@ -81,9 +80,9 @@ func FinishGame(client *websocket.Conn, result game.Result) ([]game.WSResponse, 
 		return nil, err
 	}
 
-	room, ok := gameRoomManager.Get(user.RoomId)
-	if !ok {
-		return nil, errors.New("invalid room id")
+	room, err := gameRoomManager.Get(user.RoomId)
+	if err != nil {
+		return nil, err
 	}
 
 	index, clients := 0, make([]*websocket.Conn, len(room.Clients)-1)
@@ -100,5 +99,5 @@ func FinishGame(client *websocket.Conn, result game.Result) ([]game.WSResponse, 
 		index += 1
 	}
 
-	return []game.WSResponse{}, nil
+	return []WSResponse{}, nil
 }

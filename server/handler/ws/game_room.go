@@ -1,7 +1,6 @@
 package ws
 
 import (
-	"errors"
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
 	"github.com/gorilla/websocket"
@@ -15,38 +14,38 @@ type RoomUsersV1Response struct {
 	UserIds []string `json:"user_ids"`
 }
 
-func GetRooms(client *websocket.Conn) ([]game.WSResponse, error) {
+func GetRooms(client *websocket.Conn) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	rooms := gameRoomManager.Gets()
 
-	resp := game.WSResponse{
+	resp := WSResponse{
 		Connections: []*websocket.Conn{client},
-		Payload: game.WSPayload{
-			Type: game.GetRoomsMessageType,
+		Payload: WSPayload{
+			Type: GetRoomsMessageType,
 			Data: rooms,
 		},
 	}
-	return []game.WSResponse{resp}, nil
+	return []WSResponse{resp}, nil
 }
 
-func CreateGameRoom(client *websocket.Conn, config game.CreateRoomConfig) ([]game.WSResponse, error) {
+func CreateGameRoom(client *websocket.Conn, config game.CreateRoomConfig) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	room := gameRoomManager.NewRoom(config)
 	if err := gameRoomManager.JoinRoom(client, room.Id); err != nil {
 		return nil, err
 	}
 	// TODO: 입장에 실패했을때 방 제거
-	resp := game.WSResponse{
+	resp := WSResponse{
 		Connections: []*websocket.Conn{client},
-		Payload: game.WSPayload{
-			Type: game.CreateRoomMessageType,
+		Payload: WSPayload{
+			Type: CreateRoomMessageType,
 			Data: room,
 		},
 	}
-	return []game.WSResponse{resp}, nil
+	return []WSResponse{resp}, nil
 }
 
-func JoinGameRoom(client *websocket.Conn, roomId uint) ([]game.WSResponse, error) {
+func JoinGameRoom(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 	user, err := userManager.GetUser(client)
@@ -57,17 +56,17 @@ func JoinGameRoom(client *websocket.Conn, roomId uint) ([]game.WSResponse, error
 		return nil, err
 	}
 	room, _ := gameRoomManager.Get(roomId)
-	joinResp := game.WSResponse{
+	joinResp := WSResponse{
 		Connections: room.Clients,
-		Payload: game.WSPayload{
-			Type: game.JoinRoomMessageType,
+		Payload: WSPayload{
+			Type: JoinRoomMessageType,
 			Data: user.Id,
 		},
 	}
-	roomConfigResp := game.WSResponse{
+	roomConfigResp := WSResponse{
 		Connections: []*websocket.Conn{client},
-		Payload: game.WSPayload{
-			Type: game.GetRoomConfigMessageType,
+		Payload: WSPayload{
+			Type: GetRoomConfigMessageType,
 			Data: room,
 		},
 	}
@@ -80,17 +79,17 @@ func JoinGameRoom(client *websocket.Conn, roomId uint) ([]game.WSResponse, error
 		}
 		users[index] = user.Id
 	}
-	roomUsers := game.WSResponse{
+	roomUsers := WSResponse{
 		Connections: []*websocket.Conn{client},
-		Payload: game.WSPayload{
-			Type: game.RoomUsersMessageType,
+		Payload: WSPayload{
+			Type: RoomUsersMessageType,
 			Data: RoomUsersV1Response{users},
 		},
 	}
-	return []game.WSResponse{joinResp, roomConfigResp, roomUsers}, nil
+	return []WSResponse{joinResp, roomConfigResp, roomUsers}, nil
 }
 
-func ExitGameRoom(client *websocket.Conn, roomId uint) ([]game.WSResponse, error) {
+func ExitGameRoom(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 	user, err := userManager.GetUser(client)
@@ -101,30 +100,30 @@ func ExitGameRoom(client *websocket.Conn, roomId uint) ([]game.WSResponse, error
 		return nil, err
 	}
 	room, _ := gameRoomManager.Get(roomId)
-	resp := game.WSResponse{
+	resp := WSResponse{
 		Connections: room.Clients,
-		Payload: game.WSPayload{
-			Type: game.ExitRoomMessageType,
+		Payload: WSPayload{
+			Type: ExitRoomMessageType,
 			Data: user.Id,
 		},
 	}
-	return []game.WSResponse{resp}, nil
+	return []WSResponse{resp}, nil
 }
 
-func GetRoomConfig(client *websocket.Conn, roomId uint) ([]game.WSResponse, error) {
+func GetRoomConfig(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 
-	room, ok := gameRoomManager.Get(roomId)
-	if !ok {
-		return nil, errors.New("invalid room id")
+	room, err := gameRoomManager.Get(roomId)
+	if err != nil {
+		return nil, err
 	}
 
-	resp := game.WSResponse{
+	resp := WSResponse{
 		Connections: []*websocket.Conn{client},
-		Payload: game.WSPayload{
-			Type: game.ExitRoomMessageType,
+		Payload: WSPayload{
+			Type: ExitRoomMessageType,
 			Data: room,
 		},
 	}
-	return []game.WSResponse{resp}, nil
+	return []WSResponse{resp}, nil
 }

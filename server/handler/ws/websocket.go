@@ -1,7 +1,8 @@
-package game
+package ws
 
 import (
 	"encoding/json"
+	"github.com/bedrock17/s0afweb/service/game"
 	"github.com/gorilla/websocket"
 )
 
@@ -25,8 +26,9 @@ type WSRequest struct {
 }
 
 type WSPayload struct {
-	Type WSMessageType `json:"type"`
-	Data interface{}   `json:"data"`
+	Type  WSMessageType `json:"type"`
+	Data  interface{}   `json:"data"`
+	Error int           `json:"error"`
 }
 
 type WSResponse struct {
@@ -45,16 +47,12 @@ func (b *WSRequest) UnmarshalJSON(data []byte) error {
 
 	switch t.Type {
 	case string(CreateRoomMessageType):
-		b.Data = new(CreateRoomConfig)
-	case string(JoinRoomMessageType):
-	case string(GetRoomConfigMessageType):
-	case string(ExitRoomMessageType):
-	case string(StartGameMessageType):
-
+		b.Data = new(game.CreateRoomConfig)
 	case string(TouchMessageType):
-		b.Data = new(TouchRequest)
+		b.Data = new(game.TouchRequest)
 	case string(FinishGameMessageType):
-		b.Data = new(Result)
+		b.Data = new(game.Result)
+	default:
 	}
 
 	type tmp WSRequest // avoids infinite recursion

@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"errors"
 	"github.com/bedrock17/s0afweb/dao"
+	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/game"
 	"github.com/bedrock17/s0afweb/models"
 	"github.com/labstack/echo-contrib/session"
@@ -103,7 +103,7 @@ func PostLeaderboardV1(c echo.Context) BaseResponse {
 		return BaseResponse{
 			http.StatusBadRequest,
 			nil,
-			errors.New("invalid game"),
+			errors.GameValidationErr,
 		}
 	}
 

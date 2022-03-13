@@ -1,7 +1,7 @@
 package game
 
 import (
-	"errors"
+	"github.com/bedrock17/s0afweb/errors"
 	"github.com/gorilla/websocket"
 	"sync"
 )
@@ -39,7 +39,7 @@ func (m *UserManagerImpl) RemoveUser(client *websocket.Conn) {
 func (m *UserManagerImpl) GetUser(client *websocket.Conn) (User, error) {
 	user, ok := m.state[client]
 	if !ok {
-		return User{}, errors.New("user is nowhere")
+		return User{}, errors.UserNotFoundErr
 	}
 
 	return user, nil

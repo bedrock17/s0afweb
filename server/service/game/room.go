@@ -1,7 +1,7 @@
 package game
 
 import (
-	"errors"
+	"github.com/bedrock17/s0afweb/errors"
 	"github.com/gorilla/websocket"
 	"math/rand"
 	"sync"
@@ -57,7 +57,7 @@ type RoomManager interface {
 	NewRoom(config CreateRoomConfig) Room
 	JoinRoom(client *websocket.Conn, roomId uint) error
 	ExitRoom(client *websocket.Conn, roomId uint) error
-	Get(roomId uint) (Room, bool)
+	Get(roomId uint) (Room, error)
 	Gets() []Room
 	StartGame(client *websocket.Conn, roomId uint) (Room, error)
 }
@@ -96,9 +96,12 @@ func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig) Room {
 	return m.rooms[id]
 }
 
-func (m *RoomManagerImpl) Get(roomId uint) (Room, bool) {
+func (m *RoomManagerImpl) Get(roomId uint) (Room, error) {
 	room, ok := m.rooms[roomId]
-	return room, ok
+	if !ok {
+		return Room{}, errors.InvalidRoomIdErr
+	}
+	return room, nil
 }
 
 func (m *RoomManagerImpl) Gets() []Room {
@@ -113,13 +116,13 @@ func (m *RoomManagerImpl) JoinRoom(client *websocket.Conn, roomId uint) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	room, ok := m.Get(roomId)
-	if !ok {
-		return errors.New("invalid room id")
+	room, err := m.Get(roomId)
+	if err != nil {
+		return err
 	}
 
 	if len(room.Clients) == room.Capacity {
-		return errors.New("no player slot left")
+		return errors.NoLeftSeatErr
 	}
 
 	user, err := m.userManager.GetUser(client)
@@ -127,7 +130,7 @@ func (m *RoomManagerImpl) JoinRoom(client *websocket.Conn, roomId uint) error {
 		return err
 	}
 	if user.RoomId != 0 {
-		return errors.New("user is already in the room")
+		return errors.CannotJoinMultipleRoomErr
 	}
 	m.userManager.SetUser(client, User{user.Id, roomId})
 	room.Clients = append(room.Clients, client)
@@ -140,9 +143,9 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	room, ok := m.Get(roomId)
-	if !ok {
-		return errors.New("invalid room id")
+	room, err := m.Get(roomId)
+	if err != nil {
+		return err
 	}
 
 	user, err := m.userManager.GetUser(client)
@@ -190,17 +193,17 @@ func (m *RoomManagerImpl) StartGame(client *websocket.Conn, roomId uint) (Room, 
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	room, ok := m.Get(roomId)
-	if !ok {
-		return Room{}, errors.New("invalid room id")
+	room, err := m.Get(roomId)
+	if err != nil {
+		return Room{}, err
 	}
 
 	if room.Status == RoomStatusInGame {
-		return Room{}, errors.New("game already started")
+		return Room{}, errors.GameAlreadyStartedErr
 	}
 
 	if len(room.Clients) <= 1 {
-		return Room{}, errors.New("can't start the game alone")
+		return Room{}, errors.MinimumNumberPlayerErr
 	}
 
 	user, err := m.userManager.GetUser(client)
@@ -209,7 +212,7 @@ func (m *RoomManagerImpl) StartGame(client *websocket.Conn, roomId uint) (Room, 
 	}
 
 	if user.Id != room.Master {
-		return Room{}, errors.New("only master can start the game")
+		return Room{}, errors.UnauthorizedErr
 	}
 
 	startedAt := time.Now().UnixMilli()
