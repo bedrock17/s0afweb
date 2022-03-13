@@ -60,6 +60,7 @@ export class Game {
   private context: CanvasRenderingContext2D; //canvas 2d
 
   private bfsQueue: Queue<Point>;
+  private touchQueue: Queue<Point>;
   private removeBlockCode = 0;
   private removeBlockCount = 0;
 
@@ -105,6 +106,7 @@ export class Game {
     this._seed = 0;
 
     this.bfsQueue = new Queue<Point>();
+    this.touchQueue = new Queue<Point>();
   }
 
   private static getMousePoint(canvas: HTMLCanvasElement, evt: MouseEvent) {
@@ -130,6 +132,10 @@ export class Game {
 
   public increaseLineCount() {
     this.receivedLineCount += 1;
+  }
+
+  public touch(p: Point) {
+    this.touchQueue.enqueue(p);
   }
 
   public set seed(seed: number) {
@@ -308,6 +314,14 @@ export class Game {
     const displayScore = this.score + this.removeBlockCount * this.removeBlockCount;
     if (this.removeBlockCount !== 0) {
       this.onScoreChangeCallback?.(displayScore);
+    }
+
+    // 외부에서 강제로 발생시킨 touchEvent 를 일반 touch 이벤트 처럼 처리
+    if (this.touchQueue.length > 0 && this.lastPos.x === -1 && this.lastPos.y === -1) {
+      const p = this.touchQueue.dequeue();
+      if (p) {
+        this.lastPos = p;
+      }
     }
 
     if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
