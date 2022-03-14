@@ -93,9 +93,6 @@ func WebSocketHandlerV1(c echo.Context) error {
 		case TouchMessageType:
 			touch := request.Data.(*game.TouchRequest)
 			responses, err = TouchTile(ws, *touch)
-		case FinishGameMessageType:
-			result := request.Data.(*game.Result)
-			responses, err = FinishGame(ws, *result)
 		}
 
 		sendMessage(ws, request.Type, responses, err)

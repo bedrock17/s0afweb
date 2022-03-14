@@ -139,6 +139,10 @@ const OnlinePlayRoom = () => {
         opponent.ref.current?.touch(touch);
       });
     };
+
+    websocket.messageHandle[messageType.finishGame] = () => {
+      alert('game finished');
+    };
   }, [user, opponentRefs]);
 
   useEffect(() => {

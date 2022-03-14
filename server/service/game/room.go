@@ -2,17 +2,12 @@ package game
 
 import (
 	"github.com/bedrock17/s0afweb/errors"
+	"github.com/bedrock17/s0afweb/utils"
 	"github.com/gorilla/websocket"
 	"math/rand"
 	"sync"
 	"time"
 )
-
-type Result struct {
-	Score        int    `json:"score" validate:"required,numeric"`
-	Touches      int    `json:"touches" validate:"required,numeric"`
-	TouchHistory string `json:"touch_history" validate:"required,json"`
-}
 
 type TouchRequest struct {
 	X uint `json:"x" validate:"required,numeric"`
@@ -47,6 +42,7 @@ type Room struct {
 	Master        string            `json:"master"`
 	GameStartedAt int64             `json:"game_started_at"`
 	Seed          int32             `json:"-"`
+	GameTicker    utils.GameTicker  `json:"-"`
 }
 
 const (
@@ -55,7 +51,7 @@ const (
 )
 
 type RoomManager interface {
-	NewRoom(config CreateRoomConfig) Room
+	NewRoom(config CreateRoomConfig, onGameFinish func(uint) func()) Room
 	JoinRoom(client *websocket.Conn, roomId uint) error
 	ExitRoom(client *websocket.Conn, roomId uint) error
 	Get(roomId uint) (Room, error)
@@ -78,7 +74,7 @@ func NewRoomManager(userManager UserManager) RoomManager {
 	}
 }
 
-func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig) Room {
+func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig, onGameFinish func(uint) func()) Room {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -92,6 +88,10 @@ func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig) Room {
 		PlayTime: config.PlayTime,
 		Status:   RoomStatusIdle,
 		Master:   config.Master,
+		GameTicker: utils.GameTicker{
+			Ticker:           time.NewTicker(1 * time.Second),
+			OnFinishCallback: onGameFinish(id),
+		},
 	}
 
 	return m.rooms[id]
@@ -220,10 +220,13 @@ func (m *RoomManagerImpl) StartGame(client *websocket.Conn, roomId uint) (Room, 
 		return Room{}, errors.UnauthorizedErr
 	}
 
-	startedAt := time.Now().UnixMilli()
+	now := time.Now()
+	startedAt := now.UnixMilli()
 	room.Status = RoomStatusInGame
 	room.GameStartedAt = startedAt
 	room.Seed = rand.Int31()%2147483646 + 1
+	room.GameTicker.TickerDeadlineMilli = now.Add(time.Second * time.Duration(room.PlayTime)).UnixMilli()
 	m.rooms[roomId] = room
+	m.rooms[roomId].GameTicker.Start()
 	return m.rooms[roomId], nil
 }

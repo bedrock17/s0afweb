@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"encoding/json"
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
 	"github.com/gorilla/websocket"
@@ -12,6 +13,24 @@ type CreateGameRoomV1Response struct {
 
 type RoomUsersV1Response struct {
 	UserIds []string `json:"user_ids"`
+}
+
+func onGameFinish(roomId uint) func() {
+	gameRoomManager := service.GetService().GameRoomManager()
+	return func() {
+		room, err := gameRoomManager.Get(roomId)
+		if err != nil {
+			return
+		}
+		for _, client := range room.Clients {
+			// TODO: 점수 계산해서 브로드캐스트
+			respBytes, _ := json.Marshal(WSPayload{
+				Type: FinishGameMessageType,
+				Data: nil,
+			})
+			client.WriteMessage(websocket.TextMessage, respBytes)
+		}
+	}
 }
 
 func GetRooms(client *websocket.Conn) ([]WSResponse, error) {
@@ -30,7 +49,7 @@ func GetRooms(client *websocket.Conn) ([]WSResponse, error) {
 
 func CreateGameRoom(client *websocket.Conn, config game.CreateRoomConfig) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
-	room := gameRoomManager.NewRoom(config)
+	room := gameRoomManager.NewRoom(config, onGameFinish)
 	if err := gameRoomManager.JoinRoom(client, room.Id); err != nil {
 		return nil, err
 	}

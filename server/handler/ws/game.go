@@ -68,7 +68,7 @@ func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]WSResponse, e
 	return []WSResponse{resp}, nil
 }
 
-func FinishGame(client *websocket.Conn, result game.Result) ([]WSResponse, error) {
+func FinishGame(client *websocket.Conn) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 
