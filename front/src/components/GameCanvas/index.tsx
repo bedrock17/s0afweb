@@ -41,7 +41,7 @@ const GameCanvas = ({ animationEffect, gameRef, mini }: Props) => {
     gameRef.current.animationEffect = animationEffect;
   }, [animationEffect, gameRef]);
 
-  const width = mini ? '61px' : '245px';
+  const width = mini ? '64px' : '245px';
   const height = mini ? '120px' : '460px';
 
 

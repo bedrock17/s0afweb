@@ -25,7 +25,7 @@ export const OpponentWrapper = styled('div', {
 });
 
 export const OpponentContainer = styled('div', {
-  width: '61px',
+  width: '64px',
 });
 
 export const OpponentName = styled('span', {
