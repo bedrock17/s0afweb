@@ -34,6 +34,7 @@ func CreateGameRoom(client *websocket.Conn, config game.CreateRoomConfig) ([]WSR
 	if err := gameRoomManager.JoinRoom(client, room.Id); err != nil {
 		return nil, err
 	}
+	room, _ = gameRoomManager.Get(room.Id)
 	// TODO: 입장에 실패했을때 방 제거
 	resp := WSResponse{
 		Connections: []*websocket.Conn{client},
@@ -78,6 +79,7 @@ func JoinGameRoom(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 			continue
 		}
 		users[index] = user.Id
+		index += 1
 	}
 	roomUsers := WSResponse{
 		Connections: []*websocket.Conn{client},
