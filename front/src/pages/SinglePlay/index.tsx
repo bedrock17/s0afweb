@@ -35,16 +35,18 @@ const SinglePlayPage = () => {
     });
 
     game.onScoreChange = setScore;
-    game.onStateChange = () => {
-      Leaderboard.post({
-        username: username,
-        score: game.score,
-        touches: game.touchCount,
-        touch_history: JSON.stringify(game.touchHistory),
-        seed: game.seed,
-      }).then(() => {
-        navigate('/single/result');
-      });
+    game.onStateChange = (isGameOver) => {
+      if (isGameOver) {
+        Leaderboard.post({
+          username: username,
+          score: game.score,
+          touches: game.touchCount,
+          touch_history: JSON.stringify(game.touchHistory),
+          seed: game.seed,
+        }).then(() => {
+          navigate('/single/result');
+        });
+      }
     };
   }, [gameRef, navigate, setScore, username]);
 
