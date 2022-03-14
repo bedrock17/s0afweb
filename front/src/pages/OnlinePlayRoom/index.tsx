@@ -198,7 +198,7 @@ const OnlinePlayRoom = () => {
         { user?.user_id }
         <span>Score : { '1234579' }</span>
         <GameCanvas animationEffect={false} gameRef={tempRef} />
-        <Button color={'blue'} onClick={sendGameStart}>
+        <Button color={'blue'} onClick={sendGameStart} disabled={user && getWebsocketInstance().roomMaster !== user.user_id}>
         GameStart
         </Button>
       </Wrapper>

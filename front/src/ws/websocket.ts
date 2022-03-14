@@ -13,8 +13,11 @@ export class PopTileWebsocket {
   ws: WebSocket;
   messageHandle: Record<string, (msg: WebsocketReceiveMessage<WebsocketMessageData>) => void> = {};
 
+  roomMaster: string;
+
   constructor(ws: WebSocket) {
     this.ws = ws;
+    this.roomMaster = '';
   }
 }
 

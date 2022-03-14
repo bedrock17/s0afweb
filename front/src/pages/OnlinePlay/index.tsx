@@ -14,6 +14,7 @@ const OnlinePlay = () => {
   useEffect(() => {
     websocket.messageHandle[messageType.createRoom] = (msg) => {
       const room = msg as WebsocketReceiveMessage<Room>;
+      websocket.roomMaster = room.data.master;
       navigate('/online/room#' + room.data.id);
     };
   }, []);
