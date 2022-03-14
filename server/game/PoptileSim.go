@@ -2,9 +2,7 @@ package game
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/bedrock17/s0afweb/models"
-	"time"
 )
 
 type XORShift struct {
@@ -25,20 +23,15 @@ func (x *XORShift) Next() int32 {
 }
 
 type popTileGame struct {
-	score      int
+	Score      int
 	touchCount int
 
 	columns int
 	rows    int
 	gameMap [][]int
+	random  XORShift
 
 	RandomSeed int32
-
-	touchHistory []models.Point
-}
-
-type popTileSeedInfo struct {
-	CreatedTime time.Time
 }
 
 func isValidRange(p models.Point, maxColumns, maxRows int) bool {
@@ -61,7 +54,7 @@ func (g *popTileGame) IsGameEnd() bool {
 	return false
 }
 
-func (g *popTileGame) makeBlocks(line []int) {
+func (g *popTileGame) MakeBlocks(line []int) {
 	for i := 0; i < g.rows; i++ {
 		for j := 0; j < g.columns; j++ {
 			if i != 0 {
@@ -81,12 +74,11 @@ func (g *popTileGame) InitMap(width, height int) {
 	}
 }
 
-func (g *popTileGame) SetGameParameter(width, height int, seed int32, touchHistory []models.Point) {
+func (g *popTileGame) SetGameParameter(width, height int, seed int32) {
 	g.columns = width
 	g.rows = height
-
 	g.RandomSeed = seed
-	g.touchHistory = touchHistory
+	g.random = XORShift{g.RandomSeed, g.RandomSeed}
 }
 
 var direction4 = []models.Point{
@@ -138,30 +130,22 @@ func (g *popTileGame) dropBlocks() {
 	}
 }
 
-func (g *popTileGame) SimulationGame() int {
-
-	random := XORShift{g.RandomSeed, g.RandomSeed}
-
-	for i := 0; i < len(g.touchHistory); i++ {
-		var line []int = make([]int, g.columns)
-		for j := 0; j < g.columns; j++ {
-			v := random.Next()
-			line[j] = int((v % 3) + 1)
-		}
-		g.makeBlocks(line)
-		pos := g.touchHistory[i]
-		count := g.removeBlocks(pos, g.gameMap[pos.Y][pos.X])
-		g.score += count * count
-		g.dropBlocks()
+func (g *popTileGame) SimulateOneStep(p models.Point) int {
+	var line []int = make([]int, g.columns)
+	for j := 0; j < g.columns; j++ {
+		v := g.random.Next()
+		line[j] = int((v % 3) + 1)
 	}
+	g.MakeBlocks(line)
+	count := g.removeBlocks(p, g.gameMap[p.Y][p.X])
+	g.Score += count * count
+	g.dropBlocks()
 
-	return g.score
+	return count
 }
 
 func Validate(data *models.Leaderboard) bool {
-
 	valid := false
-	score := 0
 
 	game := popTileGame{}
 
@@ -173,11 +157,13 @@ func Validate(data *models.Leaderboard) bool {
 		panic(err)
 	}
 
-	game.SetGameParameter(8, 15, data.Seed, touchHistory)
+	game.SetGameParameter(8, 15, data.Seed)
 
-	score = game.SimulationGame()
-	fmt.Println("Game Result", data.Score, score)
-	if score == data.Score {
+	for i := 0; i < len(touchHistory); i++ {
+		game.SimulateOneStep(touchHistory[i])
+	}
+
+	if game.Score == data.Score {
 		valid = true
 	}
 
