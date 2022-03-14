@@ -4,6 +4,7 @@ export const messageType = {
   joinRoom: 'join_room',
   exitRoom: 'exit_room',
   getRooms: 'get_rooms',
+  roomUsers: 'room_users',
   startGame: 'start_game',
   finishGame: 'finish_game',
   touch: 'touch_tile',

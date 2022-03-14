@@ -10,7 +10,7 @@ import GameCanvas from '~/components/GameCanvas';
 import type { Game, Point } from '~/game';
 import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
 import {
-  GameStartResponse, RoomId, WebsocketMessage 
+  GameStartResponse, RoomId, RoomUsersResponse, WebsocketMessage
 } from '~/types/websocket';
 import { getWebsocketInstance, messageType } from '~/ws/websocket';
 
@@ -18,7 +18,7 @@ import {
   OpponentContainer, OpponentName, OpponentWrapper, Wrapper
 } from './styles';
 
-type UserMappedCanvasRef = {
+type UserMappedGameRef = {
   ref: React.MutableRefObject<Game | undefined>,
   userId: UserID,
 };
@@ -36,7 +36,7 @@ const getRoomId = (): number | undefined => {
 
 const OnlinePlayRoom = () => {
   const user = useRecoilValue(userState);
-  const [opponentCanvasRefs, setOpponentCanvasRefs] = useState<UserMappedCanvasRef[]>([]);
+  const [opponentRefs, setOpponentRefs] = useState<UserMappedGameRef[]>([]);
   const tempRef = useRef<Game>();
   const navigate = useNavigate();
 
@@ -76,11 +76,23 @@ const OnlinePlayRoom = () => {
       if (userId === user?.user_id) {
         return;
       }
-      setOpponentCanvasRefs((prev) => [...prev, {
+      setOpponentRefs((prev) => [...prev, {
         ref: { current: undefined },
         userId,
       }]);
     };
+
+    websocket.messageHandle[messageType.roomUsers] = (data) => {
+      const response = data as WebsocketMessage<RoomUsersResponse>;
+      const users = response.data.user_ids;
+      const refs = users.filter((userId) => userId !== user.user_id)
+        .map((userId) => ({
+          ref: { current: undefined },
+          userId,
+        }));
+      setOpponentRefs(refs);
+    };
+
 
     websocket.messageHandle[messageType.exitRoom] = (data) => {
       const response = data as WebsocketMessage<UserID>;
@@ -88,13 +100,13 @@ const OnlinePlayRoom = () => {
       if (userId === user?.user_id) {
         return;
       }
-      setOpponentCanvasRefs((prev) => prev.filter((ref) => ref.userId !== userId));
+      setOpponentRefs((prev) => prev.filter((ref) => ref.userId !== userId));
     };
 
     websocket.messageHandle[messageType.startGame] = (touchMessage) => {
       const gameStartMessage = touchMessage.data as GameStartResponse;
 
-      opponentCanvasRefs.forEach((opponent) => {
+      opponentRefs.forEach((opponent) => {
         opponent.ref.current?.startGame(gameStartMessage.seed);
       });
 
@@ -115,12 +127,11 @@ const OnlinePlayRoom = () => {
 
     websocket.messageHandle[messageType.touch] = (touchMessage) => {
       const touch = touchMessage.data as Point;
-      opponentCanvasRefs.forEach((opponent) => {
+      opponentRefs.forEach((opponent) => {
         opponent.ref.current?.touch(touch);
       });
     };
-
-  }, [user, opponentCanvasRefs]);
+  }, [user, opponentRefs]);
 
   useEffect(() => {
     window?.addEventListener('hashchange', (e) => {
@@ -171,7 +182,7 @@ const OnlinePlayRoom = () => {
       <Wrapper>
         <OpponentWrapper>
           {
-            opponentCanvasRefs.map((opponent) => (
+            opponentRefs.map((opponent) => (
               <OpponentContainer key={opponent.userId}>
                 <OpponentName>{ opponent.userId }</OpponentName>
                 <GameCanvas animationEffect={false} gameRef={opponent.ref} mini />

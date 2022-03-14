@@ -42,7 +42,7 @@ const GameCanvas = ({ animationEffect, gameRef, mini }: Props) => {
   }, [animationEffect, gameRef]);
 
   const width = mini ? '61px' : '245px';
-  const height = mini ? '115px' : '460px';
+  const height = mini ? '120px' : '460px';
 
 
   return (

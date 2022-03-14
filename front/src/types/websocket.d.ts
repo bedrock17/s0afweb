@@ -21,8 +21,18 @@ type GameStartResponse = {
   seed: number,
 };
 
+type RoomUsersResponse = {
+  user_ids: UserID[],
+};
 
-type WebsocketMessageData = (Room | CreateRoom | RoomId | UserID | GameStartResponse | Point);
+type WebsocketMessageData = |
+  Room |
+  CreateRoom |
+  RoomId |
+  UserID |
+  GameStartResponse |
+  RoomUsersResponse |
+  Point;
 
 type WebsocketMessage<T> = {
   type: string,
