@@ -12,14 +12,14 @@ const OnlinePlay = () => {
   const websocket = getWebsocketInstance();
 
   useEffect(() => {
-    websocket.messageHandle[messageType.createRoom] = (msg: WebsocketMessage<WebsocketMessageData>) => {
-      const room = msg as WebsocketMessage<Room>;
+    websocket.messageHandle[messageType.createRoom] = (msg) => {
+      const room = msg as WebsocketReceiveMessage<Room>;
       navigate('/online/room#' + room.data.id);
     };
   }, []);
 
   const onClickCreateRoom = () => {
-    const message: WebsocketMessage<CreateRoom> = {
+    const message: WebsocketSendMessage<CreateRoom> = {
       type: messageType.createRoom,
       data: {
         capacity: 10,
@@ -28,7 +28,6 @@ const OnlinePlay = () => {
     };
 
     websocket?.ws?.send(JSON.stringify(message));
-
   };
 
   return (

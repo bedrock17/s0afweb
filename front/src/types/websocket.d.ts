@@ -1,5 +1,3 @@
-import { Point } from '~/game';
-
 type CreateRoom = {
   capacity: number,
   play_time: number,

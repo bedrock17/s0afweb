@@ -7,11 +7,8 @@ import { useRecoilValue } from 'recoil';
 import { userState } from '~/atoms/auth';
 import Button from '~/components/Button';
 import GameCanvas from '~/components/GameCanvas';
-import type { Game, Point } from '~/game';
+import type { Game } from '~/game';
 import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
-import {
-  GameStartResponse, RoomId, RoomUsersResponse, WebsocketReceiveMessage, WebsocketSendMessage
-} from '~/types/websocket';
 import { WSError } from '~/ws/errors';
 import { getWebsocketInstance, messageType } from '~/ws/websocket';
 

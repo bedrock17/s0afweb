@@ -14,11 +14,6 @@ class Queue<T> {
   }
 }
 
-export type Point = {
-  x: number,
-  y: number,
-};
-
 const direction4: Point[] = [
   { x: 0, y: 1 },
   { x: 1, y: 0 },
