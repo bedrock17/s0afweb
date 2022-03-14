@@ -10,7 +10,7 @@ import GameCanvas from '~/components/GameCanvas';
 import type { Game, Point } from '~/game';
 import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
 import {
-  GameStartResponse, RoomId, RoomUsersResponse, WebsocketMessage
+  GameStartResponse, RoomId, RoomUsersResponse, WebsocketReceiveMessage, WebsocketSendMessage
 } from '~/types/websocket';
 import { WSError } from '~/ws/errors';
 import { getWebsocketInstance, messageType } from '~/ws/websocket';
@@ -43,7 +43,7 @@ const OnlinePlayRoom = () => {
 
   const exitRoom = (roomId: RoomId) => {
     const websocket = getWebsocketInstance();
-    const payload: WebsocketMessage<RoomId> = {
+    const payload: WebsocketSendMessage<RoomId> = {
       type: messageType.exitRoom,
       data: roomId,
     };
@@ -61,7 +61,7 @@ const OnlinePlayRoom = () => {
       return;
     }
 
-    const msg: WebsocketMessage<RoomId> = {
+    const msg: WebsocketSendMessage<RoomId> = {
       type: messageType.joinRoom,
       data: roomId,
     };
@@ -72,7 +72,7 @@ const OnlinePlayRoom = () => {
     });
 
     websocket.messageHandle[messageType.joinRoom] = (data) => {
-      const response = data as WebsocketMessage<UserID>;
+      const response = data as WebsocketReceiveMessage<UserID>;
       if (response.error !== WSError.NoError) {
         switch (response.error) {
         case WSError.InvalidRoomIdError:
@@ -92,7 +92,7 @@ const OnlinePlayRoom = () => {
     };
 
     websocket.messageHandle[messageType.roomUsers] = (data) => {
-      const response = data as WebsocketMessage<RoomUsersResponse>;
+      const response = data as WebsocketReceiveMessage<RoomUsersResponse>;
       const users = response.data.user_ids;
       const refs = users.filter((userId) => userId !== user.user_id)
         .map((userId) => ({
@@ -103,7 +103,7 @@ const OnlinePlayRoom = () => {
     };
 
     websocket.messageHandle[messageType.exitRoom] = (data) => {
-      const response = data as WebsocketMessage<UserID>;
+      const response = data as WebsocketReceiveMessage<UserID>;
       const userId = response.data;
       if (userId === user?.user_id) {
         return;
@@ -121,7 +121,7 @@ const OnlinePlayRoom = () => {
       tempRef.current?.startGame(gameStartMessage.seed);
       if (tempRef.current) {
         tempRef.current.touchCallback = (p: Point) => {
-          const touchRequest: WebsocketMessage<Point> = {
+          const touchRequest: WebsocketSendMessage<Point> = {
             type: messageType.touch,
             data: {
               x: p.x,
@@ -155,7 +155,7 @@ const OnlinePlayRoom = () => {
         return;
       }
 
-      const payload: WebsocketMessage<RoomId> = {
+      const payload: WebsocketSendMessage<RoomId> = {
         type: messageType.joinRoom,
         data: newRoomId,
       };
@@ -177,7 +177,7 @@ const OnlinePlayRoom = () => {
     const roomId = getRoomId();
 
     if (roomId) {
-      const startMessage: WebsocketMessage<RoomId> = {
+      const startMessage: WebsocketSendMessage<RoomId> = {
         type: messageType.startGame,
         data: roomId
       };

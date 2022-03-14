@@ -34,7 +34,12 @@ type WebsocketMessageData = |
   RoomUsersResponse |
   Point;
 
-type WebsocketMessage<T> = {
+type WebsocketSendMessage<T> = {
+  type: string,
+  data: T,
+};
+
+type WebsocketReceiveMessage<T> = {
   type: string,
   data: T,
   error: number,

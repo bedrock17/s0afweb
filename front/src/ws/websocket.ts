@@ -1,4 +1,4 @@
-import type { WebsocketMessage, WebsocketMessageData } from '~/types/websocket';
+import type { WebsocketReceiveMessage, WebsocketMessageData } from '~/types/websocket';
 
 export const messageType = {
   createRoom: 'create_room',
@@ -13,7 +13,7 @@ export const messageType = {
 
 export class PopTileWebsocket {
   ws: WebSocket;
-  messageHandle: Record<string, (msg: WebsocketMessage<WebsocketMessageData>) => void> = {};
+  messageHandle: Record<string, (msg: WebsocketReceiveMessage<WebsocketMessageData>) => void> = {};
 
   constructor(ws: WebSocket) {
     this.ws = ws;
@@ -46,7 +46,7 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
     // eslint-disable-next-line no-console
     console.log('onmessage', msg.data);
 
-    const serverMessage: WebsocketMessage<WebsocketMessageData> = JSON.parse(msg.data);
+    const serverMessage: WebsocketReceiveMessage<WebsocketMessageData> = JSON.parse(msg.data);
 
     if (serverMessage.type in popTileWebsocket.messageHandle) {
       popTileWebsocket.messageHandle[serverMessage.type](serverMessage);
