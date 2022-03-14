@@ -122,6 +122,10 @@ func (m *RoomManagerImpl) JoinRoom(client *websocket.Conn, roomId uint) error {
 		return err
 	}
 
+	if room.Status == RoomStatusInGame {
+		return errors.GameAlreadyStartedErr
+	}
+
 	if len(room.Clients) == room.Capacity {
 		return errors.NoLeftSeatErr
 	}
