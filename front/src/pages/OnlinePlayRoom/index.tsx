@@ -35,8 +35,10 @@ const getRoomId = (): number | undefined => {
 const OnlinePlayRoom = () => {
   const user = useRecoilValue(userState);
   const [opponentRefs, setOpponentRefs] = useState<UserMappedGameRef[]>([]);
+  const [score, setScore] = useState(0);
   const tempRef = useRef<Game>();
   const navigate = useNavigate();
+
 
   const exitRoom = (roomId: RoomId) => {
     const websocket = getWebsocketInstance();
@@ -117,6 +119,7 @@ const OnlinePlayRoom = () => {
 
       tempRef.current?.startGame(gameStartMessage.seed);
       if (tempRef.current) {
+        tempRef.current.onScoreChange = setScore;
         tempRef.current.touchCallback = (p: Point) => {
           const touchRequest: WebsocketSendMessage<Point> = {
             type: messageType.touch,
@@ -196,7 +199,7 @@ const OnlinePlayRoom = () => {
           }
         </OpponentWrapper>
         { user?.user_id }
-        <span>Score : { '1234579' }</span>
+        <span>Score : { score }</span>
         <GameCanvas animationEffect={false} gameRef={tempRef} />
         <Button color={'blue'} onClick={sendGameStart} disabled={user && getWebsocketInstance().roomMaster !== user.user_id}>
         GameStart
