@@ -37,4 +37,5 @@ type WebsocketMessageData = |
 type WebsocketMessage<T> = {
   type: string,
   data: T,
+  error: number,
 };

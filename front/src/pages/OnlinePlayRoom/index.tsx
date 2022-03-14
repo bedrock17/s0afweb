@@ -12,6 +12,7 @@ import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
 import {
   GameStartResponse, RoomId, RoomUsersResponse, WebsocketMessage
 } from '~/types/websocket';
+import { WSError } from '~/ws/errors';
 import { getWebsocketInstance, messageType } from '~/ws/websocket';
 
 import {
@@ -72,6 +73,14 @@ const OnlinePlayRoom = () => {
 
     websocket.messageHandle[messageType.joinRoom] = (data) => {
       const response = data as WebsocketMessage<UserID>;
+      if (response.error !== WSError.NoError) {
+        switch (response.error) {
+        case WSError.InvalidRoomIdError:
+          alert('존재하지 않는 방입니다.');
+          navigate('/online');
+          return;
+        }
+      }
       const userId = response.data;
       if (userId === user?.user_id) {
         return;
@@ -92,7 +101,6 @@ const OnlinePlayRoom = () => {
         }));
       setOpponentRefs(refs);
     };
-
 
     websocket.messageHandle[messageType.exitRoom] = (data) => {
       const response = data as WebsocketMessage<UserID>;

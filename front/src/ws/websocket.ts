@@ -1,3 +1,4 @@
+import type { WebsocketMessage, WebsocketMessageData } from '~/types/websocket';
 
 export const messageType = {
   createRoom: 'create_room',
