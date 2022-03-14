@@ -1,5 +1,7 @@
 import type { MutableRefObject } from 'react';
-import React, { useEffect, useRef } from 'react';
+import React, {
+  useEffect, useRef, useState
+} from 'react';
 
 import { Game } from '~/game';
 
@@ -14,6 +16,7 @@ type Props = {
 
 const GameCanvas = ({ animationEffect, gameRef, mini }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isGameOver, setIsGameOver] = useState(false);
 
   useEffect(() => {
     if (!canvasRef.current) {
@@ -24,6 +27,7 @@ const GameCanvas = ({ animationEffect, gameRef, mini }: Props) => {
 
     const tileWidth = mini ? 8 : 31;
     gameRef.current = new Game(canvasRef.current, tileWidth);
+    gameRef.current.onStateChange = setIsGameOver;
 
     if (!gameRef.current) {
       return;
@@ -46,7 +50,7 @@ const GameCanvas = ({ animationEffect, gameRef, mini }: Props) => {
 
 
   return (
-    <Canvas ref={canvasRef} width={width} height={height} />
+    <Canvas ref={canvasRef} width={width} height={height} gameOver={isGameOver} />
   );
 };
 

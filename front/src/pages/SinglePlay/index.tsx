@@ -35,7 +35,7 @@ const SinglePlayPage = () => {
     });
 
     game.onScoreChange = setScore;
-    game.gameOverCallback = () => {
+    game.onStateChange = () => {
       Leaderboard.post({
         username: username,
         score: game.score,

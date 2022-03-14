@@ -22,11 +22,10 @@ const direction4: Point[] = [
 ];
 
 export class Game {
-
   public score: number;
-  public gameOver: boolean;
-  public gameOverCallback: (() => void) | null;
-  public touchCallback: ((p: Point) => void) | null;
+  public isGameOver: boolean;
+  public onStateChange?: (isGameOver: boolean) => void;
+  public touchCallback?: (p: Point) => void;
 
   public touchCount: number;
   public animationEffect: boolean;
@@ -64,9 +63,7 @@ export class Game {
     this.score = 0;
     this.touchCount = 0;
     this.receivedLineCount = 0;
-    this.gameOver = false;
-    this.gameOverCallback = null;
-    this.touchCallback = null;
+    this.isGameOver = false;
     this.lastPos = { 'y': -1, 'x': -1 };
 
     this.map = [[]];
@@ -191,12 +188,8 @@ export class Game {
       for (let j = 0; j < this.maxBlockColumn; j++) {
         if (i === 0) {
           if (this.map[i][j] !== 0) {
-            this.gameOver = true;
-
-            if (this.gameOverCallback != null) {
-              this.gameOverCallback();
-            }
-
+            this.isGameOver = true;
+            this.onStateChange?.(this.isGameOver);
             return;
           }
         } else {
@@ -280,7 +273,7 @@ export class Game {
 
   // 이곳에서 그리기 및 블록처리를 해준다.
   private gameLoop = () => {
-    if (this.gameOver) {
+    if (this.isGameOver) {
       return;
     }
 
@@ -364,11 +357,12 @@ export class Game {
     this.receivedLineCount = 0;
     this.lineHistory = [];
     this.touchHistory = [];
-    this.gameOver = false;
+    this.isGameOver = false;
     this.createBlock = false;
 
     this.seed = seed;
     this.initialize();
+    this.onStateChange?.(false);
 
     window.requestAnimationFrame(this.gameLoop);
   }
