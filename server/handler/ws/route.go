@@ -60,7 +60,8 @@ func WebSocketHandlerV1(c echo.Context) error {
 			return errors.InvalidSessionErr
 		}
 
-		if _, err := userManager.GetUser(ws); err != nil {
+		user, err := userManager.GetUser(ws)
+		if err != nil {
 			userManager.SetUser(ws, game.User{Id: userId, RoomId: 0})
 		}
 
@@ -70,6 +71,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 		}
 
 		var responses []WSResponse
+		skipResponse := false
 
 		switch request.Type {
 		case GetRoomsMessageType:
@@ -93,9 +95,15 @@ func WebSocketHandlerV1(c echo.Context) error {
 		case TouchMessageType:
 			touch := request.Data.(*game.TouchRequest)
 			responses, err = TouchTile(ws, *touch)
+		case HeartbeatType:
+			value := int(request.Data.(float64))
+			user.LastHearBeatValue = value
+			skipResponse = true
 		}
 
-		sendMessage(ws, request.Type, responses, err)
+		if !skipResponse {
+			sendMessage(ws, request.Type, responses, err)
+		}
 	}
 
 	return nil

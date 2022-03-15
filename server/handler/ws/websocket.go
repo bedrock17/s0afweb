@@ -18,6 +18,7 @@ const (
 	StartGameMessageType     WSMessageType = "start_game"
 	FinishGameMessageType    WSMessageType = "finish_game"
 	TouchMessageType         WSMessageType = "touch_tile"
+	HeartbeatType            WSMessageType = "heartbeat"
 )
 
 type WSRequest struct {

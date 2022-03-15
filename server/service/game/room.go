@@ -51,7 +51,7 @@ const (
 )
 
 type RoomManager interface {
-	NewRoom(config CreateRoomConfig, onGameFinish func(uint) func()) Room
+	NewRoom(config CreateRoomConfig, onGameFinish func(uint) func(), onHeartBeatFail func(uint) func()) Room
 	JoinRoom(client *websocket.Conn, roomId uint) error
 	ExitRoom(client *websocket.Conn, roomId uint) error
 	Get(roomId uint) (Room, error)
@@ -74,7 +74,7 @@ func NewRoomManager(userManager UserManager) RoomManager {
 	}
 }
 
-func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig, onGameFinish func(uint) func()) Room {
+func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig, onGameFinish func(uint) func(), onHeartBeatFail func(uint) func()) Room {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -89,8 +89,9 @@ func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig, onGameFinish func(uin
 		Status:   RoomStatusIdle,
 		Master:   config.Master,
 		GameTicker: utils.GameTicker{
-			Ticker:           time.NewTicker(1 * time.Second),
-			OnFinishCallback: onGameFinish(id),
+			Ticker:              time.NewTicker(1 * time.Second),
+			OnFinishCallback:    onGameFinish(id),
+			OnHeartBeatCallback: onHeartBeatFail(id),
 		},
 	}
 
@@ -137,7 +138,7 @@ func (m *RoomManagerImpl) JoinRoom(client *websocket.Conn, roomId uint) error {
 	if user.RoomId != 0 {
 		return errors.CannotJoinMultipleRoomErr
 	}
-	m.userManager.SetUser(client, User{user.Id, roomId})
+	m.userManager.SetUser(client, User{user.Id, roomId, 0})
 	room.Clients = append(room.Clients, client)
 	m.rooms[roomId] = room
 
@@ -184,7 +185,7 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 			room.Master = newMaster.Id
 		}
 		room.Clients = newClients
-		m.userManager.SetUser(client, User{user.Id, 0})
+		m.userManager.SetUser(client, User{user.Id, 0, 0})
 		m.rooms[roomId] = room
 	} else {
 		// 방의 마지막 유저인 경우 방 제거
