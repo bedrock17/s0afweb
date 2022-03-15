@@ -16,19 +16,40 @@ type RoomUsersV1Response struct {
 }
 
 func onGameFinish(roomId uint) func() {
+	userManager := service.GetService().UserManager()
 	gameRoomManager := service.GetService().GameRoomManager()
 	return func() {
+
 		room, err := gameRoomManager.Get(roomId)
 		if err != nil {
 			return
 		}
-		for _, client := range room.Clients {
-			// TODO: 점수 계산해서 브로드캐스트
+
+		index := 0
+		clients := make([]*websocket.Conn, len(room.Clients))
+		results := map[string]int{}
+
+		for c, sim := range room.Clients {
+			user, err := userManager.GetUser(c)
+			if err != nil {
+				continue
+			}
+			clients[index] = c
+			results[user.Id] = sim.Score
+			index += 1
+		}
+
+		for _, c := range clients {
 			respBytes, _ := json.Marshal(WSPayload{
 				Type: FinishGameMessageType,
-				Data: nil,
+				Data: results,
 			})
-			client.WriteMessage(websocket.TextMessage, respBytes)
+			_ = c.WriteMessage(websocket.TextMessage, respBytes)
+		}
+
+		err = gameRoomManager.ResetRoom(roomId)
+		if err != nil {
+			return
 		}
 	}
 }
@@ -43,7 +64,7 @@ func OnHeartBeatCallback(roomId uint) func() {
 			return
 		}
 
-		for _, client := range room.Clients {
+		for client := range room.Clients {
 			user, err := userManager.GetUser(client)
 
 			if err != nil {
@@ -51,7 +72,7 @@ func OnHeartBeatCallback(roomId uint) func() {
 			}
 
 			if user.LastHearBeatValue == 0 {
-				client.Close()
+				_ = client.Close()
 			} else {
 				user.LastHearBeatValue = 0
 			}
@@ -102,8 +123,16 @@ func JoinGameRoom(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 		return nil, err
 	}
 	room, _ := gameRoomManager.Get(roomId)
+
+	index := 0
+	clients := make([]*websocket.Conn, len(room.Clients))
+	for c := range room.Clients {
+		clients[index] = c
+		index += 1
+	}
+
 	joinResp := WSResponse{
-		Connections: room.Clients,
+		Connections: clients,
 		Payload: WSPayload{
 			Type: JoinRoomMessageType,
 			Data: user.Id,
@@ -116,10 +145,11 @@ func JoinGameRoom(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 			Data: room,
 		},
 	}
-	index := 0
+
+	index = 0
 	users := make([]string, len(room.Clients))
-	for _, client := range room.Clients {
-		user, err := userManager.GetUser(client)
+	for c := range room.Clients {
+		user, err := userManager.GetUser(c)
 		if err != nil {
 			continue
 		}
@@ -152,10 +182,18 @@ func ExitGameRoom(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 	if err := gameRoomManager.ExitRoom(client, roomId); err != nil {
 		return nil, err
 	}
+
 	room, err = gameRoomManager.Get(roomId)
+	index := 0
+	clients := make([]*websocket.Conn, len(room.Clients))
+	for c := range room.Clients {
+		clients[index] = c
+		index += 1
+	}
+
 	responses := make([]WSResponse, 1)
 	responses = append(responses, WSResponse{
-		Connections: room.Clients,
+		Connections: clients,
 		Payload: WSPayload{
 			Type: ExitRoomMessageType,
 			Data: user.Id,
@@ -163,7 +201,7 @@ func ExitGameRoom(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 	})
 	if err == nil && isRoomMaster {
 		responses = append(responses, WSResponse{
-			Connections: room.Clients,
+			Connections: clients,
 			Payload: WSPayload{
 				Type: GetRoomConfigMessageType,
 				Data: room,

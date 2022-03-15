@@ -34,7 +34,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 			responses, err := ExitGameRoom(ws, user.RoomId)
 			sendMessage(ws, ExitRoomMessageType, responses, err)
 		}
-		ws.Close()
+		_ = ws.Close()
 	}()
 
 	for {
@@ -94,6 +94,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 			responses, err = StartGame(ws, roomId)
 		case TouchMessageType:
 			touch := request.Data.(*game.TouchRequest)
+			err = SimulateOneStep(ws, *touch)
 			responses, err = TouchTile(ws, *touch)
 		case HeartbeatType:
 			value := int(request.Data.(float64))
@@ -117,12 +118,12 @@ func sendMessage(ws *websocket.Conn, reqType WSMessageType, responses []WSRespon
 			Error: err.(errors.WSError).Id,
 		})
 
-		ws.WriteMessage(websocket.TextMessage, respBytes)
+		_ = ws.WriteMessage(websocket.TextMessage, respBytes)
 	} else {
 		for _, resp := range responses {
 			for _, conn := range resp.Connections {
 				respBytes, _ := json.Marshal(resp.Payload)
-				conn.WriteMessage(websocket.TextMessage, respBytes)
+				_ = conn.WriteMessage(websocket.TextMessage, respBytes)
 			}
 		}
 	}

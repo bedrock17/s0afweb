@@ -5,6 +5,11 @@ import (
 	"github.com/bedrock17/s0afweb/models"
 )
 
+const (
+	DefaultMapWidth  int = 8
+	DefaultMapHeight int = 15
+)
+
 type XORShift struct {
 	seed  int32
 	state int32
@@ -22,7 +27,7 @@ func (x *XORShift) Next() int32 {
 	return x.state
 }
 
-type popTileGame struct {
+type PopTileGame struct {
 	Score      int
 	touchCount int
 
@@ -43,7 +48,7 @@ func isValidRange(p models.Point, maxColumns, maxRows int) bool {
 	return false
 }
 
-func (g *popTileGame) IsGameEnd() bool {
+func (g *PopTileGame) IsGameEnd() bool {
 	for i := 0; i < g.columns; i++ {
 		if i == 0 {
 			if g.gameMap[0][i] != 0 {
@@ -54,7 +59,7 @@ func (g *popTileGame) IsGameEnd() bool {
 	return false
 }
 
-func (g *popTileGame) MakeBlocks(line []int) {
+func (g *PopTileGame) MakeBlocks(line []int) {
 	for i := 0; i < g.rows; i++ {
 		for j := 0; j < g.columns; j++ {
 			if i != 0 {
@@ -67,14 +72,14 @@ func (g *popTileGame) MakeBlocks(line []int) {
 	}
 }
 
-func (g *popTileGame) InitMap(width, height int) {
+func (g *PopTileGame) InitMap(width, height int) {
 	g.gameMap = make([][]int, height)
 	for i := 0; i < height; i++ {
 		g.gameMap[i] = make([]int, width)
 	}
 }
 
-func (g *popTileGame) SetGameParameter(width, height int, seed int32) {
+func (g *PopTileGame) SetGameParameter(width, height int, seed int32) {
 	g.columns = width
 	g.rows = height
 	g.RandomSeed = seed
@@ -88,7 +93,7 @@ var direction4 = []models.Point{
 	{X: 0, Y: -1},
 }
 
-func (g *popTileGame) removeBlocks(p models.Point, blockCode int) int {
+func (g *PopTileGame) removeBlocks(p models.Point, blockCode int) int {
 	queue := make(chan models.Point, 120)
 	queue <- p
 	g.gameMap[p.Y][p.X] = 0
@@ -113,7 +118,7 @@ func (g *popTileGame) removeBlocks(p models.Point, blockCode int) int {
 	return count
 }
 
-func (g *popTileGame) dropBlocks() {
+func (g *PopTileGame) dropBlocks() {
 	isContinue := true
 	for isContinue {
 		isContinue = false
@@ -130,7 +135,7 @@ func (g *popTileGame) dropBlocks() {
 	}
 }
 
-func (g *popTileGame) SimulateOneStep(p models.Point) int {
+func (g *PopTileGame) SimulateOneStep(p models.Point) int {
 	var line []int = make([]int, g.columns)
 	for j := 0; j < g.columns; j++ {
 		v := g.random.Next()
@@ -147,9 +152,9 @@ func (g *popTileGame) SimulateOneStep(p models.Point) int {
 func Validate(data *models.Leaderboard) bool {
 	valid := false
 
-	game := popTileGame{}
+	game := PopTileGame{}
 
-	game.InitMap(8, 15)
+	game.InitMap(DefaultMapWidth, DefaultMapHeight)
 
 	var touchHistory []models.Point
 	err := json.Unmarshal([]byte(data.TouchHistory), &touchHistory)
@@ -157,7 +162,7 @@ func Validate(data *models.Leaderboard) bool {
 		panic(err)
 	}
 
-	game.SetGameParameter(8, 15, data.Seed)
+	game.SetGameParameter(DefaultMapWidth, DefaultMapHeight, data.Seed)
 
 	for i := 0; i < len(touchHistory); i++ {
 		game.SimulateOneStep(touchHistory[i])
@@ -168,4 +173,14 @@ func Validate(data *models.Leaderboard) bool {
 	}
 
 	return valid
+}
+
+func (g *PopTileGame) Initialize(width int, height int, seed int32) {
+	g.InitMap(width, height)
+	g.SetGameParameter(width, height, seed)
+}
+
+func (g *PopTileGame) WalkOneStep(x int, y int) {
+	p := models.Point{X: x, Y: y}
+	g.SimulateOneStep(p)
 }
