@@ -29,7 +29,6 @@ const GameCanvas = ({ animationEffect, gameRef, mini, readonly = false }: Props)
     const tileWidth = mini ? 8 : 31;
     gameRef.current = new Game(canvasRef.current, tileWidth);
     gameRef.current.onStateChange = setIsGameOver;
-    gameRef.current.readonly = readonly;
 
     if (!gameRef.current) {
       return;
@@ -45,7 +44,8 @@ const GameCanvas = ({ animationEffect, gameRef, mini, readonly = false }: Props)
       return;
     }
     gameRef.current.animationEffect = animationEffect;
-  }, [animationEffect, gameRef]);
+    gameRef.current.readonly = readonly;
+  }, [readonly, animationEffect, gameRef]);
 
   const width = mini ? '64px' : '245px';
   const height = mini ? '120px' : '460px';

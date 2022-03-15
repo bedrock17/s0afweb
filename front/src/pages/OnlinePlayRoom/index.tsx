@@ -120,13 +120,13 @@ const OnlinePlayRoom = () => {
     websocket.messageHandle[messageType.startGame] = (touchMessage) => {
       const gameStartMessage = touchMessage.data as GameStartResponse;
 
+      setGameStarted(true);
       opponentRefs.forEach((opponent) => {
         opponent.ref.current?.startGame(gameStartMessage.seed);
       });
 
       tempRef.current?.startGame(gameStartMessage.seed);
       if (tempRef.current) {
-        tempRef.current.readonly = false;
         tempRef.current.onScoreChange = setScore;
         tempRef.current.touchCallback = (p: Point) => {
           const touchRequest: WebsocketSendMessage<Point> = {
@@ -149,6 +149,7 @@ const OnlinePlayRoom = () => {
     };
 
     websocket.messageHandle[messageType.finishGame] = () => {
+      setGameStarted(false);
       alert('game finished');
     };
   }, [user, opponentRefs]);
@@ -193,8 +194,6 @@ const OnlinePlayRoom = () => {
         type: messageType.startGame,
         data: roomId,
       };
-      console.log(startMessage);
-      setGameStarted(startMessage.data !== 0);
       websocket.ws.send(JSON.stringify(startMessage));
     }
   };
@@ -214,7 +213,7 @@ const OnlinePlayRoom = () => {
         </OpponentWrapper>
         <Username master={user && room?.master === user.user_id}>{ user?.user_id }</Username>
         <span>Score : { score }</span>
-        <GameCanvas animationEffect={false} gameRef={tempRef} readonly />
+        <GameCanvas animationEffect={false} gameRef={tempRef} readonly={!gameStarted} />
         <Button color={'blue'} onClick={sendGameStart} disabled={!user || room?.master !== user.user_id}>
           Game Start
         </Button>
