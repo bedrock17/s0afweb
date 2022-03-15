@@ -11,10 +11,11 @@ type Props = {
   animationEffect: boolean,
   gameRef: MutableRefObject<Game | undefined>,
   mini?: boolean,
+  readonly?: boolean,
 };
 
 
-const GameCanvas = ({ animationEffect, gameRef, mini }: Props) => {
+const GameCanvas = ({ animationEffect, gameRef, mini, readonly = false }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isGameOver, setIsGameOver] = useState(false);
 
@@ -28,6 +29,7 @@ const GameCanvas = ({ animationEffect, gameRef, mini }: Props) => {
     const tileWidth = mini ? 8 : 31;
     gameRef.current = new Game(canvasRef.current, tileWidth);
     gameRef.current.onStateChange = setIsGameOver;
+    gameRef.current.readonly = readonly;
 
     if (!gameRef.current) {
       return;

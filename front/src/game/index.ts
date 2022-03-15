@@ -22,6 +22,7 @@ const direction4: Point[] = [
 ];
 
 export class Game {
+  public readonly: boolean;
   public score: number;
   public isGameOver: boolean;
   public onStateChange?: (isGameOver: boolean) => void;
@@ -60,6 +61,7 @@ export class Game {
 
 
   constructor(canvas: HTMLCanvasElement, tileWidth = 31) {
+    this.readonly = false;
     this.score = 0;
     this.touchCount = 0;
     this.receivedLineCount = 0;
@@ -215,6 +217,10 @@ export class Game {
   }
 
   private onTileClick = (e: MouseEvent) => {
+    if (this.readonly) {
+      return;
+    }
+
     const pos = Game.getMousePoint(this.canvas, e);
     const { x, y } = pos;
 

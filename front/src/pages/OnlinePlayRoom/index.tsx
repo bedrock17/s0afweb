@@ -197,7 +197,7 @@ const OnlinePlayRoom = () => {
             opponentRefs.map((opponent) => (
               <OpponentContainer key={opponent.userId}>
                 <OpponentName>{ opponent.userId }</OpponentName>
-                <GameCanvas animationEffect={false} gameRef={opponent.ref} mini />
+                <GameCanvas animationEffect={false} gameRef={opponent.ref} mini readonly />
               </OpponentContainer>
             ))
           }
