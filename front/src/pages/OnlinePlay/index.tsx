@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSetRecoilState } from 'recoil';
 
+import { gameRoomState } from '~/atoms/game';
 import Button from '~/components/Button';
 import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
 import { getWebsocketInstance, messageType } from '~/ws/websocket';
 
 import { Wrapper } from './styles';
-import { useSetRecoilState } from 'recoil';
-import { gameRoomState } from '~/atoms/game';
 
 const OnlinePlay = () => {
   const navigate = useNavigate();

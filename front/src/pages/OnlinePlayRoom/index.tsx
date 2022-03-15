@@ -212,13 +212,9 @@ const OnlinePlayRoom = () => {
         <Username master={user && room?.master === user.user_id}>{ user?.user_id }</Username>
         <span>Score : { score }</span>
         <GameCanvas animationEffect={false} gameRef={tempRef} readonly={!gameStarted} />
-        {
-          user && getWebsocketInstance().currentRoom?.master === user.user_id && (
-            <Button color={'blue'} onClick={sendGameStart}>
-              GameStart
-            </Button>
-          )
-        }
+        <Button color={'blue'} onClick={sendGameStart} disabled={!user || room?.master !== user.user_id}>
+          Game Start
+        </Button>
       </Wrapper>
     </OnlinePlayLayout>
   );

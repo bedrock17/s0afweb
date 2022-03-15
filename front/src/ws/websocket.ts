@@ -14,8 +14,6 @@ export class PopTileWebsocket {
   ws: WebSocket;
   messageHandle: Record<string, (msg: WebsocketReceiveMessage<WebsocketMessageData>) => void> = {};
 
-  currentRoom?: Room;
-
   constructor(ws: WebSocket) {
     this.ws = ws;
   }
