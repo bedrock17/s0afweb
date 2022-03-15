@@ -117,18 +117,34 @@ func ExitGameRoom(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+	room, err := gameRoomManager.Get(roomId)
+	if err != nil {
+		return nil, err
+	}
+	isRoomMaster := room.Master == user.Id
+
 	if err := gameRoomManager.ExitRoom(client, roomId); err != nil {
 		return nil, err
 	}
-	room, _ := gameRoomManager.Get(roomId)
-	resp := WSResponse{
+	room, err = gameRoomManager.Get(roomId)
+	responses := make([]WSResponse, 1)
+	responses = append(responses, WSResponse{
 		Connections: room.Clients,
 		Payload: WSPayload{
 			Type: ExitRoomMessageType,
 			Data: user.Id,
 		},
+	})
+	if err == nil && isRoomMaster {
+		responses = append(responses, WSResponse{
+			Connections: room.Clients,
+			Payload: WSPayload{
+				Type: GetRoomConfigMessageType,
+				Data: room,
+			},
+		})
 	}
-	return []WSResponse{resp}, nil
+	return responses, nil
 }
 
 func GetRoomConfig(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
@@ -142,7 +158,7 @@ func GetRoomConfig(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 	resp := WSResponse{
 		Connections: []*websocket.Conn{client},
 		Payload: WSPayload{
-			Type: ExitRoomMessageType,
+			Type: GetRoomConfigMessageType,
 			Data: room,
 		},
 	}

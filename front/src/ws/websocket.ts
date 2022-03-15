@@ -3,6 +3,7 @@ export const messageType = {
   joinRoom: 'join_room',
   exitRoom: 'exit_room',
   getRooms: 'get_rooms',
+  roomConfig: 'room_config',
   roomUsers: 'room_users',
   startGame: 'start_game',
   finishGame: 'finish_game',
@@ -13,11 +14,10 @@ export class PopTileWebsocket {
   ws: WebSocket;
   messageHandle: Record<string, (msg: WebsocketReceiveMessage<WebsocketMessageData>) => void> = {};
 
-  roomMaster: string;
+  currentRoom?: Room;
 
   constructor(ws: WebSocket) {
     this.ws = ws;
-    this.roomMaster = '';
   }
 }
 

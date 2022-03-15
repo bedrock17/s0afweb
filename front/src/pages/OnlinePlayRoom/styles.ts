@@ -28,14 +28,25 @@ export const OpponentContainer = styled('div', {
   width: '64px',
 });
 
-export const OpponentName = styled('span', {
+export const Username = styled('span', {
   '&': {
-    display: 'block',
-    width: '100%',
-    overflow: 'hidden',
+  },
+  variants: {
+    opponent: {
+      true: {
+        display: 'block',
+        width: '100%',
+        overflow: 'hidden',
 
-    fontSize: rem(12),
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
+        fontSize: rem(12),
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+      }
+    },
+    master: {
+      true: {
+        fontWeight: 700,
+      }
+    }
   }
 });

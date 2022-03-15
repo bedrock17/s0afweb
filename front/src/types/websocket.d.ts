@@ -12,6 +12,7 @@ type Room = {
   play_time: number,
   status: RoomStatus,
   master: UserID,
+  game_started_at: number,
 };
 
 type GameStartResponse = {

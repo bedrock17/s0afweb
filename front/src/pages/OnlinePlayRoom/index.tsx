@@ -2,9 +2,10 @@ import React, {
   useEffect, useRef, useState
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { userState } from '~/atoms/auth';
+import { gameRoomState } from '~/atoms/game';
 import Button from '~/components/Button';
 import GameCanvas from '~/components/GameCanvas';
 import type { Game } from '~/game';
@@ -13,7 +14,7 @@ import { WSError } from '~/ws/errors';
 import { getWebsocketInstance, messageType } from '~/ws/websocket';
 
 import {
-  OpponentContainer, OpponentName, OpponentWrapper, Wrapper
+  OpponentContainer, Username, OpponentWrapper, Wrapper
 } from './styles';
 
 type UserMappedGameRef = {
@@ -36,10 +37,10 @@ const OnlinePlayRoom = () => {
   const user = useRecoilValue(userState);
   const [opponentRefs, setOpponentRefs] = useState<UserMappedGameRef[]>([]);
   const [score, setScore] = useState(0);
+  const [room, setRoom] = useRecoilState(gameRoomState);
   const tempRef = useRef<Game>();
   const navigate = useNavigate();
   const [gameStarted, setGameStarted] = useState(false);
-
 
   const exitRoom = (roomId: RoomId) => {
     const websocket = getWebsocketInstance();
@@ -100,6 +101,11 @@ const OnlinePlayRoom = () => {
           userId,
         }));
       setOpponentRefs(refs);
+    };
+
+    websocket.messageHandle[messageType.roomConfig] = (data) => {
+      const response = data as WebsocketReceiveMessage<Room>;
+      setRoom(response.data);
     };
 
     websocket.messageHandle[messageType.exitRoom] = (data) => {
@@ -183,7 +189,7 @@ const OnlinePlayRoom = () => {
     if (roomId) {
       const startMessage: WebsocketSendMessage<RoomId> = {
         type: messageType.startGame,
-        data: roomId
+        data: roomId,
       };
       websocket.ws.send(JSON.stringify(startMessage));
       setGameStarted(true);
@@ -197,18 +203,22 @@ const OnlinePlayRoom = () => {
           {
             opponentRefs.map((opponent) => (
               <OpponentContainer key={opponent.userId}>
-                <OpponentName>{ opponent.userId }</OpponentName>
+                <Username opponent master={room?.master === opponent.userId}>{ opponent.userId }</Username>
                 <GameCanvas animationEffect={false} gameRef={opponent.ref} mini readonly />
               </OpponentContainer>
             ))
           }
         </OpponentWrapper>
-        { user?.user_id }
+        <Username master={user && room?.master === user.user_id}>{ user?.user_id }</Username>
         <span>Score : { score }</span>
-        <GameCanvas animationEffect={false} gameRef={tempRef} readonly={!gameStarted}/>
-        <Button color={'blue'} onClick={sendGameStart} disabled={user && getWebsocketInstance().roomMaster !== user.user_id}>
-        GameStart
-        </Button>
+        <GameCanvas animationEffect={false} gameRef={tempRef} readonly={!gameStarted} />
+        {
+          user && getWebsocketInstance().currentRoom?.master === user.user_id && (
+            <Button color={'blue'} onClick={sendGameStart}>
+              GameStart
+            </Button>
+          )
+        }
       </Wrapper>
     </OnlinePlayLayout>
   );

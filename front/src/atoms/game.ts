@@ -14,3 +14,8 @@ export const gameAnimationEffectState = atom({
   key: 'gameAnimationEffect',
   default: true,
 });
+
+export const gameRoomState = atom<Room | undefined>({
+  key: 'gameRoom',
+  default: undefined,
+});

@@ -6,16 +6,19 @@ import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
 import { getWebsocketInstance, messageType } from '~/ws/websocket';
 
 import { Wrapper } from './styles';
+import { useSetRecoilState } from 'recoil';
+import { gameRoomState } from '~/atoms/game';
 
 const OnlinePlay = () => {
   const navigate = useNavigate();
   const websocket = getWebsocketInstance();
+  const setRoom = useSetRecoilState(gameRoomState);
 
   useEffect(() => {
     websocket.messageHandle[messageType.createRoom] = (msg) => {
-      const room = msg as WebsocketReceiveMessage<Room>;
-      websocket.roomMaster = room.data.master;
-      navigate('/online/room#' + room.data.id);
+      const response = msg as WebsocketReceiveMessage<Room>;
+      setRoom(response.data);
+      navigate(`/online/room#${response.data.id}`);
     };
   }, []);
 
