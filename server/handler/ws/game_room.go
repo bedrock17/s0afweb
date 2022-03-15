@@ -33,6 +33,32 @@ func onGameFinish(roomId uint) func() {
 	}
 }
 
+func OnHeartBeatCallback(roomId uint) func() {
+	gameRoomManager := service.GetService().GameRoomManager()
+	userManager := service.GetService().UserManager()
+	return func() {
+		room, err := gameRoomManager.Get(roomId)
+
+		if err != nil {
+			return
+		}
+
+		for _, client := range room.Clients {
+			user, err := userManager.GetUser(client)
+
+			if err != nil {
+				return
+			}
+
+			if user.LastHearBeatValue == 0 {
+				client.Close()
+			} else {
+				user.LastHearBeatValue = 0
+			}
+		}
+	}
+}
+
 func GetRooms(client *websocket.Conn) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	rooms := gameRoomManager.Gets()
@@ -49,7 +75,7 @@ func GetRooms(client *websocket.Conn) ([]WSResponse, error) {
 
 func CreateGameRoom(client *websocket.Conn, config game.CreateRoomConfig) ([]WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
-	room := gameRoomManager.NewRoom(config, onGameFinish)
+	room := gameRoomManager.NewRoom(config, onGameFinish, OnHeartBeatCallback)
 	if err := gameRoomManager.JoinRoom(client, room.Id); err != nil {
 		return nil, err
 	}

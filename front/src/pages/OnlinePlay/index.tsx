@@ -27,7 +27,7 @@ const OnlinePlay = () => {
       type: messageType.createRoom,
       data: {
         capacity: 10,
-        play_time: 10,
+        play_time: 180,
       }
     };
 

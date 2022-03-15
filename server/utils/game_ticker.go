@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -9,14 +8,19 @@ type GameTicker struct {
 	Ticker              *time.Ticker
 	TickerDeadlineMilli int64
 	OnFinishCallback    func()
+	OnHeartBeatCallback func()
 }
 
 func (gt GameTicker) Start() {
 	go func() {
+		lastHeartBeatCheckTime := time.Now().UnixMilli()
 		for range gt.Ticker.C {
-			fmt.Println("Tick")
-			if time.Now().UnixMilli() >= gt.TickerDeadlineMilli {
-				fmt.Println("Done")
+			nowMilli := time.Now().UnixMilli()
+			if nowMilli-lastHeartBeatCheckTime > 10000 {
+				gt.OnHeartBeatCallback()
+			}
+
+			if nowMilli >= gt.TickerDeadlineMilli {
 				gt.Ticker.Stop()
 				if gt.OnFinishCallback != nil {
 					gt.OnFinishCallback()

@@ -7,8 +7,9 @@ import (
 )
 
 type User struct {
-	Id     string
-	RoomId uint
+	Id                string
+	RoomId            uint
+	LastHearBeatValue int
 }
 
 type UserManager interface {
