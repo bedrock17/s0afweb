@@ -38,6 +38,7 @@ const OnlinePlayRoom = () => {
   const [score, setScore] = useState(0);
   const tempRef = useRef<Game>();
   const navigate = useNavigate();
+  const [gameStarted, setGameStarted] = useState(false);
 
 
   const exitRoom = (roomId: RoomId) => {
@@ -179,13 +180,13 @@ const OnlinePlayRoom = () => {
   const sendGameStart = () => {
     const websocket = getWebsocketInstance();
     const roomId = getRoomId();
-
     if (roomId) {
       const startMessage: WebsocketSendMessage<RoomId> = {
         type: messageType.startGame,
         data: roomId
       };
       websocket.ws.send(JSON.stringify(startMessage));
+      setGameStarted(true);
     }
   };
 
@@ -204,7 +205,7 @@ const OnlinePlayRoom = () => {
         </OpponentWrapper>
         { user?.user_id }
         <span>Score : { score }</span>
-        <GameCanvas animationEffect={false} gameRef={tempRef} />
+        <GameCanvas animationEffect={false} gameRef={tempRef} readonly={!gameStarted}/>
         <Button color={'blue'} onClick={sendGameStart} disabled={user && getWebsocketInstance().roomMaster !== user.user_id}>
         GameStart
         </Button>
