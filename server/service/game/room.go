@@ -180,7 +180,7 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 	if len(room.Clients) > 1 {
 		index := 0
 		newClients := map[*websocket.Conn]*game.PopTileGame{}
-		newUsers := make([]User, len(room.Clients)-1)
+		newUsers := make([]*User, len(room.Clients)-1)
 		for conn, sim := range room.Clients {
 			u, err := m.userManager.GetUser(conn)
 			if err != nil {

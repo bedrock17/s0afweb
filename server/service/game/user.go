@@ -15,32 +15,32 @@ type User struct {
 type UserManager interface {
 	SetUser(client *websocket.Conn, user User)
 	RemoveUser(client *websocket.Conn)
-	GetUser(client *websocket.Conn) (User, error)
+	GetUser(client *websocket.Conn) (*User, error)
 }
 
 type UserManagerImpl struct {
 	mu    sync.Mutex
-	state map[*websocket.Conn]User
+	state map[*websocket.Conn]*User
 }
 
 func NewUserManager() UserManager {
 	return &UserManagerImpl{
-		state: make(map[*websocket.Conn]User),
+		state: make(map[*websocket.Conn]*User),
 	}
 }
 
 func (m *UserManagerImpl) SetUser(client *websocket.Conn, user User) {
-	m.state[client] = user
+	m.state[client] = &user
 }
 
 func (m *UserManagerImpl) RemoveUser(client *websocket.Conn) {
 	delete(m.state, client)
 }
 
-func (m *UserManagerImpl) GetUser(client *websocket.Conn) (User, error) {
+func (m *UserManagerImpl) GetUser(client *websocket.Conn) (*User, error) {
 	user, ok := m.state[client]
 	if !ok {
-		return User{}, errors.UserNotFoundErr
+		return nil, errors.UserNotFoundErr
 	}
 
 	return user, nil

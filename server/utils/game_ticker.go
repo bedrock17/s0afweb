@@ -18,6 +18,7 @@ func (gt GameTicker) Start() {
 			nowMilli := time.Now().UnixMilli()
 			if nowMilli-lastHeartBeatCheckTime > 10000 {
 				gt.OnHeartBeatCallback()
+				lastHeartBeatCheckTime = nowMilli
 			}
 
 			if nowMilli >= gt.TickerDeadlineMilli {
