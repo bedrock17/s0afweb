@@ -5,6 +5,7 @@ type CreateRoom = {
 
 type RoomStatus = number;
 type RoomId = number;
+type HeartBeatValue = number;
 
 type Room = {
   id: number,

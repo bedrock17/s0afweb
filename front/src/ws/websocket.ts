@@ -8,6 +8,7 @@ export const messageType = {
   startGame: 'start_game',
   finishGame: 'finish_game',
   touch: 'touch_tile',
+  heartbeat: 'heartbeat',
 };
 
 export class PopTileWebsocket {
