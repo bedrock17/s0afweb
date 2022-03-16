@@ -1,4 +1,5 @@
 import React, {
+  useCallback,
   useEffect, useRef, useState
 } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +15,7 @@ import { WSError } from '~/ws/errors';
 import { getWebsocketInstance, messageType } from '~/ws/websocket';
 
 import {
-  OpponentContainer, Username, OpponentWrapper, Wrapper, Score
+  OpponentContainer, Username, OpponentWrapper, Wrapper, Score, ScoreboardModal, ScoreTable, Dim
 } from './styles';
 
 type UserMappedGameRef = {
@@ -42,6 +43,12 @@ const OnlinePlayRoom = () => {
   const tempRef = useRef<Game>();
   const navigate = useNavigate();
   const [gameStarted, setGameStarted] = useState(false);
+  const [gameResult, setGameResult] = useState<[string, number][]>([]);
+  const [showModal, setShowModal] = useState(false);
+
+  const onCloseModal = useCallback(() => {
+    setShowModal(false);
+  }, []);
 
   const exitRoom = (roomId: RoomId) => {
     const websocket = getWebsocketInstance();
@@ -188,7 +195,11 @@ const OnlinePlayRoom = () => {
       });
     };
 
-    websocket.messageHandle[messageType.finishGame] = () => {
+    websocket.messageHandle[messageType.finishGame] = (data) => {
+      const response = data as WebsocketReceiveMessage<FinishGameResponse>;
+      const sortedResult = Object.entries(response.data).sort(([,x],[,y]) => y - x);
+      setGameResult(sortedResult);
+      setShowModal(true);
       setGameStarted(false);
       alert('game finished');
     };
@@ -261,6 +272,32 @@ const OnlinePlayRoom = () => {
           Game Start
         </Button>
       </Wrapper>
+      { showModal && (
+        <>
+          <Dim />
+          <ScoreboardModal>
+            <ScoreTable>
+              <thead>
+                <tr>
+                  <th>이름</th>
+                  <th>점수</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  gameResult.map(([username, value]) => (
+                    <tr key={username}>
+                      <td>{ username }</td>
+                      <td>{ value }</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </ScoreTable>
+            <Button color={'blue'} onClick={onCloseModal}>닫기</Button>
+          </ScoreboardModal>
+        </>
+      )}
     </OnlinePlayLayout>
   );
 };

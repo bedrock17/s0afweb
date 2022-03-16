@@ -25,6 +25,8 @@ type RoomUsersResponse = {
   user_ids: UserID[],
 };
 
+type FinishGameResponse = Record<string, number>;
+
 type WebsocketMessageData = |
   Room |
   CreateRoom |

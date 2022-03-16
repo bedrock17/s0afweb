@@ -68,3 +68,41 @@ export const Score = styled('span', {
     },
   }
 });
+
+export const ScoreboardModal = styled('div', {
+  '&': {
+    position: 'fixed',
+
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+
+    width: '100%',
+    maxWidth: rem(320),
+    minHeight: '50%',
+    padding: rem(10),
+    border: `${rem(1)} solid $gray700`,
+
+    backgroundColor: '$white',
+  },
+});
+
+export const ScoreTable = styled('table', {
+  maxWidth: rem(180),
+  width: '100%',
+
+  'tr': {
+    height: rem(24),
+  },
+  'th, td': {
+    textAlign: 'center',
+  }
+});
+
+export const Dim = styled('div', {
+  position: 'fixed',
+  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  width: '100%',
+  height: '100%',
+});
