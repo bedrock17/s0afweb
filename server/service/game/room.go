@@ -11,14 +11,14 @@ import (
 )
 
 type TouchRequest struct {
-	X uint `json:"x" validate:"required,numeric"`
-	Y uint `json:"y" validate:"required,numeric"`
+	X int `json:"x" validate:"required,numeric"`
+	Y int `json:"y" validate:"required,numeric"`
 }
 
 type TouchResponse struct {
 	UserID string `json:"user_id"`
-	X      uint   `json:"x"`
-	Y      uint   `json:"y"`
+	X      int    `json:"x"`
+	Y      int    `json:"y"`
 }
 
 type CreateRoomConfig struct {

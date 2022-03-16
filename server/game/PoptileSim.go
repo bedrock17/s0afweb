@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/bedrock17/s0afweb/models"
 )
 
@@ -170,6 +171,16 @@ func Validate(data *models.Leaderboard) bool {
 	}
 
 	return valid
+}
+
+func (g *PopTileGame) PrintMap() {
+	fmt.Printf("========%d========\n", g.touchCount)
+	for i := 0; i < g.rows; i++ {
+		for j := 0; j < g.columns; j++ {
+			fmt.Printf("%d ", g.gameMap[i][j])
+		}
+		fmt.Print("\n")
+	}
 }
 
 func (g *PopTileGame) Initialize(width int, height int, seed int32) {

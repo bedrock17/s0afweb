@@ -90,6 +90,36 @@ func SimulateOneStep(client *websocket.Conn, touch game.TouchRequest) error {
 		return errors.UserNotFoundErr
 	}
 	// TODO: X, Y가 int 인지 uint 인지 결정할 것
-	simulator.WalkOneStep(int(touch.X), int(touch.Y))
+	simulator.WalkOneStep(touch.X, touch.Y)
 	return nil
+}
+
+func GameOver(client *websocket.Conn) (bool, error) {
+	gameRoomManager := service.GetService().GameRoomManager()
+	userManager := service.GetService().UserManager()
+
+	user, err := userManager.GetUser(client)
+	if err != nil {
+		return false, err
+	}
+
+	room, err := gameRoomManager.Get(user.RoomId)
+	if err != nil {
+		return false, err
+	}
+
+	count := 0
+	for _, sim := range room.Clients {
+		if sim.GameOver {
+			count += 1
+		}
+	}
+
+	result := false
+	if count >= len(room.Clients) {
+		result = true
+		room.GameTicker.ForceQuit()
+	}
+
+	return result, nil
 }

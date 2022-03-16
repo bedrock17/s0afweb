@@ -31,3 +31,10 @@ func (gt GameTicker) Start() {
 		}
 	}()
 }
+
+func (gt GameTicker) ForceQuit() {
+	gt.Ticker.Stop()
+	if gt.OnFinishCallback != nil {
+		gt.OnFinishCallback()
+	}
+}

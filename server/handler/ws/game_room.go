@@ -19,7 +19,6 @@ func onGameFinish(roomId uint) func() {
 	userManager := service.GetService().UserManager()
 	gameRoomManager := service.GetService().GameRoomManager()
 	return func() {
-
 		room, err := gameRoomManager.Get(roomId)
 		if err != nil {
 			return

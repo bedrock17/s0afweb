@@ -95,6 +95,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 		case TouchMessageType:
 			touch := request.Data.(*game.TouchRequest)
 			err = SimulateOneStep(ws, *touch)
+			_, _ = GameOver(ws)
 			responses, err = TouchTile(ws, *touch)
 		case HeartbeatType:
 			value := int(request.Data.(float64))
