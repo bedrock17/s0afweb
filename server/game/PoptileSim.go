@@ -49,29 +49,23 @@ func isValidRange(p models.Point, maxColumns, maxRows int) bool {
 	return false
 }
 
-func (g *PopTileGame) IsGameEnd() bool {
+func (g *PopTileGame) isGameEnd() bool {
 	for i := 0; i < g.columns; i++ {
-		if i == 0 {
-			if g.gameMap[0][i] != 0 {
-				return true
-			}
+		if g.gameMap[0][i] != 0 {
+			return true
 		}
 	}
 	return false
 }
 
-func (g *PopTileGame) MakeBlocks(line []int) {
-	for i := 0; i < g.rows; i++ {
+func (g *PopTileGame) makeBlocks() {
+	for i := 1; i < g.rows; i++ {
 		for j := 0; j < g.columns; j++ {
-			if i == 0 {
-				if g.gameMap[0][j] != 0 {
-					g.GameOver = true
-				}
-			} else {
-				g.gameMap[i-1][j] = g.gameMap[i][j]
-			}
+			g.gameMap[i-1][j] = g.gameMap[i][j]
+
 			if i == g.rows-1 {
-				g.gameMap[i][j] = line[j]
+				v := g.random.Next()
+				g.gameMap[i][j] = int((v % 3) + 1)
 			}
 		}
 	}
@@ -142,12 +136,8 @@ func (g *PopTileGame) dropBlocks() {
 }
 
 func (g *PopTileGame) SimulateOneStep(p models.Point) int {
-	var line []int = make([]int, g.columns)
-	for j := 0; j < g.columns; j++ {
-		v := g.random.Next()
-		line[j] = int((v % 3) + 1)
-	}
-	g.MakeBlocks(line)
+	g.GameOver = g.isGameEnd()
+	g.makeBlocks()
 	count := g.removeBlocks(p, g.gameMap[p.Y][p.X])
 	g.Score += count * count
 	g.dropBlocks()
@@ -184,6 +174,7 @@ func Validate(data *models.Leaderboard) bool {
 func (g *PopTileGame) Initialize(width int, height int, seed int32) {
 	g.InitMap(width, height)
 	g.SetGameParameter(width, height, seed)
+	g.makeBlocks()
 }
 
 func (g *PopTileGame) WalkOneStep(x int, y int) {
