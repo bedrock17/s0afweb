@@ -50,3 +50,21 @@ export const Username = styled('span', {
     }
   }
 });
+
+export const Score = styled('span', {
+  '&': {
+  },
+  variants: {
+    opponent: {
+      true: {
+        display: 'block',
+        width: '100%',
+        overflow: 'hidden',
+
+        fontSize: rem(12),
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis',
+      }
+    },
+  }
+});

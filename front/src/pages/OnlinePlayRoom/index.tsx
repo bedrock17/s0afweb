@@ -14,7 +14,7 @@ import { WSError } from '~/ws/errors';
 import { getWebsocketInstance, messageType } from '~/ws/websocket';
 
 import {
-  OpponentContainer, Username, OpponentWrapper, Wrapper
+  OpponentContainer, Username, OpponentWrapper, Wrapper, Score
 } from './styles';
 
 type UserMappedGameRef = {
@@ -36,6 +36,7 @@ const getRoomId = (): number | undefined => {
 const OnlinePlayRoom = () => {
   const user = useRecoilValue(userState);
   const [opponentRefs, setOpponentRefs] = useState<UserMappedGameRef[]>([]);
+  const [opponentScores, setOpponentScores] = useState<number[]>([]);
   const [score, setScore] = useState(0);
   const [room, setRoom] = useRecoilState(gameRoomState);
   const tempRef = useRef<Game>();
@@ -49,6 +50,11 @@ const OnlinePlayRoom = () => {
       data: roomId,
     };
     websocket.ws.send(JSON.stringify(payload));
+  };
+
+  const setOpponentScore = (index: number) => (value: number) => {
+    opponentScores[index] = value;
+    setOpponentScores([...opponentScores]);
   };
 
   useEffect(() => {
@@ -86,10 +92,15 @@ const OnlinePlayRoom = () => {
       if (userId === user?.user_id) {
         return;
       }
-      setOpponentRefs((prev) => [...prev, {
-        ref: { current: undefined },
-        userId,
-      }]);
+      setOpponentRefs((prev) => {
+        return [...prev, {
+          ref: { current: undefined },
+          userId,
+        }];
+      });
+      setOpponentScores((prev) => {
+        return [...prev, 0];
+      });
     };
 
     websocket.messageHandle[messageType.roomUsers] = (data) => {
@@ -101,6 +112,7 @@ const OnlinePlayRoom = () => {
           userId,
         }));
       setOpponentRefs(refs);
+      setOpponentScores(users.map(() => 0));
     };
 
     websocket.messageHandle[messageType.roomConfig] = (data) => {
@@ -114,15 +126,21 @@ const OnlinePlayRoom = () => {
       if (userId === user?.user_id) {
         return;
       }
+      const index = opponentRefs.findIndex((ref) => ref.userId === userId);
       setOpponentRefs((prev) => prev.filter((ref) => ref.userId !== userId));
+      setOpponentScores([...opponentScores.slice(0, index), ...opponentScores.slice(index + 1)]);
     };
 
     websocket.messageHandle[messageType.startGame] = (touchMessage) => {
       const gameStartMessage = touchMessage.data as GameStartResponse;
 
       setGameStarted(true);
-      opponentRefs.forEach((opponent) => {
-        opponent.ref.current?.startGame(gameStartMessage.seed);
+      opponentRefs.forEach((opponent, index) => {
+        if (!opponent.ref.current) {
+          return;
+        }
+        opponent.ref.current.startGame(gameStartMessage.seed);
+        opponent.ref.current.onScoreChange = setOpponentScore(index);
       });
 
       tempRef.current?.startGame(gameStartMessage.seed);
@@ -203,12 +221,15 @@ const OnlinePlayRoom = () => {
       <Wrapper>
         <OpponentWrapper>
           {
-            opponentRefs.map((opponent) => (
-              <OpponentContainer key={opponent.userId}>
-                <Username opponent master={room?.master === opponent.userId}>{ opponent.userId }</Username>
-                <GameCanvas animationEffect={false} gameRef={opponent.ref} mini readonly />
-              </OpponentContainer>
-            ))
+            opponentRefs.map((opponent) => {
+              return (
+                <OpponentContainer key={opponent.userId}>
+                  <Username opponent master={room?.master === opponent.userId}>{ opponent.userId }</Username>
+                  <GameCanvas animationEffect={false} gameRef={opponent.ref} mini readonly />
+                  <Score opponent>{ opponent.ref.current?.score }</Score>
+                </OpponentContainer>
+              );
+            })
           }
         </OpponentWrapper>
         <Username master={user && room?.master === user.user_id}>{ user?.user_id }</Username>
