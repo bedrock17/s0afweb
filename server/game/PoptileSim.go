@@ -58,7 +58,7 @@ func (g *PopTileGame) isGameEnd() bool {
 	return false
 }
 
-func (g *PopTileGame) makeBlocks() {
+func (g *PopTileGame) MakeBlocks() {
 	for i := 1; i < g.rows; i++ {
 		for j := 0; j < g.columns; j++ {
 			g.gameMap[i-1][j] = g.gameMap[i][j]
@@ -136,11 +136,13 @@ func (g *PopTileGame) dropBlocks() {
 }
 
 func (g *PopTileGame) SimulateOneStep(p models.Point) int {
-	g.GameOver = g.isGameEnd()
-	g.makeBlocks()
+
 	count := g.removeBlocks(p, g.gameMap[p.Y][p.X])
 	g.Score += count * count
 	g.dropBlocks()
+
+	g.GameOver = g.isGameEnd()
+	g.MakeBlocks()
 
 	return count
 }
@@ -148,17 +150,16 @@ func (g *PopTileGame) SimulateOneStep(p models.Point) int {
 func Validate(data *models.Leaderboard) bool {
 	valid := false
 
-	game := PopTileGame{}
-
-	game.InitMap(DefaultMapWidth, DefaultMapHeight)
-
 	var touchHistory []models.Point
 	err := json.Unmarshal([]byte(data.TouchHistory), &touchHistory)
 	if err != nil {
 		panic(err)
 	}
 
+	game := PopTileGame{}
+	game.InitMap(DefaultMapWidth, DefaultMapHeight)
 	game.SetGameParameter(DefaultMapWidth, DefaultMapHeight, data.Seed)
+	game.MakeBlocks()
 
 	for i := 0; i < len(touchHistory); i++ {
 		game.SimulateOneStep(touchHistory[i])
@@ -174,7 +175,7 @@ func Validate(data *models.Leaderboard) bool {
 func (g *PopTileGame) Initialize(width int, height int, seed int32) {
 	g.InitMap(width, height)
 	g.SetGameParameter(width, height, seed)
-	g.makeBlocks()
+	g.MakeBlocks()
 }
 
 func (g *PopTileGame) WalkOneStep(x int, y int) {
