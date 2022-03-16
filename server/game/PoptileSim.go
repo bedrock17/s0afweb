@@ -36,6 +36,7 @@ type PopTileGame struct {
 	gameMap [][]int
 	random  XORShift
 
+	GameOver   bool
 	RandomSeed int32
 }
 
@@ -62,7 +63,11 @@ func (g *PopTileGame) IsGameEnd() bool {
 func (g *PopTileGame) MakeBlocks(line []int) {
 	for i := 0; i < g.rows; i++ {
 		for j := 0; j < g.columns; j++ {
-			if i != 0 {
+			if i == 0 {
+				if g.gameMap[0][j] != 0 {
+					g.GameOver = true
+				}
+			} else {
 				g.gameMap[i-1][j] = g.gameMap[i][j]
 			}
 			if i == g.rows-1 {
@@ -80,6 +85,7 @@ func (g *PopTileGame) InitMap(width, height int) {
 }
 
 func (g *PopTileGame) SetGameParameter(width, height int, seed int32) {
+	g.GameOver = false
 	g.columns = width
 	g.rows = height
 	g.RandomSeed = seed
