@@ -64,28 +64,6 @@ const OnlinePlayRoom = () => {
     setOpponentScores([...opponentScores]);
   };
 
-  const sendHeartBeat = () => {
-    const websocket = getWebsocketInstance();
-
-    const heartBeatMessage: WebsocketSendMessage<HeartBeatValue> = {
-      type: messageType.heartbeat,
-      data: new Date().getTime()
-    };
-
-    websocket.ws.send(JSON.stringify(heartBeatMessage));
-  };
-
-  let intervalID: NodeJS.Timer | undefined;
-
-  useEffect(() => {
-    if (intervalID) {
-      clearInterval(intervalID);
-    }
-    if (gameStarted) {
-      intervalID = setInterval(sendHeartBeat, 5000);
-    }
-  }, [gameStarted]);
-
   useEffect(() => {
     if (!user) {
       return;

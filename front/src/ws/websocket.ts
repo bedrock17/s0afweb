@@ -32,6 +32,15 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
   }
   const popTileWebsocket = new PopTileWebsocket(websocket);
 
+  const sendHeartBeat = () => {
+    const heartBeatMessage: WebsocketSendMessage<HeartBeatValue> = {
+      type: messageType.heartbeat,
+      data: new Date().getTime()
+    };
+    websocket.send(JSON.stringify(heartBeatMessage));
+  };
+  setInterval(sendHeartBeat, 5000);
+
   websocket.onopen = () => {
     // eslint-disable-next-line no-console
     console.log('open');

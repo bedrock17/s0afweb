@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"time"
 )
 
 var (
@@ -26,6 +27,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 		return err
 	}
 	userManager := service.GetService().UserManager()
+	ws.SetReadDeadline(time.Now().Add(15 * time.Second))
 
 	defer func() {
 		user, err := userManager.GetUser(ws)
@@ -60,7 +62,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 			return errors.InvalidSessionErr
 		}
 
-		user, err := userManager.GetUser(ws)
+		_, err = userManager.GetUser(ws)
 		if err != nil {
 			userManager.SetUser(ws, game.User{Id: userId, RoomId: 0})
 		}
@@ -98,8 +100,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 			_, _ = GameOver(ws)
 			responses, err = TouchTile(ws, *touch)
 		case HeartbeatType:
-			value := int(request.Data.(float64))
-			user.LastHearBeatValue = value
+			ws.SetReadDeadline(time.Now().Add(15 * time.Second))
 			skipResponse = true
 		}
 
