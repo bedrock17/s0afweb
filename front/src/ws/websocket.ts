@@ -41,6 +41,11 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
   };
   setInterval(sendHeartBeat, 5000);
 
+  websocket.onopen = () => {
+    // eslint-disable-next-line no-console
+    console.log('open');
+  };
+
   websocket.onerror = (e) => {
     // eslint-disable-next-line no-console
     console.log('onerror', e);
