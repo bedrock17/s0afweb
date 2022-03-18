@@ -167,9 +167,11 @@ const OnlinePlayRoom = () => {
     };
 
     websocket.messageHandle[messageType.touch] = (touchMessage) => {
-      const touch = touchMessage.data as Point;
+      const response = touchMessage.data as TileTouchEvent;
       opponentRefs.forEach((opponent) => {
-        opponent.ref.current?.touch(touch);
+        if (opponent.userId === response.user_id) {
+          opponent.ref.current?.touch({ x: response.x, y: response.y });
+        }
       });
     };
 

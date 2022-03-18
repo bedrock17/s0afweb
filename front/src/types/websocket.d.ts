@@ -25,6 +25,10 @@ type RoomUsersResponse = {
   user_ids: UserID[],
 };
 
+type TileTouchEvent = Point & {
+  user_id: UserID,
+};
+
 type FinishGameResponse = Record<string, number>;
 
 type WebsocketMessageData = |
@@ -34,7 +38,8 @@ type WebsocketMessageData = |
   UserID |
   GameStartResponse |
   RoomUsersResponse |
-  Point;
+  Point |
+  TileTouchEvent;
 
 type WebsocketSendMessage<T> = {
   type: string,
