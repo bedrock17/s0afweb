@@ -22,7 +22,7 @@ export class PopTileWebsocket {
 
 const createPopTileWebsocket = (): PopTileWebsocket => {
   const l = window.location;
-  const url = ((l.protocol === 'https:') ? 'wss://' : 'ws://') + l.host + l.pathname + '/v1/ws';
+  const url = ((l.protocol === 'https:') ? 'wss://' : 'ws://') + l.host + '/v1/ws';
 
   let websocket: WebSocket;
   if (import.meta.env.DEV) {
