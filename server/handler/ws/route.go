@@ -113,10 +113,6 @@ func WebSocketHandlerV1(c echo.Context) error {
 }
 
 func sendMessage(client *websocket2.Client, reqType websocket2.WSMessageType, responses []websocket2.WSResponse, err error) {
-	client.Mu.Lock()
-	defer func() {
-		client.Mu.Unlock()
-	}()
 
 	if err != nil {
 		respBytes, _ := json.Marshal(websocket2.WSPayload{
@@ -125,12 +121,17 @@ func sendMessage(client *websocket2.Client, reqType websocket2.WSMessageType, re
 			Error: err.(errors.WSError).Id,
 		})
 
+		client.Mu.Lock()
 		_ = client.Conn.WriteMessage(websocket.TextMessage, respBytes)
+		client.Mu.Unlock()
+
 	} else {
 		for _, resp := range responses {
 			for _, client := range resp.Clients {
+				client.Mu.Lock()
 				respBytes, _ := json.Marshal(resp.Payload)
 				_ = client.Conn.WriteMessage(websocket.TextMessage, respBytes)
+				client.Mu.Unlock()
 			}
 		}
 	}
