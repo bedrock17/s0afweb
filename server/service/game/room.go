@@ -127,6 +127,7 @@ func (m *RoomManagerImpl) ResetRoom(roomId uint) error {
 	// TODO: 게임 끝난 후 초기화할 다른 방 설정 요소들 생각해볼 것
 	room.GameStartedAt = 0
 	room.Status = RoomStatusIdle
+	m.rooms[roomId] = room
 
 	return nil
 }
