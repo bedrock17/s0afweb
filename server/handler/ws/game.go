@@ -4,25 +4,25 @@ import (
 	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
-	"github.com/gorilla/websocket"
+	"github.com/bedrock17/s0afweb/websocket"
 )
 
-func StartGame(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
+func StartGame(client *websocket.Client, roomId uint) ([]websocket.WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	room, err := gameRoomManager.StartGame(client, roomId)
 	if err != nil {
 		return nil, err
 	}
 	index := 0
-	clients := make([]*websocket.Conn, len(room.Clients))
+	clients := make([]*websocket.Client, len(room.Clients))
 	for c := range room.Clients {
 		clients[index] = c
 		index += 1
 	}
-	resp := WSResponse{
-		Connections: clients,
-		Payload: WSPayload{
-			Type: StartGameMessageType,
+	resp := websocket.WSResponse{
+		Clients: clients,
+		Payload: websocket.WSPayload{
+			Type: websocket.StartGameMessageType,
 			Data: game.StartResponse{
 				GameStartedAt: room.GameStartedAt,
 				Seed:          room.Seed,
@@ -30,10 +30,10 @@ func StartGame(client *websocket.Conn, roomId uint) ([]WSResponse, error) {
 		},
 	}
 
-	return []WSResponse{resp}, nil
+	return []websocket.WSResponse{resp}, nil
 }
 
-func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]WSResponse, error) {
+func TouchTile(client *websocket.Client, touch websocket.TouchRequest) ([]websocket.WSResponse, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 	user, err := userManager.GetUser(client)
@@ -45,7 +45,7 @@ func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]WSResponse, e
 		return nil, err
 	}
 
-	index, clients := 0, make([]*websocket.Conn, len(room.Clients)-1)
+	index, clients := 0, make([]*websocket.Client, len(room.Clients)-1)
 
 	for c := range room.Clients {
 		participant, err := userManager.GetUser(c)
@@ -59,11 +59,11 @@ func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]WSResponse, e
 		index += 1
 	}
 
-	resp := WSResponse{
-		Connections: clients,
-		Payload: WSPayload{
-			Type: TouchMessageType,
-			Data: game.TouchResponse{
+	resp := websocket.WSResponse{
+		Clients: clients,
+		Payload: websocket.WSPayload{
+			Type: websocket.TouchMessageType,
+			Data: websocket.TouchResponse{
 				UserID: user.Id,
 				X:      touch.X,
 				Y:      touch.Y,
@@ -71,10 +71,10 @@ func TouchTile(client *websocket.Conn, touch game.TouchRequest) ([]WSResponse, e
 		},
 	}
 
-	return []WSResponse{resp}, nil
+	return []websocket.WSResponse{resp}, nil
 }
 
-func SimulateOneStep(client *websocket.Conn, touch game.TouchRequest) error {
+func SimulateOneStep(client *websocket.Client, touch websocket.TouchRequest) error {
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 	user, err := userManager.GetUser(client)
@@ -94,7 +94,7 @@ func SimulateOneStep(client *websocket.Conn, touch game.TouchRequest) error {
 	return nil
 }
 
-func GameOver(client *websocket.Conn) (bool, error) {
+func GameOver(client *websocket.Client) (bool, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 

@@ -5,6 +5,7 @@ import (
 	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
+	websocket2 "github.com/bedrock17/s0afweb/websocket"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -22,6 +23,7 @@ var (
 
 func WebSocketHandlerV1(c echo.Context) error {
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+	client := &websocket2.Client{Conn: ws}
 	if err != nil {
 		return err
 	}
@@ -29,10 +31,10 @@ func WebSocketHandlerV1(c echo.Context) error {
 	ws.SetReadDeadline(time.Now().Add(15 * time.Second))
 
 	defer func() {
-		user, err := userManager.GetUser(ws)
+		user, err := userManager.GetUser(client)
 		if err == nil && user.RoomId > 0 {
-			responses, err := ExitGameRoom(ws, user.RoomId)
-			sendMessage(ws, ExitRoomMessageType, responses, err)
+			responses, err := ExitGameRoom(client, user.RoomId)
+			sendMessage(client, websocket2.ExitRoomMessageType, responses, err)
 		}
 		_ = ws.Close()
 	}()
@@ -60,70 +62,75 @@ func WebSocketHandlerV1(c echo.Context) error {
 			return errors.InvalidSessionErr
 		}
 
-		_, err = userManager.GetUser(ws)
+		_, err = userManager.GetUser(client)
 		if err != nil {
-			userManager.SetUser(ws, game.User{Id: userId, RoomId: 0})
+			userManager.SetUser(client, game.User{Id: userId, RoomId: 0})
 		}
 
-		request := new(WSRequest)
+		request := new(websocket2.WSRequest)
 		if err := json.Unmarshal(message, request); err != nil {
 			panic(err)
 		}
 
-		var responses []WSResponse
+		var responses []websocket2.WSResponse
 		skipResponse := false
 
 		switch request.Type {
-		case GetRoomsMessageType:
-			responses, err = GetRooms(ws)
-		case CreateRoomMessageType:
-			config := request.Data.(*game.CreateRoomConfig)
+		case websocket2.GetRoomsMessageType:
+			responses, err = GetRooms(client)
+		case websocket2.CreateRoomMessageType:
+			config := request.Data.(*websocket2.CreateRoomConfig)
 			config.Master = userId
-			responses, err = CreateGameRoom(ws, *config)
-		case JoinRoomMessageType:
+			responses, err = CreateGameRoom(client, *config)
+		case websocket2.JoinRoomMessageType:
 			roomId := uint(request.Data.(float64))
-			responses, err = JoinGameRoom(ws, roomId)
-		case GetRoomConfigMessageType:
+			responses, err = JoinGameRoom(client, roomId)
+		case websocket2.GetRoomConfigMessageType:
 			roomId := uint(request.Data.(float64))
-			responses, err = GetRoomConfig(ws, roomId)
-		case ExitRoomMessageType:
+			responses, err = GetRoomConfig(client, roomId)
+		case websocket2.ExitRoomMessageType:
 			roomId := uint(request.Data.(float64))
-			responses, err = ExitGameRoom(ws, roomId)
-		case StartGameMessageType:
+			responses, err = ExitGameRoom(client, roomId)
+		case websocket2.StartGameMessageType:
 			roomId := uint(request.Data.(float64))
-			responses, err = StartGame(ws, roomId)
-		case TouchMessageType:
-			touch := request.Data.(*game.TouchRequest)
-			err = SimulateOneStep(ws, *touch)
-			_, _ = GameOver(ws)
-			responses, err = TouchTile(ws, *touch)
-		case HeartbeatType:
-			ws.SetReadDeadline(time.Now().Add(15 * time.Second))
+			responses, err = StartGame(client, roomId)
+		case websocket2.TouchMessageType:
+			touch := request.Data.(*websocket2.TouchRequest)
+			err = SimulateOneStep(client, *touch)
+			_, _ = GameOver(client)
+			responses, err = TouchTile(client, *touch)
+		case websocket2.HeartbeatType:
+			client.Conn.SetReadDeadline(time.Now().Add(15 * time.Second))
 			skipResponse = true
 		}
 
 		if !skipResponse {
-			sendMessage(ws, request.Type, responses, err)
+			sendMessage(client, request.Type, responses, err)
 		}
 	}
 
 	return nil
 }
 
-func sendMessage(ws *websocket.Conn, reqType WSMessageType, responses []WSResponse, err error) {
+func sendMessage(client *websocket2.Client, reqType websocket2.WSMessageType, responses []websocket2.WSResponse, err error) {
+	client.Mu.Lock()
+	defer func() {
+		client.Mu.Unlock()
+	}()
+
 	if err != nil {
-		respBytes, _ := json.Marshal(WSPayload{
+		respBytes, _ := json.Marshal(websocket2.WSPayload{
 			Type:  reqType,
 			Data:  nil,
 			Error: err.(errors.WSError).Id,
 		})
 
-		_ = ws.WriteMessage(websocket.TextMessage, respBytes)
+		_ = client.Conn.WriteMessage(websocket.TextMessage, respBytes)
 	} else {
 		for _, resp := range responses {
-			for _, conn := range resp.Connections {
+			for _, client := range resp.Clients {
 				respBytes, _ := json.Marshal(resp.Payload)
-				_ = conn.WriteMessage(websocket.TextMessage, respBytes)
+				_ = client.Conn.WriteMessage(websocket.TextMessage, respBytes)
 			}
 		}
 	}

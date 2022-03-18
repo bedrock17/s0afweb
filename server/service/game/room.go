@@ -4,28 +4,11 @@ import (
 	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/game"
 	"github.com/bedrock17/s0afweb/utils"
-	"github.com/gorilla/websocket"
+	"github.com/bedrock17/s0afweb/websocket"
 	"math/rand"
 	"sync"
 	"time"
 )
-
-type TouchRequest struct {
-	X int `json:"x" validate:"required,numeric"`
-	Y int `json:"y" validate:"required,numeric"`
-}
-
-type TouchResponse struct {
-	UserID string `json:"user_id"`
-	X      int    `json:"x"`
-	Y      int    `json:"y"`
-}
-
-type CreateRoomConfig struct {
-	Capacity int    `json:"capacity"  validate:"required,numeric,min=2,max=16"`
-	PlayTime int32  `json:"play_time" validate:"required,numeric,min=10,max=300"`
-	Master   string `json:"-"`
-}
 
 type RoomStatus int
 
@@ -35,15 +18,15 @@ type StartResponse struct {
 }
 
 type Room struct {
-	Id            uint                                  `json:"id"`
-	Clients       map[*websocket.Conn]*game.PopTileGame `json:"-"`
-	Capacity      int                                   `json:"capacity"`
-	PlayTime      int32                                 `json:"play_time"`
-	Status        RoomStatus                            `json:"status"`
-	Master        string                                `json:"master"`
-	GameStartedAt int64                                 `json:"game_started_at"`
-	Seed          int32                                 `json:"-"`
-	GameTicker    *utils.GameTicker                     `json:"-"`
+	Id            uint                                    `json:"id"`
+	Clients       map[*websocket.Client]*game.PopTileGame `json:"-"`
+	Capacity      int                                     `json:"capacity"`
+	PlayTime      int32                                   `json:"play_time"`
+	Status        RoomStatus                              `json:"status"`
+	Master        string                                  `json:"master"`
+	GameStartedAt int64                                   `json:"game_started_at"`
+	Seed          int32                                   `json:"-"`
+	GameTicker    *utils.GameTicker                       `json:"-"`
 }
 
 const (
@@ -52,13 +35,13 @@ const (
 )
 
 type RoomManager interface {
-	NewRoom(config CreateRoomConfig, onGameFinish func(uint) func()) Room
-	JoinRoom(client *websocket.Conn, roomId uint) error
-	ExitRoom(client *websocket.Conn, roomId uint) error
+	NewRoom(config websocket.CreateRoomConfig, onGameFinish func(uint) func()) Room
+	JoinRoom(client *websocket.Client, roomId uint) error
+	ExitRoom(client *websocket.Client, roomId uint) error
 	ResetRoom(roomId uint) error
 	Get(roomId uint) (Room, error)
 	Gets() []Room
-	StartGame(client *websocket.Conn, roomId uint) (Room, error)
+	StartGame(client *websocket.Client, roomId uint) (Room, error)
 }
 
 type RoomManagerImpl struct {
@@ -76,7 +59,7 @@ func NewRoomManager(userManager UserManager) RoomManager {
 	}
 }
 
-func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig, onGameFinish func(uint) func()) Room {
+func (m *RoomManagerImpl) NewRoom(config websocket.CreateRoomConfig, onGameFinish func(uint) func()) Room {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -85,7 +68,7 @@ func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig, onGameFinish func(uin
 
 	m.rooms[id] = Room{
 		Id:       id,
-		Clients:  map[*websocket.Conn]*game.PopTileGame{},
+		Clients:  map[*websocket.Client]*game.PopTileGame{},
 		Capacity: config.Capacity,
 		PlayTime: config.PlayTime,
 		Status:   RoomStatusIdle,
@@ -132,7 +115,7 @@ func (m *RoomManagerImpl) ResetRoom(roomId uint) error {
 	return nil
 }
 
-func (m *RoomManagerImpl) JoinRoom(client *websocket.Conn, roomId uint) error {
+func (m *RoomManagerImpl) JoinRoom(client *websocket.Client, roomId uint) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -163,7 +146,7 @@ func (m *RoomManagerImpl) JoinRoom(client *websocket.Conn, roomId uint) error {
 	return nil
 }
 
-func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
+func (m *RoomManagerImpl) ExitRoom(client *websocket.Client, roomId uint) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -179,7 +162,7 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 
 	if len(room.Clients) > 1 {
 		index := 0
-		newClients := map[*websocket.Conn]*game.PopTileGame{}
+		newClients := map[*websocket.Client]*game.PopTileGame{}
 		newUsers := make([]*User, len(room.Clients)-1)
 		for conn, sim := range room.Clients {
 			u, err := m.userManager.GetUser(conn)
@@ -213,7 +196,7 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Conn, roomId uint) error {
 	return nil
 }
 
-func (m *RoomManagerImpl) StartGame(client *websocket.Conn, roomId uint) (Room, error) {
+func (m *RoomManagerImpl) StartGame(client *websocket.Client, roomId uint) (Room, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 

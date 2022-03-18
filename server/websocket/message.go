@@ -1,9 +1,7 @@
-package ws
+package websocket
 
 import (
 	"encoding/json"
-	"github.com/bedrock17/s0afweb/service/game"
-	"github.com/gorilla/websocket"
 )
 
 type WSMessageType string
@@ -33,8 +31,8 @@ type WSPayload struct {
 }
 
 type WSResponse struct {
-	Connections []*websocket.Conn
-	Payload     WSPayload
+	Clients []*Client
+	Payload WSPayload
 }
 
 func (b *WSRequest) UnmarshalJSON(data []byte) error {
@@ -48,12 +46,29 @@ func (b *WSRequest) UnmarshalJSON(data []byte) error {
 
 	switch t.Type {
 	case string(CreateRoomMessageType):
-		b.Data = new(game.CreateRoomConfig)
+		b.Data = new(CreateRoomConfig)
 	case string(TouchMessageType):
-		b.Data = new(game.TouchRequest)
+		b.Data = new(TouchRequest)
 	default:
 	}
 
 	type tmp WSRequest // avoids infinite recursion
 	return json.Unmarshal(data, (*tmp)(b))
+}
+
+type TouchRequest struct {
+	X int `json:"x" validate:"required,numeric"`
+	Y int `json:"y" validate:"required,numeric"`
+}
+
+type TouchResponse struct {
+	UserID string `json:"user_id"`
+	X      int    `json:"x"`
+	Y      int    `json:"y"`
+}
+
+type CreateRoomConfig struct {
+	Capacity int    `json:"capacity"  validate:"required,numeric,min=2,max=16"`
+	PlayTime int32  `json:"play_time" validate:"required,numeric,min=10,max=300"`
+	Master   string `json:"-"`
 }

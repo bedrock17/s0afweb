@@ -2,7 +2,7 @@ package game
 
 import (
 	"github.com/bedrock17/s0afweb/errors"
-	"github.com/gorilla/websocket"
+	"github.com/bedrock17/s0afweb/websocket"
 	"sync"
 )
 
@@ -12,31 +12,31 @@ type User struct {
 }
 
 type UserManager interface {
-	SetUser(client *websocket.Conn, user User)
-	RemoveUser(client *websocket.Conn)
-	GetUser(client *websocket.Conn) (*User, error)
+	SetUser(client *websocket.Client, user User)
+	RemoveUser(client *websocket.Client)
+	GetUser(client *websocket.Client) (*User, error)
 }
 
 type UserManagerImpl struct {
 	mu    sync.Mutex
-	state map[*websocket.Conn]*User
+	state map[*websocket.Client]*User
 }
 
 func NewUserManager() UserManager {
 	return &UserManagerImpl{
-		state: make(map[*websocket.Conn]*User),
+		state: make(map[*websocket.Client]*User),
 	}
 }
 
-func (m *UserManagerImpl) SetUser(client *websocket.Conn, user User) {
+func (m *UserManagerImpl) SetUser(client *websocket.Client, user User) {
 	m.state[client] = &user
 }
 
-func (m *UserManagerImpl) RemoveUser(client *websocket.Conn) {
+func (m *UserManagerImpl) RemoveUser(client *websocket.Client) {
 	delete(m.state, client)
 }
 
-func (m *UserManagerImpl) GetUser(client *websocket.Conn) (*User, error) {
+func (m *UserManagerImpl) GetUser(client *websocket.Client) (*User, error) {
 	user, ok := m.state[client]
 	if !ok {
 		return nil, errors.UserNotFoundErr
