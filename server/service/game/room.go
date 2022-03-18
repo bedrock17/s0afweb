@@ -43,7 +43,7 @@ type Room struct {
 	Master        string                                `json:"master"`
 	GameStartedAt int64                                 `json:"game_started_at"`
 	Seed          int32                                 `json:"-"`
-	GameTicker    utils.GameTicker                      `json:"-"`
+	GameTicker    *utils.GameTicker                     `json:"-"`
 }
 
 const (
@@ -90,8 +90,8 @@ func (m *RoomManagerImpl) NewRoom(config CreateRoomConfig, onGameFinish func(uin
 		PlayTime: config.PlayTime,
 		Status:   RoomStatusIdle,
 		Master:   config.Master,
-		GameTicker: utils.GameTicker{
-			Ticker:           time.NewTicker(1 * time.Second),
+		GameTicker: &utils.GameTicker{
+			TickerDuration:   1 * time.Second,
 			OnFinishCallback: onGameFinish(id),
 		},
 	}
@@ -245,6 +245,7 @@ func (m *RoomManagerImpl) StartGame(client *websocket.Conn, roomId uint) (Room, 
 	room.GameStartedAt = startedAt
 	room.Seed = rand.Int31()%2147483646 + 1
 	room.GameTicker.TickerDeadlineMilli = now.Add(time.Second * time.Duration(room.PlayTime)).UnixMilli()
+
 	m.rooms[roomId] = room
 	m.rooms[roomId].GameTicker.Start()
 	for _, sim := range room.Clients {

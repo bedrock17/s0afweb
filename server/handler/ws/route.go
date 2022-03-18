@@ -2,7 +2,6 @@ package ws
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
@@ -31,7 +30,6 @@ func WebSocketHandlerV1(c echo.Context) error {
 
 	defer func() {
 		user, err := userManager.GetUser(ws)
-		fmt.Println(user)
 		if err == nil && user.RoomId > 0 {
 			responses, err := ExitGameRoom(ws, user.RoomId)
 			sendMessage(ws, ExitRoomMessageType, responses, err)
