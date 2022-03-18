@@ -218,6 +218,7 @@ export class Game {
 
   private onTileClick = (e: MouseEvent) => {
     if (this.readonly) {
+      e.preventDefault();
       return;
     }
 
