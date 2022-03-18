@@ -108,7 +108,7 @@ func (m *RoomManagerImpl) Get(roomId uint) (Room, error) {
 }
 
 func (m *RoomManagerImpl) Gets() []Room {
-	var rooms []Room
+	rooms := make([]Room, 0)
 	for _, value := range m.rooms {
 		rooms = append(rooms, value)
 	}
