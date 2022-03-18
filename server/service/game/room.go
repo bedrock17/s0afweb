@@ -41,7 +41,7 @@ type Room struct {
 	PlayTime      int32                                 `json:"play_time"`
 	Status        RoomStatus                            `json:"status"`
 	Master        string                                `json:"master"`
-	GameStartedAt int64                                 `json:"game_started_at"`
+	GameStartedAt int64                                 `json:"-"`
 	Seed          int32                                 `json:"-"`
 	GameTicker    utils.GameTicker                      `json:"-"`
 }

@@ -6,6 +6,7 @@ type CreateRoom = {
 type RoomStatus = number;
 type RoomId = number;
 type HeartBeatValue = number;
+type GetRooms = undefined;
 
 type Room = {
   id: number,
@@ -13,7 +14,6 @@ type Room = {
   play_time: number,
   status: RoomStatus,
   master: UserID,
-  game_started_at: number,
 };
 
 type GameStartResponse = {
@@ -34,6 +34,8 @@ type WebsocketMessageData = |
   UserID |
   GameStartResponse |
   RoomUsersResponse |
+  Room[] |
+  GetRooms |
   Point;
 
 type WebsocketSendMessage<T> = {
