@@ -341,9 +341,11 @@ export class Game {
       }
 
       this.removeBlockCode = this.map[this.lastPos.y][this.lastPos.x];
-      this.removeBlockCount = 1;
-      this.map[this.lastPos.y][this.lastPos.x] = 0;
-      this.bfsQueue.enqueue(this.lastPos);
+      if (this.removeBlockCode !== 0) {
+        this.removeBlockCount = 1;
+        this.map[this.lastPos.y][this.lastPos.x] = 0;
+        this.bfsQueue.enqueue(this.lastPos);
+      }
 
       this.touchCount += 1;
       this.createBlock = true;
