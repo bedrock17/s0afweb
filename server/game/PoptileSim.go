@@ -160,6 +160,7 @@ func Validate(data *models.Leaderboard) bool {
 	game := PopTileGame{}
 	game.InitMap(DefaultMapWidth, DefaultMapHeight)
 	game.SetGameParameter(DefaultMapWidth, DefaultMapHeight, data.Seed)
+	game.Score = 0
 	game.MakeBlocks()
 
 	for i := 0; i < len(touchHistory); i++ {
@@ -186,6 +187,7 @@ func (g *PopTileGame) PrintMap() {
 func (g *PopTileGame) Initialize(width int, height int, seed int32) {
 	g.InitMap(width, height)
 	g.SetGameParameter(width, height, seed)
+	g.Score = 0
 	g.MakeBlocks()
 }
 

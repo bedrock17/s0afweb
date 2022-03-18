@@ -245,11 +245,10 @@ func (m *RoomManagerImpl) StartGame(client *websocket.Conn, roomId uint) (Room, 
 	room.GameStartedAt = startedAt
 	room.Seed = rand.Int31()%2147483646 + 1
 	room.GameTicker.TickerDeadlineMilli = now.Add(time.Second * time.Duration(room.PlayTime)).UnixMilli()
-
-	m.rooms[roomId] = room
-	m.rooms[roomId].GameTicker.Start()
 	for _, sim := range room.Clients {
 		sim.Initialize(game.DefaultMapWidth, game.DefaultMapHeight, room.Seed)
 	}
+	m.rooms[roomId].GameTicker.Start()
+	m.rooms[roomId] = room
 	return m.rooms[roomId], nil
 }
