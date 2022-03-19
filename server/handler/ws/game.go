@@ -89,9 +89,9 @@ func SimulateOneStep(client *websocket.Client, touch websocket.TouchRequest) err
 	if !ok {
 		return errors.UserNotFoundErr
 	}
-	// TODO: X, Y가 int 인지 uint 인지 결정할 것
-	simulator.WalkOneStep(touch.X, touch.Y)
-	return nil
+
+	_, err = simulator.WalkOneStep(touch.X, touch.Y)
+	return err
 }
 
 func GameOver(client *websocket.Client) (bool, error) {

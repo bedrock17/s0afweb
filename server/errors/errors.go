@@ -17,6 +17,7 @@ func (w WSError) Error() string {
 var (
 	InvalidSessionErr         = WSError{Id: 50000, Err: errors.New("invalid session")}
 	UserNotFoundErr           = WSError{Id: 50001, Err: errors.New("user not found")}
+	InvalidTouchPoint         = WSError{Id: 50002, Err: errors.New("invalid touch point")}
 	NoLeftSeatErr             = WSError{Id: 40000, Err: errors.New("no player slot left")}
 	InvalidRoomIdErr          = WSError{Id: 40001, Err: errors.New("invalid room id")}
 	CannotJoinMultipleRoomErr = WSError{Id: 40002, Err: errors.New("user is already in the room")}

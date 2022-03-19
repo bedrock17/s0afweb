@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/models"
 )
 
@@ -136,7 +137,11 @@ func (g *PopTileGame) dropBlocks() {
 	}
 }
 
-func (g *PopTileGame) SimulateOneStep(p models.Point) int {
+func (g *PopTileGame) SimulateOneStep(p models.Point) (int, error) {
+
+	if !isValidRange(p, g.columns, g.rows) || g.gameMap[p.Y][p.X] == 0 {
+		return 0, errors.InvalidTouchPoint
+	}
 
 	count := g.removeBlocks(p, g.gameMap[p.Y][p.X])
 	g.Score += count * count
@@ -145,7 +150,7 @@ func (g *PopTileGame) SimulateOneStep(p models.Point) int {
 	g.GameOver = g.isGameEnd()
 	g.MakeBlocks()
 
-	return count
+	return count, nil
 }
 
 func Validate(data *models.Leaderboard) bool {
@@ -191,7 +196,7 @@ func (g *PopTileGame) Initialize(width int, height int, seed int32) {
 	g.MakeBlocks()
 }
 
-func (g *PopTileGame) WalkOneStep(x int, y int) {
+func (g *PopTileGame) WalkOneStep(x int, y int) (int, error) {
 	p := models.Point{X: x, Y: y}
-	g.SimulateOneStep(p)
+	return g.SimulateOneStep(p)
 }
