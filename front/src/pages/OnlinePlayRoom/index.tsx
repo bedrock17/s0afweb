@@ -119,8 +119,12 @@ const OnlinePlayRoom = () => {
       setOpponentScores([...opponentScores.slice(0, index), ...opponentScores.slice(index + 1)]);
     };
 
-    websocket.messageHandle[messageType.startGame] = (touchMessage) => {
-      const gameStartMessage = touchMessage.data as GameStartResponse;
+    websocket.messageHandle[messageType.startGame] = (startMessage) => {
+      if (startMessage.error !== 0) {
+        return;
+      }
+
+      const gameStartMessage = startMessage.data as GameStartResponse;
 
       setScore(0);
       setGameStarted(true);
