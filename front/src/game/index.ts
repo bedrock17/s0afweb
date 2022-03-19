@@ -368,6 +368,7 @@ export class Game {
     this.touchHistory = [];
     this.isGameOver = false;
     this.createBlock = false;
+    this.lastPos = { x: -1, y: -1 };
 
     this.seed = seed;
     this.initialize();
