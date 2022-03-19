@@ -186,12 +186,12 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Client, roomId uint) error 
 			room.Master = newMaster.Id
 		}
 		room.Clients = newClients
-		m.userManager.SetUser(client, User{user.Id, 0})
 		m.rooms[roomId] = room
 	} else {
 		// 방의 마지막 유저인 경우 방 제거
 		delete(m.rooms, roomId)
 	}
+	m.userManager.SetUser(client, User{user.Id, 0})
 
 	return nil
 }
