@@ -12,12 +12,12 @@ import SinglePlayResultPage from './pages/SinglePlayResult';
 function App() {
   return (
     <Routes>
-      <Route path={'/'} element={<IndexPage />} />
       <Route path={'/single/leaderboard'} element={<SingleLeaderboardPage />} />
       <Route path={'/single/result'} element={<SinglePlayResultPage />} />
       <Route path={'/single/*'} element={<SinglePlayPage />} />
       <Route path={'/online/*'} element={<OnlinePlay />} />
-      <Route path={'/online/room'} element={<OnlinePlayRoom />} />
+      <Route path={'/online/room/:id'} element={<OnlinePlayRoom />} />
+      <Route path={'*'} element={<IndexPage />} />
     </Routes>
   );
 }

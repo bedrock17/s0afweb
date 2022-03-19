@@ -18,7 +18,7 @@ const OnlinePlay = () => {
     websocket.messageHandle[messageType.createRoom] = (msg) => {
       const response = msg as WebsocketReceiveMessage<Room>;
       setRoom(response.data);
-      navigate(`/online/room#${response.data.id}`);
+      navigate(`/online/room/${response.data.id}`);
     };
   }, []);
 

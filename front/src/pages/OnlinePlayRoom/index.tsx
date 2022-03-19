@@ -2,7 +2,7 @@ import React, {
   useCallback,
   useEffect, useRef, useState
 } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { userState } from '~/atoms/auth';
@@ -23,18 +23,9 @@ type UserMappedGameRef = {
   userId: UserID,
 };
 
-const getRoomId = (): number | undefined => {
-  const roomNumberString = location.hash.replace('#', '');
-  const roomNumber = Number(roomNumberString);
-
-  if (!Number.isInteger(roomNumber)) {
-    return undefined;
-  }
-
-  return roomNumber;
-};
-
 const OnlinePlayRoom = () => {
+  const params = useParams();
+  const roomId = Number(params.id);
   const user = useRecoilValue(userState);
   const [opponentRefs, setOpponentRefs] = useState<UserMappedGameRef[]>([]);
   const [opponentScores, setOpponentScores] = useState<number[]>([]);
@@ -50,15 +41,6 @@ const OnlinePlayRoom = () => {
     setShowModal(false);
   }, []);
 
-  const exitRoom = (roomId: RoomId) => {
-    const websocket = getWebsocketInstance();
-    const payload: WebsocketSendMessage<RoomId> = {
-      type: messageType.exitRoom,
-      data: roomId,
-    };
-    websocket.ws.send(JSON.stringify(payload));
-  };
-
   const setOpponentScore = (index: number) => (value: number) => {
     opponentScores[index] = value;
     setOpponentScores([...opponentScores]);
@@ -69,7 +51,6 @@ const OnlinePlayRoom = () => {
       return;
     }
 
-    const roomId = getRoomId();
     if (!roomId) {
       navigate('/');
       return;
@@ -187,48 +168,29 @@ const OnlinePlayRoom = () => {
   }, [user, opponentRefs]);
 
   useEffect(() => {
-    window?.addEventListener('hashchange', (e) => {
-      const oldRoomId = Number(e.oldURL.split('#')[1]);
-      const newRoomId = Number(e.newURL.split('#')[1]);
-
-      if (Number.isInteger(oldRoomId)) {
-        exitRoom(oldRoomId);
-      }
-
-      if (!Number.isInteger(newRoomId)) {
-        navigate('/');
-        return;
-      }
-
-      const payload: WebsocketSendMessage<RoomId> = {
-        type: messageType.joinRoom,
-        data: newRoomId,
-      };
-      const websocket = getWebsocketInstance();
-      websocket.ws.send(JSON.stringify(payload));
-    });
-
     return () => {
-      const roomId = getRoomId();
-      if (!roomId) {
-        return;
-      }
-      exitRoom(roomId);
+      const websocket = getWebsocketInstance();
+      const payload: WebsocketSendMessage<RoomId> = {
+        type: messageType.exitRoom,
+        data: roomId,
+      };
+      websocket.ws.send(JSON.stringify(payload));
     };
   }, []);
 
   const sendGameStart = () => {
     const websocket = getWebsocketInstance();
-    const roomId = getRoomId();
-
-    if (roomId) {
-      const startMessage: WebsocketSendMessage<RoomId> = {
-        type: messageType.startGame,
-        data: roomId,
-      };
-      websocket.ws.send(JSON.stringify(startMessage));
-    }
+    const startMessage: WebsocketSendMessage<RoomId> = {
+      type: messageType.startGame,
+      data: roomId,
+    };
+    websocket.ws.send(JSON.stringify(startMessage));
   };
+
+  if (!Number.isInteger(roomId)) {
+    navigate('/');
+    return null;
+  }
 
   return (
     <OnlinePlayLayout>
