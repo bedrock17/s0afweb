@@ -183,7 +183,6 @@ const OnlinePlayRoom = () => {
       setGameResult(sortedResult);
       setShowModal(true);
       setGameStarted(false);
-      alert('game finished');
     };
   }, [user, opponentRefs]);
 
