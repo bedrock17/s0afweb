@@ -141,11 +141,13 @@ const OnlinePlayRoom = () => {
     websocket.messageHandle[messageType.startGame] = (touchMessage) => {
       const gameStartMessage = touchMessage.data as GameStartResponse;
 
+      setScore(0);
       setGameStarted(true);
       opponentRefs.forEach((opponent, index) => {
         if (!opponent.ref.current) {
           return;
         }
+        setOpponentScore(index)(0);
         opponent.ref.current.startGame(gameStartMessage.seed);
         opponent.ref.current.onScoreChange = setOpponentScore(index);
       });
@@ -234,12 +236,12 @@ const OnlinePlayRoom = () => {
       <Wrapper>
         <OpponentWrapper>
           {
-            opponentRefs.map((opponent) => {
+            opponentRefs.map((opponent, index) => {
               return (
                 <OpponentContainer key={opponent.userId}>
                   <Username opponent master={room?.master === opponent.userId}>{ opponent.userId }</Username>
                   <GameCanvas animationEffect={false} gameRef={opponent.ref} mini readonly />
-                  <Score opponent>{ opponent.ref.current?.score }</Score>
+                  <Score opponent>{ opponentScores[index] }</Score>
                 </OpponentContainer>
               );
             })
