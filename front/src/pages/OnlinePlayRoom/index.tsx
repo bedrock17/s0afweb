@@ -48,6 +48,7 @@ const OnlinePlayRoom = () => {
 
   useEffect(() => {
     if (!user) {
+      navigate('/');
       return;
     }
 

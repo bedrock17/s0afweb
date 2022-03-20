@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 
+import { userState } from '~/atoms/auth';
 import { gameRoomState } from '~/atoms/game';
 import Button from '~/components/Button';
 import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
@@ -13,8 +14,15 @@ const OnlinePlay = () => {
   const navigate = useNavigate();
   const websocket = getWebsocketInstance();
   const setRoom = useSetRecoilState(gameRoomState);
+  const user = useRecoilValue(userState);
 
   useEffect(() => {
+
+    if (!user) {
+      navigate('/');
+      return;
+    }
+
     websocket.messageHandle[messageType.createRoom] = (msg) => {
       const response = msg as WebsocketReceiveMessage<Room>;
       setRoom(response.data);
