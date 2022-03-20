@@ -174,6 +174,7 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Client, roomId uint) error 
 			}
 			newClients[conn] = sim
 			newUsers[index] = u
+			index += 1
 		}
 
 		// 방장인 경우 새로운 방장을 랜덤으로 선택
