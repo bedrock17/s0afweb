@@ -3,6 +3,7 @@ package game
 import (
 	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/game"
+	"github.com/bedrock17/s0afweb/proto"
 	"github.com/bedrock17/s0afweb/utils"
 	"github.com/bedrock17/s0afweb/websocket"
 	"math/rand"
@@ -23,7 +24,7 @@ type Room struct {
 	Capacity      int                                     `json:"capacity"`
 	PlayTime      int32                                   `json:"play_time"`
 	Status        RoomStatus                              `json:"status"`
-	Master        string                                  `json:"master"`
+	Master        string                                  `json:"master_id"`
 	GameStartedAt int64                                   `json:"game_started_at"`
 	Seed          int32                                   `json:"-"`
 	GameTicker    *utils.GameTicker                       `json:"-"`
@@ -35,7 +36,7 @@ const (
 )
 
 type RoomManager interface {
-	NewRoom(config websocket.CreateRoomConfig, onGameFinish func(uint) func()) Room
+	NewRoom(config *proto.CreateRoomRequest, master_id *User, onGameFinish func(uint) func()) Room
 	JoinRoom(client *websocket.Client, roomId uint) error
 	ExitRoom(client *websocket.Client, roomId uint) error
 	ResetRoom(roomId uint) error
@@ -59,7 +60,7 @@ func NewRoomManager(userManager UserManager) RoomManager {
 	}
 }
 
-func (m *RoomManagerImpl) NewRoom(config websocket.CreateRoomConfig, onGameFinish func(uint) func()) Room {
+func (m *RoomManagerImpl) NewRoom(config *proto.CreateRoomRequest, master_id *User, onGameFinish func(uint) func()) Room {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -69,10 +70,10 @@ func (m *RoomManagerImpl) NewRoom(config websocket.CreateRoomConfig, onGameFinis
 	m.rooms[id] = Room{
 		Id:       id,
 		Clients:  map[*websocket.Client]*game.PopTileGame{},
-		Capacity: config.Capacity,
+		Capacity: int(config.Capacity),
 		PlayTime: config.PlayTime,
 		Status:   RoomStatusIdle,
-		Master:   config.Master,
+		Master:   master_id.Id,
 		GameTicker: &utils.GameTicker{
 			TickerDuration:   1 * time.Second,
 			OnFinishCallback: onGameFinish(id),

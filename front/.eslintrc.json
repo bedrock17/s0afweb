@@ -22,6 +22,7 @@
     "plugin:jsx-a11y/recommended",
     "plugin:@typescript-eslint/recommended"
   ],
+  "ignorePatterns": ["**/proto/**/*.js", "**/proto/**/*.ts"],
   "rules": {
     "no-unused-vars": "off",
     "no-use-before-define": "off",

@@ -7,11 +7,12 @@ require (
 	github.com/gorilla/sessions v1.2.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/joho/godotenv v1.4.0
-	github.com/labstack/echo-contrib v0.12.0
+	github.com/labstack/echo-contrib v0.11.0
 	github.com/labstack/echo/v4 v4.7.0
 	github.com/swaggo/echo-swagger v1.3.0
 	github.com/swaggo/swag v1.8.0
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b
+	google.golang.org/protobuf v1.26.0
 	gorm.io/driver/sqlite v1.3.1
 	gorm.io/gorm v1.23.2
 )
@@ -50,6 +51,5 @@ require (
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 	golang.org/x/tools v0.1.9 // indirect
 	google.golang.org/appengine v1.6.6 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

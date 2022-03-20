@@ -1,19 +1,10 @@
-export const messageType = {
-  createRoom: 'create_room',
-  joinRoom: 'join_room',
-  exitRoom: 'exit_room',
-  getRooms: 'get_rooms',
-  roomConfig: 'room_config',
-  roomUsers: 'room_users',
-  startGame: 'start_game',
-  finishGame: 'finish_game',
-  touch: 'touch_tile',
-  heartbeat: 'heartbeat',
-};
+import { proto } from '~/proto/message';
+import type { ProtoMessage } from '~/types/proto';
+import { newProtoRequest } from '~/utils/proto';
 
 export class PopTileWebsocket {
   ws: WebSocket;
-  messageHandle: Record<string, (msg: WebsocketReceiveMessage<WebsocketMessageData>) => void> = {};
+  messageHandle: Record<string, (msg: ProtoMessage) => void> = {};
 
   constructor(ws: WebSocket) {
     this.ws = ws;
@@ -33,11 +24,13 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
   const popTileWebsocket = new PopTileWebsocket(websocket);
 
   const sendHeartBeat = () => {
-    const heartBeatMessage: WebsocketSendMessage<HeartBeatValue> = {
-      type: messageType.heartbeat,
-      data: new Date().getTime()
-    };
-    websocket.send(JSON.stringify(heartBeatMessage));
+    const message = newProtoRequest(
+      proto.RequestType.heartbeat,
+      proto.HeartbeatRequest.fromObject({
+        timestamp: new Date().getTime(),
+      })
+    ).serializeBinary();
+    websocket.send(message);
   };
   setInterval(sendHeartBeat, 5000);
 
@@ -53,17 +46,17 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
 
   websocket.onmessage = (msg) => {
     // eslint-disable-next-line no-console
-    console.log('onmessage', msg.data);
-
-    const serverMessage: WebsocketReceiveMessage<WebsocketMessageData> = JSON.parse(msg.data);
-
-    if (serverMessage.type in popTileWebsocket.messageHandle) {
-      popTileWebsocket.messageHandle[serverMessage.type](serverMessage);
-    } else {
-      // eslint-disable-next-line no-console
-      console.log('Unknown message type');
-    }
-
+    msg.data.arrayBuffer().then((buffer: Uint8Array) => {
+      const response = proto.Response.deserializeBinary(buffer);
+      const respObj = response.toObject();
+      console.log(respObj);
+      if (respObj.type !== undefined && respObj.type in popTileWebsocket.messageHandle) {
+        popTileWebsocket.messageHandle[respObj.type](respObj as ProtoMessage);
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('Unknown message type');
+      }
+    });
   };
 
   return popTileWebsocket;

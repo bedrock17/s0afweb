@@ -24,4 +24,5 @@ yarn-error.log*
 test
 db.sqlite
 s0afweb*
-
+*.pb.go
+front/src/proto

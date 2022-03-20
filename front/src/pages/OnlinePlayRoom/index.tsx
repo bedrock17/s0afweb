@@ -11,8 +11,10 @@ import Button from '~/components/Button';
 import GameCanvas from '~/components/GameCanvas';
 import type { Game } from '~/game';
 import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
+import { proto } from '~/proto/message';
+import { newProtoRequest, parseData } from '~/utils/proto';
 import { WSError } from '~/ws/errors';
-import { getWebsocketInstance, messageType } from '~/ws/websocket';
+import { getWebsocketInstance } from '~/ws/websocket';
 
 import {
   OpponentContainer, Username, OpponentWrapper, Wrapper, Score, ScoreboardModal, ScoreTable, Dim
@@ -34,7 +36,7 @@ const OnlinePlayRoom = () => {
   const tempRef = useRef<Game>();
   const navigate = useNavigate();
   const [gameStarted, setGameStarted] = useState(false);
-  const [gameResult, setGameResult] = useState<[string, number][]>([]);
+  const [gameResult, setGameResult] = useState<proto.UserScore[]>([]);
   const [showModal, setShowModal] = useState(false);
 
   const onCloseModal = useCallback(() => {
@@ -52,18 +54,20 @@ const OnlinePlayRoom = () => {
       return;
     }
 
-    const msg: WebsocketSendMessage<RoomId> = {
-      type: messageType.joinRoom,
-      data: roomId,
-    };
+    const message = newProtoRequest(
+      proto.RequestType.join_room,
+      proto.JoinRoomRequest.fromObject({
+        room_id: roomId,
+      })
+    ).serializeBinary();
     const websocket = getWebsocketInstance();
 
     websocket.ws.onopen = (() => {
-      websocket.ws.send(JSON.stringify(msg));
+      websocket.ws.send(message);
     });
 
-    websocket.messageHandle[messageType.joinRoom] = (data) => {
-      const response = data as WebsocketReceiveMessage<UserID>;
+    websocket.messageHandle[proto.RequestType.join_room] = (response) => {
+      const data = parseData<proto.JoinRoomResponse>(response);
       if (response.error !== WSError.NoError) {
         switch (response.error) {
         case WSError.InvalidRoomIdError:
@@ -72,14 +76,13 @@ const OnlinePlayRoom = () => {
           return;
         }
       }
-      const userId = response.data;
-      if (userId === user?.user_id) {
+      if (data.user_id === user?.user_id) {
         return;
       }
       setOpponentRefs((prev) => {
         return [...prev, {
           ref: { current: undefined },
-          userId,
+          userId: data.user_id,
         }];
       });
       setOpponentScores((prev) => {
@@ -87,9 +90,9 @@ const OnlinePlayRoom = () => {
       });
     };
 
-    websocket.messageHandle[messageType.roomUsers] = (data) => {
-      const response = data as WebsocketReceiveMessage<RoomUsersResponse>;
-      const users = response.data.user_ids;
+    websocket.messageHandle[proto.RequestType.room_users] = (response) => {
+      const data = parseData<proto.GetRoomUsersResponse>(response);
+      const users = data.user_ids;
       const refs = users.filter((userId) => userId !== user?.user_id)
         .map((userId) => ({
           ref: { current: undefined },
@@ -99,14 +102,14 @@ const OnlinePlayRoom = () => {
       setOpponentScores(users.map(() => 0));
     };
 
-    websocket.messageHandle[messageType.roomConfig] = (data) => {
-      const response = data as WebsocketReceiveMessage<Room>;
-      setRoom(response.data);
+    websocket.messageHandle[proto.RequestType.room_config] = (response) => {
+      const data = parseData<proto.GetRoomConfigResponse>(response);
+      setRoom(data.room);
     };
 
-    websocket.messageHandle[messageType.exitRoom] = (data) => {
-      const response = data as WebsocketReceiveMessage<UserID>;
-      const userId = response.data;
+    websocket.messageHandle[proto.RequestType.exit_room] = (response) => {
+      const data = parseData<proto.ExitRoomResponse>(response);
+      const userId = data.user_id;
       if (userId === user?.user_id) {
         return;
       }
@@ -115,52 +118,54 @@ const OnlinePlayRoom = () => {
       setOpponentScores([...opponentScores.slice(0, index), ...opponentScores.slice(index + 1)]);
     };
 
-    websocket.messageHandle[messageType.startGame] = (startMessage) => {
-      if (startMessage.error !== 0) {
+    websocket.messageHandle[proto.RequestType.start_game] = (response) => {
+      if ((response.error ?? 0) !== 0) {
         return;
       }
-
-      const gameStartMessage = startMessage.data as GameStartResponse;
+      const data = parseData<proto.StartGameResponse>(response);
 
       setScore(0);
       setGameStarted(true);
+      const seed = data.seed ?? 0;
       opponentRefs.forEach((opponent, index) => {
         if (!opponent.ref.current) {
           return;
         }
         setOpponentScore(index)(0);
-        opponent.ref.current.startGame(gameStartMessage.seed);
+        opponent.ref.current.startGame(seed);
         opponent.ref.current.onScoreChange = setOpponentScore(index);
       });
 
-      tempRef.current?.startGame(gameStartMessage.seed);
+      tempRef.current?.startGame(seed);
       if (tempRef.current) {
         tempRef.current.onScoreChange = setScore;
         tempRef.current.touchCallback = (p: Point) => {
-          const touchRequest: WebsocketSendMessage<Point> = {
-            type: messageType.touch,
-            data: {
+          const msg = newProtoRequest(
+            proto.RequestType.touch,
+            proto.TouchRequest.fromObject({
               x: p.x,
               y: p.y,
-            }
-          };
-          websocket.ws.send(JSON.stringify(touchRequest));
+            })
+          ).serializeBinary();
+
+          websocket.ws.send(msg);
         };
       }
     };
 
-    websocket.messageHandle[messageType.touch] = (touchMessage) => {
-      const response = touchMessage.data as TileTouchEvent;
+    websocket.messageHandle[proto.RequestType.touch] = (response) => {
+      const data = parseData<proto.TouchResponse>(response);
       opponentRefs.forEach((opponent) => {
-        if (opponent.userId === response.user_id) {
-          opponent.ref.current?.touch({ x: response.x, y: response.y });
+        if (opponent.userId === data.user_id) {
+          opponent.ref.current?.touch({ x: data.x ?? 0, y: data.y ?? 0 });
         }
       });
     };
 
-    websocket.messageHandle[messageType.finishGame] = (data) => {
-      const response = data as WebsocketReceiveMessage<FinishGameResponse>;
-      const sortedResult = Object.entries(response.data).sort(([,x],[,y]) => y - x);
+    websocket.messageHandle[proto.RequestType.finish_game] = (response) => {
+      const data = parseData<proto.FinishGameResponse>(response);
+      const sortedResult = data.user_scores
+        .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
       setGameResult(sortedResult);
       setShowModal(true);
       setGameStarted(false);
@@ -170,21 +175,25 @@ const OnlinePlayRoom = () => {
   useEffect(() => {
     return () => {
       const websocket = getWebsocketInstance();
-      const payload: WebsocketSendMessage<RoomId> = {
-        type: messageType.exitRoom,
-        data: roomId,
-      };
-      websocket.ws.send(JSON.stringify(payload));
+      const msg = newProtoRequest(
+        proto.RequestType.exit_room,
+        proto.ExitRoomRequest.fromObject({
+          room_id: roomId,
+        })
+      ).serializeBinary();
+      websocket.ws.send(msg);
     };
   }, []);
 
   const sendGameStart = () => {
     const websocket = getWebsocketInstance();
-    const startMessage: WebsocketSendMessage<RoomId> = {
-      type: messageType.startGame,
-      data: roomId,
-    };
-    websocket.ws.send(JSON.stringify(startMessage));
+    const message = newProtoRequest(
+      proto.RequestType.start_game,
+      proto.StartGameRequest.fromObject({
+        room_id: roomId,
+      })
+    ).serializeBinary();
+    websocket.ws.send(message);
   };
 
   if (!Number.isInteger(roomId)) {
@@ -200,7 +209,7 @@ const OnlinePlayRoom = () => {
             opponentRefs.map((opponent, index) => {
               return (
                 <OpponentContainer key={opponent.userId}>
-                  <Username opponent master={room?.master === opponent.userId}>{ opponent.userId }</Username>
+                  <Username opponent master={room?.master_id === opponent.userId}>{ opponent.userId }</Username>
                   <GameCanvas animationEffect={false} gameRef={opponent.ref} mini readonly />
                   <Score opponent>{ opponentScores[index] }</Score>
                 </OpponentContainer>
@@ -208,10 +217,10 @@ const OnlinePlayRoom = () => {
             })
           }
         </OpponentWrapper>
-        <Username master={user && room?.master === user.user_id}>{ user?.user_id }</Username>
+        <Username master={user && room?.master_id === user.user_id}>{ user?.user_id }</Username>
         <span>Score : { score }</span>
         <GameCanvas animationEffect={false} gameRef={tempRef} readonly={!gameStarted} />
-        <Button color={'blue'} onClick={sendGameStart} disabled={!user || room?.master !== user.user_id}>
+        <Button color={'blue'} onClick={sendGameStart} disabled={!user || room?.master_id !== user.user_id}>
           Game Start
         </Button>
       </Wrapper>
@@ -228,10 +237,10 @@ const OnlinePlayRoom = () => {
               </thead>
               <tbody>
                 {
-                  gameResult.map(([username, value]) => (
-                    <tr key={username}>
-                      <td>{ username }</td>
-                      <td>{ value }</td>
+                  gameResult.map(({ user_id, score: user_score }) => (
+                    <tr key={user_id}>
+                      <td>{ user_id }</td>
+                      <td>{ user_score ?? 0 }</td>
                     </tr>
                   ))
                 }

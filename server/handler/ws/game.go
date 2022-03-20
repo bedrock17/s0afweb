@@ -2,12 +2,12 @@ package ws
 
 import (
 	"github.com/bedrock17/s0afweb/errors"
+	"github.com/bedrock17/s0afweb/proto"
 	"github.com/bedrock17/s0afweb/service"
-	"github.com/bedrock17/s0afweb/service/game"
 	"github.com/bedrock17/s0afweb/websocket"
 )
 
-func StartGame(client *websocket.Client, roomId uint) ([]websocket.WSResponse, error) {
+func StartGame(client *websocket.Client, roomId uint) ([]websocket.Response, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	room, err := gameRoomManager.StartGame(client, roomId)
 	if err != nil {
@@ -19,21 +19,28 @@ func StartGame(client *websocket.Client, roomId uint) ([]websocket.WSResponse, e
 		clients[index] = c
 		index += 1
 	}
-	resp := websocket.WSResponse{
+	resp := websocket.Response{
 		Clients: clients,
-		Payload: websocket.WSPayload{
-			Type: websocket.StartGameMessageType,
-			Data: game.StartResponse{
+		Payload: &proto.Response{
+			Type: proto.RequestType_start_game,
+			Data: proto.ToAny(&proto.StartGameResponse{
 				GameStartedAt: room.GameStartedAt,
 				Seed:          room.Seed,
-			},
+			}),
 		},
+		//Payload: websocket.WSPayload{
+		//	Type: websocket.StartGameMessageType,
+		//	Data: game.StartResponse{
+		//		GameStartedAt: room.GameStartedAt,
+		//		Seed:          room.Seed,
+		//	},
+		//},
 	}
 
-	return []websocket.WSResponse{resp}, nil
+	return []websocket.Response{resp}, nil
 }
 
-func TouchTile(client *websocket.Client, touch websocket.TouchRequest) ([]websocket.WSResponse, error) {
+func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket.Response, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 	user, err := userManager.GetUser(client)
@@ -59,22 +66,22 @@ func TouchTile(client *websocket.Client, touch websocket.TouchRequest) ([]websoc
 		index += 1
 	}
 
-	resp := websocket.WSResponse{
+	resp := websocket.Response{
 		Clients: clients,
-		Payload: websocket.WSPayload{
-			Type: websocket.TouchMessageType,
-			Data: websocket.TouchResponse{
-				UserID: user.Id,
+		Payload: &proto.Response{
+			Type: proto.RequestType_touch,
+			Data: proto.ToAny(&proto.TouchResponse{
+				UserId: user.Id,
 				X:      touch.X,
 				Y:      touch.Y,
-			},
+			}),
 		},
 	}
 
-	return []websocket.WSResponse{resp}, nil
+	return []websocket.Response{resp}, nil
 }
 
-func SimulateOneStep(client *websocket.Client, touch websocket.TouchRequest) error {
+func SimulateOneStep(client *websocket.Client, touch *proto.TouchRequest) error {
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 	user, err := userManager.GetUser(client)
@@ -90,7 +97,7 @@ func SimulateOneStep(client *websocket.Client, touch websocket.TouchRequest) err
 		return errors.UserNotFoundErr
 	}
 
-	_, err = simulator.WalkOneStep(touch.X, touch.Y)
+	_, err = simulator.WalkOneStep(int(touch.X), int(touch.Y))
 	return err
 }
 
