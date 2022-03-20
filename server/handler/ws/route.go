@@ -101,7 +101,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 		case websocket2.TouchMessageType:
 			touch := request.Data.(*websocket2.TouchRequest)
 			err = SimulateOneStep(client, *touch)
-			_, _ = GameOver(client)
+			GameOver(client)
 			responses, err = TouchTile(client, *touch)
 		case websocket2.HeartbeatType:
 			client.Conn.SetReadDeadline(time.Now().Add(15 * time.Second))

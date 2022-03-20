@@ -11,7 +11,7 @@ type GameTicker struct {
 	OnFinishCallback    func()
 }
 
-func (gt GameTicker) Start() {
+func (gt *GameTicker) Start() {
 	if gt.ticker == nil {
 		gt.ticker = time.NewTicker(gt.TickerDuration)
 	} else {
