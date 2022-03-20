@@ -47,11 +47,6 @@ const OnlinePlayRoom = () => {
   };
 
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-      return;
-    }
-
     if (!roomId) {
       navigate('/');
       return;
@@ -95,7 +90,7 @@ const OnlinePlayRoom = () => {
     websocket.messageHandle[messageType.roomUsers] = (data) => {
       const response = data as WebsocketReceiveMessage<RoomUsersResponse>;
       const users = response.data.user_ids;
-      const refs = users.filter((userId) => userId !== user.user_id)
+      const refs = users.filter((userId) => userId !== user?.user_id)
         .map((userId) => ({
           ref: { current: undefined },
           userId,

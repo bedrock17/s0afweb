@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Routes, Route, Navigate 
+  Routes, Route, Navigate
 } from 'react-router-dom';
 
 import OnlinePlay from '~/pages/OnlinePlay';
