@@ -17,7 +17,6 @@ export const newProtoRequest = (type: proto.RequestType, message: IProtoMessage)
 
 export const parseData = <T>(message: ProtoMessage): T => {
   const o = responseType[message.type].deserializeBinary(message.data!.value).toObject() as T;
-  console.log(o);
   return o;
 };
 
