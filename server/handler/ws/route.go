@@ -57,8 +57,12 @@ func WebSocketHandlerV1(c echo.Context) error {
 		}
 
 		rawUserId := sess.Values["userId"]
+		if rawUserId == nil {
+			return errors.SessionDoseNotExist
+		}
+
 		userId := rawUserId.(string)
-		if rawUserId == nil || userId == "" {
+		if userId == "" {
 			return errors.InvalidSessionErr
 		}
 
