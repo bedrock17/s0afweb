@@ -5,15 +5,20 @@ go 1.17
 require (
 	github.com/go-playground/validator/v10 v10.10.0
 	github.com/gorilla/sessions v1.2.1
-	github.com/labstack/echo-contrib v0.12.0
+	github.com/gorilla/websocket v1.5.0
+	github.com/joho/godotenv v1.4.0
+	github.com/labstack/echo-contrib v0.11.0
 	github.com/labstack/echo/v4 v4.7.0
 	github.com/swaggo/echo-swagger v1.3.0
 	github.com/swaggo/swag v1.8.0
+	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b
+	google.golang.org/protobuf v1.26.0
 	gorm.io/driver/sqlite v1.3.1
 	gorm.io/gorm v1.23.2
 )
 
 require (
+	cloud.google.com/go v0.65.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
@@ -24,6 +29,7 @@ require (
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
@@ -44,5 +50,6 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 	golang.org/x/tools v0.1.9 // indirect
+	google.golang.org/appengine v1.6.6 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

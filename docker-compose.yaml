@@ -6,7 +6,7 @@ services:
       - "8080"
     working_dir: /
     volumes:
-      - "./server/db.sqlite:/db.sqlite"
+      - "./server/.env:/.env"
   nginx:
     build: front/
     ports:

@@ -1,23 +1,7 @@
 
+import Queue from '~/utils/queue';
+
 import XORShift from './xorshift';
-
-class Queue<T> {
-  list: T[] = [];
-  get length() {
-    return this.list.length;
-  }
-  enqueue(item: T) {
-    this.list.push(item);
-  }
-  dequeue() {
-    return this.list.shift();
-  }
-}
-
-export type Point = {
-  x: number,
-  y: number,
-};
 
 const direction4: Point[] = [
   { x: 0, y: 1 },
@@ -27,10 +11,12 @@ const direction4: Point[] = [
 ];
 
 export class Game {
-
+  public readonly: boolean;
   public score: number;
-  public gameOver: boolean;
-  public gameOverCallback: (() => void) | null;
+  public isGameOver: boolean;
+  public onStateChange?: (isGameOver: boolean) => void;
+  public touchCallback?: (p: Point) => void;
+
   public touchCount: number;
   public animationEffect: boolean;
   public lineHistory: string[] = [];
@@ -42,30 +28,33 @@ export class Game {
   private _colors: string[];
   private _seed: number;
 
+  private readonly map: number[][];
+  private readonly tileWidth: number;
+  private readonly canvas: HTMLCanvasElement; //canvas
+
   private blockMax: number;
-  private map: number[][];
   private maxBlockRow: number;
   private maxBlockColumn: number;
-  private BWIDTH: number;
-  private BHEIGHT: number;
-  private OUTLINE_PIXEL: number;
-  private MAPPXWIDTH: number;
-  private MAPPXHEIGHT: number;
+  private canvasWidth: number;
+  private canvasHeight: number;
+  private receivedLineCount: number;
 
   private onScoreChangeCallback?: CallableFunction;
 
-  private canvas: HTMLCanvasElement; //canvas
   private context: CanvasRenderingContext2D; //canvas 2d
 
   private bfsQueue: Queue<Point>;
+  private touchQueue: Queue<Point>;
   private removeBlockCode = 0;
   private removeBlockCount = 0;
 
-  constructor(canvas: HTMLCanvasElement) {
+
+  constructor(canvas: HTMLCanvasElement, tileWidth = 31) {
+    this.readonly = false;
     this.score = 0;
     this.touchCount = 0;
-    this.gameOver = false;
-    this.gameOverCallback = null;
+    this.receivedLineCount = 0;
+    this.isGameOver = false;
     this.lastPos = { 'y': -1, 'x': -1 };
 
     this.map = [[]];
@@ -73,11 +62,10 @@ export class Game {
 
     this.maxBlockRow = 15; //max map width
     this.maxBlockColumn = 8; //max map height
-    this.BWIDTH = 31; //block width
-    this.BHEIGHT = 31; //block height
-    this.OUTLINE_PIXEL = 0;
-    this.MAPPXWIDTH = 800; //canvas width
-    this.MAPPXHEIGHT = 800; //canvas height
+    this.tileWidth = tileWidth; //tile width
+
+    this.canvasWidth = this.maxBlockColumn * this.tileWidth; //canvas width
+    this.canvasHeight = this.maxBlockRow * this.tileWidth; //canvas height
 
     //option
     this.animationEffect = true;
@@ -101,6 +89,7 @@ export class Game {
     this._seed = 0;
 
     this.bfsQueue = new Queue<Point>();
+    this.touchQueue = new Queue<Point>();
   }
 
   private static getMousePoint(canvas: HTMLCanvasElement, evt: MouseEvent) {
@@ -122,6 +111,14 @@ export class Game {
       }
     }
     return false;
+  }
+
+  public increaseLineCount() {
+    this.receivedLineCount += 1;
+  }
+
+  public touch(p: Point) {
+    this.touchQueue.enqueue(p);
   }
 
   public set seed(seed: number) {
@@ -146,32 +143,32 @@ export class Game {
     this.maxBlockColumn = size.width;
     this.maxBlockRow = size.height;
 
-    this.MAPPXWIDTH = this.maxBlockColumn * this.BWIDTH; //canvas width
-    this.MAPPXHEIGHT = this.maxBlockRow * this.BHEIGHT; //canvas height
+    this.canvasWidth = this.maxBlockColumn * this.tileWidth; //canvas width
+    this.canvasHeight = this.maxBlockRow * this.tileWidth; //canvas height
   }
 
   // animationFrame 인자로 넘어온 값 만큼 블록이 올라가는 과정을 프임별로 보여준다
   private draw(animationFrame: number) { //draw blocks and score
     this.context.fillStyle = 'rgb(255, 255, 255)';
-    this.context.fillRect(0, 0, this.MAPPXWIDTH, this.BHEIGHT);
+    this.context.fillRect(0, 0, this.canvasWidth, this.tileWidth);
 
     for (let animationIndex = 0; animationIndex < animationFrame; animationIndex++) {
 
       let yposFrameValue = 0;
       if (animationFrame > 1) {
-        yposFrameValue = (this.BHEIGHT * (animationFrame - animationIndex - 1)) / animationFrame;
+        yposFrameValue = (this.tileWidth * (animationFrame - animationIndex - 1)) / animationFrame;
 
       }
 
       for (let i = 0; i < this.maxBlockRow; i++) {
         for (let j = 0; j < this.maxBlockColumn; j++) {
-          const yPos = i * (this.BHEIGHT + this.OUTLINE_PIXEL);
-          const xPos = j * (this.BWIDTH + this.OUTLINE_PIXEL);
+          const yPos = i * this.tileWidth;
+          const xPos = j * this.tileWidth;
 
           const colorCode = this.colors[this.map[i][j]];
 
           this.context.fillStyle = 'rgb' + colorCode;
-          this.context.fillRect(xPos, yPos + yposFrameValue, this.BWIDTH, this.BHEIGHT);
+          this.context.fillRect(xPos, yPos + yposFrameValue, this.tileWidth, this.tileWidth);
         }
       }
     }
@@ -182,15 +179,8 @@ export class Game {
       for (let j = 0; j < this.maxBlockColumn; j++) {
         if (i === 0) {
           if (this.map[i][j] !== 0) {
-            //end
-            // console.log("end!!!")
-            this.gameOver = true;
-            // this.startGame()
-
-            if (this.gameOverCallback != null) {
-              this.gameOverCallback();
-            }
-
+            this.isGameOver = true;
+            this.onStateChange?.(this.isGameOver);
             return;
           }
         } else {
@@ -216,11 +206,16 @@ export class Game {
   }
 
   private onTileClick = (e: MouseEvent) => {
+    if (this.readonly) {
+      e.preventDefault();
+      return;
+    }
+
     const pos = Game.getMousePoint(this.canvas, e);
     const { x, y } = pos;
 
-    const column = Math.floor(x / (this.BWIDTH + this.OUTLINE_PIXEL));
-    const row = Math.floor(y / (this.BHEIGHT + this.OUTLINE_PIXEL));
+    const column = Math.floor(x / this.tileWidth);
+    const row = Math.floor(y / this.tileWidth);
 
     if (row >= this.maxBlockRow || column >= this.maxBlockColumn) {
       return;
@@ -241,7 +236,7 @@ export class Game {
     this.newBlocks();
     this.context.globalAlpha = 0.2;
     this.context.fillStyle = 'rgb(0, 171, 255)';
-    this.context.fillRect(0, 0, this.MAPPXWIDTH, this.MAPPXHEIGHT);
+    this.context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     this.context.globalAlpha = 1;
   }
 
@@ -274,7 +269,7 @@ export class Game {
 
   // 이곳에서 그리기 및 블록처리를 해준다.
   private gameLoop = () => {
-    if (this.gameOver) {
+    if (this.isGameOver) {
       return;
     }
 
@@ -305,10 +300,24 @@ export class Game {
       this.onScoreChangeCallback?.(displayScore);
     }
 
+    // 외부에서 강제로 발생시킨 touchEvent 를 일반 touch 이벤트 처럼 처리
+    if (this.touchQueue.length > 0 && this.lastPos.x === -1 && this.lastPos.y === -1) {
+      const p = this.touchQueue.dequeue();
+      if (p) {
+        this.lastPos = p;
+      }
+    }
+
     if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
       if (this.createBlock) {
         this.onScoreChangeCallback?.(displayScore);
         this.newBlocks();
+
+        for (let i = 0; i < this.receivedLineCount; i++) {
+          this.newBlocks();
+        }
+        this.receivedLineCount = 0;
+
         this.createBlock = false;
         this.lastPos = { y: -1, x: -1 };
       }
@@ -317,10 +326,16 @@ export class Game {
     if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
       this.touchHistory.push(this.lastPos);
 
+      if (this.touchCallback) {
+        this.touchCallback(this.lastPos);
+      }
+
       this.removeBlockCode = this.map[this.lastPos.y][this.lastPos.x];
-      this.removeBlockCount = 1;
-      this.map[this.lastPos.y][this.lastPos.x] = 0;
-      this.bfsQueue.enqueue(this.lastPos);
+      if (this.removeBlockCode !== 0) {
+        this.removeBlockCount = 1;
+        this.map[this.lastPos.y][this.lastPos.x] = 0;
+        this.bfsQueue.enqueue(this.lastPos);
+      }
 
       this.touchCount += 1;
       this.createBlock = true;
@@ -337,13 +352,16 @@ export class Game {
   public startGame(seed: number) {
     this.score = 0;
     this.touchCount = 0;
+    this.receivedLineCount = 0;
     this.lineHistory = [];
     this.touchHistory = [];
-    this.gameOver = false;
+    this.isGameOver = false;
     this.createBlock = false;
+    this.lastPos = { x: -1, y: -1 };
 
     this.seed = seed;
     this.initialize();
+    this.onStateChange?.(false);
 
     window.requestAnimationFrame(this.gameLoop);
   }

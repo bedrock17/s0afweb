@@ -19,6 +19,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: p => p.replace(/^\/api/, ''),
       },
+      '/ws': {
+        target: 'ws://localhost:8080/v1/ws',
+        ws: true,
+        changeOrigin: true,
+      },
     },
   },
   plugins: [react()],

@@ -1,0 +1,130 @@
+syntax = "proto3";
+option go_package = "/;proto";
+
+import "google/protobuf/any.proto";
+package proto;
+
+message Room {
+  enum RoomStatus {
+    _ = 0;
+    idle = 1;
+    inGame = 2;
+  }
+  uint32 id = 1;
+  int32 headcount = 2;
+  int32 capacity = 3;
+  int32 play_time = 4;
+  string master_id = 5;
+  RoomStatus status = 6;
+  int64 game_started_at = 7;
+}
+
+enum MessageType {
+  _ = 0;
+  get_rooms = 1;
+  create_room = 2;
+  join_room = 3;
+  room_config = 4;
+  exit_room = 5;
+  start_game = 6;
+  touch = 7;
+  finish_game = 8;
+  room_users = 9;
+  heartbeat = 10;
+}
+
+message Request {
+  MessageType type = 1;
+  google.protobuf.Any data = 2;
+}
+
+message Response {
+  MessageType type = 1;
+  google.protobuf.Any data = 2;
+  int32 error = 3;
+}
+
+// Get Rooms
+message GetRoomsRequest {}
+
+message GetRoomsResponse {
+  repeated Room rooms = 1;
+}
+
+// Create Room
+message CreateRoomRequest {
+  int32 capacity = 1;
+  int32 play_time = 2;
+}
+
+message CreateRoomResponse {
+  Room room = 1;
+}
+
+// Join Room
+message JoinRoomRequest {
+  uint32 room_id = 1;
+}
+
+message JoinRoomResponse {
+  string user_id = 1;
+}
+
+// Get Room Config
+message GetRoomConfigRequest {
+  uint32 room_id = 1;
+}
+
+message GetRoomConfigResponse {
+  Room room = 1;
+}
+
+// Room Users
+message GetRoomUsersResponse {
+  repeated string user_ids = 1;
+}
+
+// Exit Room
+message ExitRoomRequest {
+  uint32 room_id = 1;
+}
+
+message ExitRoomResponse {
+  string user_id = 1;
+}
+
+// Start Game
+message StartGameRequest {
+  uint32 room_id = 1;
+}
+
+message StartGameResponse {
+  int32 seed = 1;
+  int64 game_started_at = 2;
+}
+
+// Touch Request
+message TouchRequest {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message TouchResponse {
+  string user_id = 1;
+  int32 x = 2;
+  int32 y = 3;
+}
+
+message UserScore {
+  string user_id = 1;
+  int32 score = 2;
+}
+
+message FinishGameResponse {
+  repeated UserScore user_scores = 1;
+}
+
+// Heartbeat
+message HeartbeatRequest {
+  int64 timestamp = 1;
+}

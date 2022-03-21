@@ -18,7 +18,7 @@ type Leaderboard struct {
 	Touches      int            `json:"touches" validate:"required,numeric"`
 	TouchHistory string         `json:"touch_history" gorm:"type:text" validate:"required,json"`
 	Seed         int32          `json:"seed" validate:"required,numeric"`
-	CreatedAt    time.Time      `swaggerignore:"true"`
-	UpdatedAt    time.Time      `swaggerignore:"true"`
-	DeletedAt    gorm.DeletedAt `swaggerignore:"true" gorm:"index"`
+	CreatedAt    time.Time      `json:"-" swaggerignore:"true"`
+	UpdatedAt    time.Time      `json:"-" swaggerignore:"true"`
+	DeletedAt    gorm.DeletedAt `json:"-" swaggerignore:"true" gorm:"index"`
 }

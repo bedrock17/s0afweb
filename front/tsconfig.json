@@ -8,7 +8,7 @@
       "~/*": ["src/*"]
     },
     "allowJs": false,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
@@ -19,7 +19,12 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "typeRoots": [
+      "node_modules/@types",
+      "src/types"
+    ]
   },
   "include": ["src"],
+  "exclude": ["src/proto"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

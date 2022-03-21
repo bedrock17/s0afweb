@@ -4,6 +4,15 @@ const request = axios.create({
   baseURL: '/api',
 });
 
+export const Auth = {
+  profile: {
+    get: async () => {
+      const { data } = await request.get<APIResponse<UserProfile>>('/v1/auth/profile');
+      return data.data;
+    }
+  },
+};
+
 export const Seed = {
   get: async () => {
     const { data } = await request.get<APIResponse<number>>('/v1/seed');

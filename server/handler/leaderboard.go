@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"errors"
 	"github.com/bedrock17/s0afweb/dao"
+	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/game"
 	"github.com/bedrock17/s0afweb/models"
 	"github.com/labstack/echo-contrib/session"
@@ -33,13 +33,14 @@ func GetLeaderboardV1(c echo.Context) BaseResponse {
 		code = http.StatusInternalServerError
 	}
 
-	var leaderboardsResponse []LeaderboardResponse
-	for _, e := range leaderboards {
-		leaderboardsResponse = append(leaderboardsResponse, LeaderboardResponse{
+	leaderboardsResponse := make([]LeaderboardResponse, len(leaderboards))
+
+	for i, e := range leaderboards {
+		leaderboardsResponse[i] = LeaderboardResponse{
 			Username: e.Username,
 			Score:    e.Score,
 			Touches:  e.Touches,
-		})
+		}
 	}
 
 	return BaseResponse{
@@ -102,12 +103,12 @@ func PostLeaderboardV1(c echo.Context) BaseResponse {
 		return BaseResponse{
 			http.StatusBadRequest,
 			nil,
-			errors.New("invalid game"),
+			errors.GameValidationErr,
 		}
 	}
 
 	repo := dao.GetRepository().Leaderboard()
-	err = repo.Create(*leaderboard)
+	err = repo.CreateOrUpdate(*leaderboard)
 	code := http.StatusCreated
 	if err != nil {
 		code = http.StatusInternalServerError

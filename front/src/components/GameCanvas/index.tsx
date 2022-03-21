@@ -1,7 +1,8 @@
 import type { MutableRefObject } from 'react';
-import React, { useEffect, useRef } from 'react';
+import React, {
+  useEffect, useRef, useState
+} from 'react';
 
-import { Seed } from '~/api';
 import { Game } from '~/game';
 
 import { Canvas } from './styles';
@@ -9,11 +10,14 @@ import { Canvas } from './styles';
 type Props = {
   animationEffect: boolean,
   gameRef: MutableRefObject<Game | undefined>,
+  mini?: boolean,
+  readonly?: boolean,
 };
 
 
-const GameCanvas = ({ animationEffect, gameRef }: Props) => {
+const GameCanvas = ({ animationEffect, gameRef, mini, readonly = false }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isGameOver, setIsGameOver] = useState(false);
 
   useEffect(() => {
     if (!canvasRef.current) {
@@ -22,15 +26,13 @@ const GameCanvas = ({ animationEffect, gameRef }: Props) => {
 
     canvasRef.current.onselectstart = () => false;
 
-    gameRef.current = new Game(canvasRef.current);
+    const tileWidth = mini ? 8 : 31;
+    gameRef.current = new Game(canvasRef.current, tileWidth);
+    gameRef.current.onStateChange = setIsGameOver;
 
     if (!gameRef.current) {
       return;
     }
-
-    Seed.get().then((seed) => {
-      gameRef.current!.startGame(seed);
-    });
 
     return () => {
       gameRef.current = undefined;
@@ -42,10 +44,15 @@ const GameCanvas = ({ animationEffect, gameRef }: Props) => {
       return;
     }
     gameRef.current.animationEffect = animationEffect;
-  }, [animationEffect, gameRef]);
+    gameRef.current.readonly = readonly;
+  }, [readonly, animationEffect, gameRef]);
+
+  const width = mini ? '64px' : '245px';
+  const height = mini ? '120px' : '460px';
+
 
   return (
-    <Canvas ref={canvasRef} width='245px' height='460px'/>
+    <Canvas ref={canvasRef} width={width} height={height} gameOver={isGameOver} />
   );
 };
 

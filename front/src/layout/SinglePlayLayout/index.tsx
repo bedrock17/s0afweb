@@ -4,11 +4,11 @@ import Footer from '~/components/Footer';
 
 import { Container } from './styles';
 
-const Layout: React.FC = ({ children }) => (
+const SinglePlayLayout: React.FC = ({ children }) => (
   <Container>
     { children }
     <Footer />
   </Container>
 );
 
-export default Layout;
+export default SinglePlayLayout;

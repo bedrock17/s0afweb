@@ -4,13 +4,14 @@ import {
 } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
-import { Leaderboard } from '~/api';
+import { Leaderboard, Seed } from '~/api';
 import {
   gameAnimationEffectState, gameScoreState, gameUsernameState
 } from '~/atoms/game';
 import GameCanvas from '~/components/GameCanvas';
 import Switch from '~/components/Switch';
 import type { Game } from '~/game';
+import SinglePlayLayout from '~/layout/SinglePlayLayout';
 
 import { Wrapper } from './styles';
 
@@ -29,19 +30,25 @@ const SinglePlayPage = () => {
       return;
     }
 
+    Seed.get().then((seed) => {
+      game.startGame(seed);
+    });
+
     game.onScoreChange = setScore;
-    game.gameOverCallback = () => {
-      Leaderboard.post({
-        username: username,
-        score: game.score,
-        touches: game.touchCount,
-        touch_history: JSON.stringify(game.touchHistory),
-        seed: game.seed,
-      }).then(() => {
-        navigate('/single/result');
-      });
+    game.onStateChange = (isGameOver) => {
+      if (isGameOver) {
+        Leaderboard.post({
+          username: username,
+          score: game.score,
+          touches: game.touchCount,
+          touch_history: JSON.stringify(game.touchHistory),
+          seed: game.seed,
+        }).then(() => {
+          navigate('/single/result');
+        });
+      }
     };
-  }, [gameRef, setScore, username]);
+  }, [gameRef, navigate, setScore, username]);
 
   if (username.length === 0) {
     return <Routes>
@@ -50,14 +57,16 @@ const SinglePlayPage = () => {
   }
 
   return (
-    <Wrapper>
-      { username }
-      <span>Score : { score }</span>
-      <Switch checked={animationEffect} onChange={setAnimationEffect}>
+    <SinglePlayLayout>
+      <Wrapper>
+        { username }
+        <span>Score : { score }</span>
+        <Switch checked={animationEffect} onChange={setAnimationEffect}>
         애니메이션 효과
-      </Switch>
-      <GameCanvas gameRef={gameRef} animationEffect={animationEffect} />
-    </Wrapper>
+        </Switch>
+        <GameCanvas gameRef={gameRef} animationEffect={animationEffect} />
+      </Wrapper>
+    </SinglePlayLayout>
   );
 };
 
