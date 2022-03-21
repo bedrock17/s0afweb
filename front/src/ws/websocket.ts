@@ -1,8 +1,7 @@
 import { proto } from '~/proto/message';
 import type { ProtoMessage } from '~/types/proto';
 import { newProtoRequest } from '~/utils/proto';
-
-import Queue from "~/utils/queue";
+import Queue from '~/utils/queue';
 
 export class PopTileWebsocket {
   ws: WebSocket;

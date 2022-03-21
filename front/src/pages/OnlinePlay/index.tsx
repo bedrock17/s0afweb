@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { userState } from '~/atoms/auth';
@@ -17,7 +17,7 @@ const OnlinePlay = () => {
   const websocket = getWebsocketInstance();
   const setRoom = useSetRecoilState(gameRoomState);
   const user = useRecoilValue(userState);
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const [rooms, setRooms] = useState<proto.Room[]>([]);
 
   useEffect(() => {
 
@@ -65,7 +65,7 @@ const OnlinePlay = () => {
           rooms.map(value => {
             return <Link key={value.master_id} to={`/online/room/${value.id}`}>
               <Button disabled={value.status === proto.Room.RoomStatus.inGame} color={'orange'}>
-                { value.id } - { value.master_id }
+                { value.id } - { value.master_id } - { value.headcount}/{value.capacity }
               </Button>
             </Link>;
           })
