@@ -24,17 +24,12 @@ type Room struct {
 	Headcount     int                                     `json:"headcount"`
 	Capacity      int                                     `json:"capacity"`
 	PlayTime      int32                                   `json:"play_time"`
-	Status        RoomStatus                              `json:"status"`
+	Status        proto.Room_RoomStatus                   `json:"status"`
 	Master        string                                  `json:"master_id"`
 	GameStartedAt int64                                   `json:"game_started_at"`
 	Seed          int32                                   `json:"-"`
 	GameTicker    *utils.GameTicker                       `json:"-"`
 }
-
-const (
-	RoomStatusIdle RoomStatus = 1 + iota
-	RoomStatusInGame
-)
 
 type RoomManager interface {
 	NewRoom(config *proto.CreateRoomRequest, masterId *User, onGameFinish func(uint) func()) Room
@@ -74,7 +69,7 @@ func (m *RoomManagerImpl) NewRoom(config *proto.CreateRoomRequest, masterId *Use
 		Headcount: 0,
 		Capacity:  int(config.Capacity),
 		PlayTime:  config.PlayTime,
-		Status:    RoomStatusIdle,
+		Status:    proto.Room_idle,
 		Master:    masterId.Id,
 		GameTicker: &utils.GameTicker{
 			TickerDuration:   1 * time.Second,
@@ -112,7 +107,7 @@ func (m *RoomManagerImpl) ResetRoom(roomId uint) error {
 
 	// TODO: 게임 끝난 후 초기화할 다른 방 설정 요소들 생각해볼 것
 	room.GameStartedAt = 0
-	room.Status = RoomStatusIdle
+	room.Status = proto.Room_idle
 	m.rooms[roomId] = room
 
 	return nil
@@ -127,7 +122,7 @@ func (m *RoomManagerImpl) JoinRoom(client *websocket.Client, roomId uint) error 
 		return err
 	}
 
-	if room.Status == RoomStatusInGame {
+	if room.Status == proto.Room_inGame {
 		return errors.GameAlreadyStartedErr
 	}
 
@@ -211,7 +206,7 @@ func (m *RoomManagerImpl) StartGame(client *websocket.Client, roomId uint) (Room
 		return Room{}, err
 	}
 
-	if room.Status == RoomStatusInGame {
+	if room.Status == proto.Room_inGame {
 		return Room{}, errors.GameAlreadyStartedErr
 	}
 
@@ -230,7 +225,7 @@ func (m *RoomManagerImpl) StartGame(client *websocket.Client, roomId uint) (Room
 
 	now := time.Now()
 	startedAt := now.UnixMilli()
-	room.Status = RoomStatusInGame
+	room.Status = proto.Room_inGame
 	room.GameStartedAt = startedAt
 	room.Seed = rand.Int31()%2147483646 + 1
 	room.GameTicker.TickerDeadlineMilli = now.Add(time.Second * time.Duration(room.PlayTime)).UnixMilli()

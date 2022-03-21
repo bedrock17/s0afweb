@@ -24,7 +24,7 @@ func ToProtoRoom(room game.Room) *proto.Room {
 		Capacity:      int32(room.Capacity),
 		PlayTime:      room.PlayTime,
 		MasterId:      room.Master,
-		Status:        proto.Room_RoomStatus(room.Status),
+		Status:        room.Status,
 		GameStartedAt: room.GameStartedAt,
 	}
 }
