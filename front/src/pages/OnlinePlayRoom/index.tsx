@@ -17,7 +17,7 @@ import { WSError } from '~/ws/errors';
 import { getWebsocketInstance } from '~/ws/websocket';
 
 import {
-  OpponentContainer, Username, OpponentWrapper, Wrapper, Score, ScoreboardModal, ScoreTable, Dim
+  OpponentContainer, Username, OpponentWrapper, Wrapper, GameInfo, ScoreboardModal, ScoreTable, Dim, GameInfoWrapper
 } from './styles';
 
 type UserMappedGameRef = {
@@ -31,6 +31,7 @@ const OnlinePlayRoom = () => {
   const user = useRecoilValue(userState);
   const [opponentRefs, setOpponentRefs] = useState<UserMappedGameRef[]>([]);
   const [opponentScores, setOpponentScores] = useState<number[]>([]);
+  const [time, setTime] = useState(0);
   const [score, setScore] = useState(0);
   const [room, setRoom] = useRecoilState(gameRoomState);
   const tempRef = useRef<Game>();
@@ -38,6 +39,7 @@ const OnlinePlayRoom = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameResult, setGameResult] = useState<proto.UserScore[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const timerInterval = useRef<NodeJS.Timeout>();
 
   const onCloseModal = useCallback(() => {
     setShowModal(false);
@@ -123,7 +125,11 @@ const OnlinePlayRoom = () => {
         return;
       }
       const data = parseData<proto.StartGameResponse>(response);
+      timerInterval.current = setInterval(() => {
+        setTime((prev) => Math.max(0, prev - 1));
+      }, 1000);
 
+      setTime(room!.play_time);
       setScore(0);
       setGameStarted(true);
       const seed = data.seed ?? 0;
@@ -163,6 +169,9 @@ const OnlinePlayRoom = () => {
     };
 
     websocket.messageHandle[proto.RequestType.finish_game] = (response) => {
+      if (timerInterval.current) {
+        clearInterval(timerInterval.current);
+      }
       const data = parseData<proto.FinishGameResponse>(response);
       const sortedResult = data.user_scores
         .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
@@ -174,6 +183,9 @@ const OnlinePlayRoom = () => {
 
   useEffect(() => {
     return () => {
+      if (timerInterval.current) {
+        clearInterval(timerInterval.current);
+      }
       const websocket = getWebsocketInstance();
       const msg = newProtoRequest(
         proto.RequestType.exit_room,
@@ -211,14 +223,17 @@ const OnlinePlayRoom = () => {
                 <OpponentContainer key={opponent.userId}>
                   <Username opponent master={room?.master_id === opponent.userId}>{ opponent.userId }</Username>
                   <GameCanvas animationEffect={false} gameRef={opponent.ref} mini readonly />
-                  <Score opponent>{ opponentScores[index] }</Score>
+                  <GameInfo opponent>{ opponentScores[index] }</GameInfo>
                 </OpponentContainer>
               );
             })
           }
         </OpponentWrapper>
         <Username master={user && room?.master_id === user.user_id}>{ user?.user_id }</Username>
-        <span>Score : { score }</span>
+        <GameInfoWrapper>
+          <GameInfo>Time : { time }</GameInfo>
+          <GameInfo>Score : { score }</GameInfo>
+        </GameInfoWrapper>
         <GameCanvas animationEffect={false} gameRef={tempRef} readonly={!gameStarted} />
         <Button color={'blue'} onClick={sendGameStart} disabled={!user || room?.master_id !== user.user_id}>
           Game Start

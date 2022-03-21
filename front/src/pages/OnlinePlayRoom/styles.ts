@@ -28,6 +28,12 @@ export const OpponentContainer = styled('div', {
   width: '64px',
 });
 
+export const GameInfoWrapper = styled('div', {
+  width: rem(245),
+  display: 'flex',
+  justifyContent: 'space-between',
+});
+
 export const Username = styled('span', {
   '&': {
   },
@@ -51,7 +57,7 @@ export const Username = styled('span', {
   }
 });
 
-export const Score = styled('span', {
+export const GameInfo = styled('span', {
   '&': {
   },
   variants: {
