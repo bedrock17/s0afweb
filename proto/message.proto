@@ -18,7 +18,7 @@ message Room {
   int64 game_started_at = 6;
 }
 
-enum RequestType {
+enum MessageType {
   get_rooms = 0;
   create_room = 1;
   join_room = 2;
@@ -32,12 +32,12 @@ enum RequestType {
 }
 
 message Request {
-  RequestType type = 1;
+  MessageType type = 1;
   google.protobuf.Any data = 2;
 }
 
 message Response {
-  RequestType type = 1;
+  MessageType type = 1;
   google.protobuf.Any data = 2;
   int32 error = 3;
 }

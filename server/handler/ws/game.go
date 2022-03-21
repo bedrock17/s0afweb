@@ -22,7 +22,7 @@ func StartGame(client *websocket.Client, roomId uint) ([]websocket.Response, err
 	resp := websocket.Response{
 		Clients: clients,
 		Payload: &proto.Response{
-			Type: proto.RequestType_start_game,
+			Type: proto.MessageType_start_game,
 			Data: proto.ToAny(&proto.StartGameResponse{
 				GameStartedAt: room.GameStartedAt,
 				Seed:          room.Seed,
@@ -69,7 +69,7 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 	resp := websocket.Response{
 		Clients: clients,
 		Payload: &proto.Response{
-			Type: proto.RequestType_touch,
+			Type: proto.MessageType_touch,
 			Data: proto.ToAny(&proto.TouchResponse{
 				UserId: user.Id,
 				X:      touch.X,

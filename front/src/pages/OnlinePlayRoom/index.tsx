@@ -57,7 +57,7 @@ const OnlinePlayRoom = () => {
     }
 
     const message = newProtoRequest(
-      proto.RequestType.join_room,
+      proto.MessageType.join_room,
       proto.JoinRoomRequest.fromObject({
         room_id: roomId,
       })
@@ -68,8 +68,8 @@ const OnlinePlayRoom = () => {
       websocket.ws.send(message);
     });
 
-    websocket.messageHandle[proto.RequestType.join_room] = (response) => {
-      if (response.error !== WSError.NoError) {
+    websocket.messageHandle[proto.MessageType.join_room] = (response) => {
+      if (response.error !== undefined && response.error !== WSError.NoError) {
         switch (response.error) {
         case WSError.InvalidRoomIdError:
           alert('존재하지 않는 방입니다.');
@@ -97,7 +97,7 @@ const OnlinePlayRoom = () => {
       });
     };
 
-    websocket.messageHandle[proto.RequestType.room_users] = (response) => {
+    websocket.messageHandle[proto.MessageType.room_users] = (response) => {
       const data = parseData<proto.GetRoomUsersResponse>(response);
       const users = data.user_ids;
       const refs = users.filter((userId) => userId !== user?.user_id)
@@ -109,12 +109,12 @@ const OnlinePlayRoom = () => {
       setOpponentScores(users.map(() => 0));
     };
 
-    websocket.messageHandle[proto.RequestType.room_config] = (response) => {
+    websocket.messageHandle[proto.MessageType.room_config] = (response) => {
       const data = parseData<proto.GetRoomConfigResponse>(response);
       setRoom(data.room);
     };
 
-    websocket.messageHandle[proto.RequestType.exit_room] = (response) => {
+    websocket.messageHandle[proto.MessageType.exit_room] = (response) => {
       const data = parseData<proto.ExitRoomResponse>(response);
       const userId = data.user_id;
       if (userId === user?.user_id) {
@@ -125,7 +125,7 @@ const OnlinePlayRoom = () => {
       setOpponentScores([...opponentScores.slice(0, index), ...opponentScores.slice(index + 1)]);
     };
 
-    websocket.messageHandle[proto.RequestType.start_game] = (response) => {
+    websocket.messageHandle[proto.MessageType.start_game] = (response) => {
       if ((response.error ?? 0) !== 0) {
         return;
       }
@@ -152,7 +152,7 @@ const OnlinePlayRoom = () => {
         tempRef.current.onScoreChange = setScore;
         tempRef.current.touchCallback = (p: Point) => {
           const msg = newProtoRequest(
-            proto.RequestType.touch,
+            proto.MessageType.touch,
             proto.TouchRequest.fromObject({
               x: p.x,
               y: p.y,
@@ -164,7 +164,7 @@ const OnlinePlayRoom = () => {
       }
     };
 
-    websocket.messageHandle[proto.RequestType.touch] = (response) => {
+    websocket.messageHandle[proto.MessageType.touch] = (response) => {
       const data = parseData<proto.TouchResponse>(response);
       opponentRefs.forEach((opponent) => {
         if (opponent.userId === data.user_id) {
@@ -173,7 +173,7 @@ const OnlinePlayRoom = () => {
       });
     };
 
-    websocket.messageHandle[proto.RequestType.finish_game] = (response) => {
+    websocket.messageHandle[proto.MessageType.finish_game] = (response) => {
       if (timerInterval.current) {
         clearInterval(timerInterval.current);
       }
@@ -193,7 +193,7 @@ const OnlinePlayRoom = () => {
       }
       const websocket = getWebsocketInstance();
       const msg = newProtoRequest(
-        proto.RequestType.exit_room,
+        proto.MessageType.exit_room,
         proto.ExitRoomRequest.fromObject({
           room_id: roomId,
         })
@@ -205,7 +205,7 @@ const OnlinePlayRoom = () => {
   const sendGameStart = () => {
     const websocket = getWebsocketInstance();
     const message = newProtoRequest(
-      proto.RequestType.start_game,
+      proto.MessageType.start_game,
       proto.StartGameRequest.fromObject({
         room_id: roomId,
       })

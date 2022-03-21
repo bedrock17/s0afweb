@@ -25,7 +25,7 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
 
   const sendHeartBeat = () => {
     const message = newProtoRequest(
-      proto.RequestType.heartbeat,
+      proto.MessageType.heartbeat,
       proto.HeartbeatRequest.fromObject({
         timestamp: new Date().getTime(),
       })

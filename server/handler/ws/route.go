@@ -36,7 +36,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 		user, err := userManager.GetUser(client)
 		if err == nil && user.RoomId > 0 {
 			responses, err := ExitGameRoom(client, user.RoomId)
-			sendMessage(client, proto.RequestType_exit_room, responses, err)
+			sendMessage(client, proto.MessageType_exit_room, responses, err)
 		}
 		_ = ws.Close()
 	}()
@@ -81,35 +81,35 @@ func WebSocketHandlerV1(c echo.Context) error {
 		skipResponse := false
 
 		switch request.Type {
-		case proto.RequestType_get_rooms:
+		case proto.MessageType_get_rooms:
 			responses, err = GetRooms(client)
-		case proto.RequestType_create_room:
+		case proto.MessageType_create_room:
 			payload := new(proto.CreateRoomRequest)
 			err = pb.Unmarshal(request.Data.Value, payload)
 			responses, err = CreateGameRoom(client, payload)
-		case proto.RequestType_join_room:
+		case proto.MessageType_join_room:
 			payload := new(proto.JoinRoomRequest)
 			err = pb.Unmarshal(request.Data.Value, payload)
 			responses, err = JoinGameRoom(client, uint(payload.RoomId))
-		case proto.RequestType_room_config:
+		case proto.MessageType_room_config:
 			payload := new(proto.GetRoomConfigRequest)
 			err = pb.Unmarshal(request.Data.Value, payload)
 			responses, err = GetRoomConfig(client, uint(payload.RoomId))
-		case proto.RequestType_exit_room:
+		case proto.MessageType_exit_room:
 			payload := new(proto.ExitRoomRequest)
 			err = pb.Unmarshal(request.Data.Value, payload)
 			responses, err = ExitGameRoom(client, uint(payload.RoomId))
-		case proto.RequestType_start_game:
+		case proto.MessageType_start_game:
 			payload := new(proto.StartGameRequest)
 			err = pb.Unmarshal(request.Data.Value, payload)
 			responses, err = StartGame(client, uint(payload.RoomId))
-		case proto.RequestType_touch:
+		case proto.MessageType_touch:
 			payload := new(proto.TouchRequest)
 			err = pb.Unmarshal(request.Data.Value, payload)
 			err = SimulateOneStep(client, payload)
 			_, _ = GameOver(client)
 			responses, err = TouchTile(client, payload)
-		case proto.RequestType_heartbeat:
+		case proto.MessageType_heartbeat:
 			client.Conn.SetReadDeadline(time.Now().Add(15 * time.Second))
 			skipResponse = true
 		}
@@ -122,7 +122,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 	return nil
 }
 
-func sendMessage(client *websocket2.Client, reqType proto.RequestType, responses []websocket2.Response, err error) {
+func sendMessage(client *websocket2.Client, reqType proto.MessageType, responses []websocket2.Response, err error) {
 	if err != nil {
 		payload := proto.Response{
 			Type:  reqType,

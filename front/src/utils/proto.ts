@@ -6,7 +6,7 @@ interface IProtoMessage {
   serializeBinary(): Uint8Array;
 }
 
-export const newProtoRequest = (type: proto.RequestType, message: IProtoMessage): proto.Request => {
+export const newProtoRequest = (type: proto.MessageType, message: IProtoMessage): proto.Request => {
   return proto.Request.fromObject({
     type,
     data: google.protobuf.Any.fromObject({
@@ -21,12 +21,13 @@ export const parseData = <T>(message: ProtoMessage): T => {
 };
 
 export const responseType: Record<number, ProtoResponse> = {
-  [proto.RequestType.get_rooms]: proto.GetRoomsResponse,
-  [proto.RequestType.create_room]: proto.CreateRoomResponse,
-  [proto.RequestType.join_room]: proto.JoinRoomResponse,
-  [proto.RequestType.room_config]: proto.GetRoomConfigResponse,
-  [proto.RequestType.start_game]: proto.StartGameResponse,
-  [proto.RequestType.touch]: proto.TouchResponse,
-  [proto.RequestType.finish_game]: proto.FinishGameResponse,
-  [proto.RequestType.room_users]: proto.GetRoomUsersResponse,
+  [proto.MessageType.get_rooms]: proto.GetRoomsResponse,
+  [proto.MessageType.create_room]: proto.CreateRoomResponse,
+  [proto.MessageType.join_room]: proto.JoinRoomResponse,
+  [proto.MessageType.room_config]: proto.GetRoomConfigResponse,
+  [proto.MessageType.exit_room]: proto.ExitRoomResponse,
+  [proto.MessageType.start_game]: proto.StartGameResponse,
+  [proto.MessageType.touch]: proto.TouchResponse,
+  [proto.MessageType.finish_game]: proto.FinishGameResponse,
+  [proto.MessageType.room_users]: proto.GetRoomUsersResponse,
 };
