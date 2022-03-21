@@ -5,8 +5,9 @@ import "google/protobuf/any.proto";
 package proto;
 
 enum RoomStatus {
-  idle = 0;
-  inGame = 1;
+  _ = 0;
+  idle = 1;
+  inGame = 2;
 }
 
 message Room {
