@@ -69,15 +69,20 @@ const OnlinePlayRoom = () => {
     });
 
     websocket.messageHandle[proto.RequestType.join_room] = (response) => {
-      const data = parseData<proto.JoinRoomResponse>(response);
       if (response.error !== WSError.NoError) {
         switch (response.error) {
         case WSError.InvalidRoomIdError:
           alert('존재하지 않는 방입니다.');
           navigate('/online');
           return;
+        default:
+          alert(`알 수 없는 오류가 발생했습니다. (${response.error})`);
+          navigate('/online');
+          return;
         }
       }
+
+      const data = parseData<proto.JoinRoomResponse>(response);
       if (data.user_id === user?.user_id) {
         return;
       }

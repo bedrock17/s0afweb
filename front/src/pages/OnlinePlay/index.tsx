@@ -7,7 +7,9 @@ import { gameRoomState } from '~/atoms/game';
 import Button from '~/components/Button';
 import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
 import { proto } from '~/proto/message';
-import { newProtoRequest, responseType } from '~/utils/proto';
+import {
+  newProtoRequest, parseData, responseType 
+} from '~/utils/proto';
 import { getWebsocketInstance } from '~/ws/websocket';
 
 import { Wrapper } from './styles';
@@ -26,7 +28,7 @@ const OnlinePlay = () => {
     }
 
     websocket.messageHandle[proto.RequestType.create_room] = (response) => {
-      const data = responseType[response.type].deserializeBinary(response.data!.value).toObject() as proto.CreateRoomResponse;
+      const data = parseData<proto.CreateRoomResponse>(response);
       setRoom(data.room);
       navigate(`/online/room/${data.room.id}`);
     };
