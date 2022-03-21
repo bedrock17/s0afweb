@@ -48,7 +48,9 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
     // eslint-disable-next-line no-console
     msg.data.arrayBuffer().then((buffer: Uint8Array) => {
       const response = proto.Response.deserializeBinary(buffer);
+      console.log(response);
       const respObj = response.toObject();
+      console.log(respObj, respObj.type);
       if (respObj.type !== undefined && respObj.type in popTileWebsocket.messageHandle) {
         popTileWebsocket.messageHandle[respObj.type](respObj as ProtoMessage);
       } else {

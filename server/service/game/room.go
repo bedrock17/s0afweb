@@ -31,7 +31,7 @@ type Room struct {
 }
 
 const (
-	RoomStatusIdle RoomStatus = iota
+	RoomStatusIdle RoomStatus = 1 + iota
 	RoomStatusInGame
 )
 

@@ -4,13 +4,12 @@ option go_package = "/;proto";
 import "google/protobuf/any.proto";
 package proto;
 
-enum RoomStatus {
-  _ = 0;
-  idle = 1;
-  inGame = 2;
-}
-
 message Room {
+  enum RoomStatus {
+    _ = 0;
+    idle = 1;
+    inGame = 2;
+  }
   uint32 id = 1;
   int32 capacity = 2;
   int32 play_time = 3;
@@ -20,16 +19,17 @@ message Room {
 }
 
 enum MessageType {
-  get_rooms = 0;
-  create_room = 1;
-  join_room = 2;
-  room_config = 3;
-  exit_room = 4;
-  start_game = 5;
-  touch = 6;
-  finish_game = 7;
-  room_users = 8;
-  heartbeat = 9;
+  _ = 0;
+  get_rooms = 1;
+  create_room = 2;
+  join_room = 3;
+  room_config = 4;
+  exit_room = 5;
+  start_game = 6;
+  touch = 7;
+  finish_game = 8;
+  room_users = 9;
+  heartbeat = 10;
 }
 
 message Request {
