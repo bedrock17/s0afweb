@@ -20,6 +20,7 @@ type RoomUsersV1Response struct {
 func ToProtoRoom(room game.Room) *proto.Room {
 	return &proto.Room{
 		Id:            uint32(room.Id),
+		Headcount:     int32(room.Headcount),
 		Capacity:      int32(room.Capacity),
 		PlayTime:      room.PlayTime,
 		MasterId:      room.Master,

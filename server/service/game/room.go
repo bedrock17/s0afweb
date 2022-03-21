@@ -21,6 +21,7 @@ type StartResponse struct {
 type Room struct {
 	Id            uint                                    `json:"id"`
 	Clients       map[*websocket.Client]*game.PopTileGame `json:"-"`
+	Headcount     int                                     `json:"headcount"`
 	Capacity      int                                     `json:"capacity"`
 	PlayTime      int32                                   `json:"play_time"`
 	Status        RoomStatus                              `json:"status"`
@@ -36,7 +37,7 @@ const (
 )
 
 type RoomManager interface {
-	NewRoom(config *proto.CreateRoomRequest, master_id *User, onGameFinish func(uint) func()) Room
+	NewRoom(config *proto.CreateRoomRequest, masterId *User, onGameFinish func(uint) func()) Room
 	JoinRoom(client *websocket.Client, roomId uint) error
 	ExitRoom(client *websocket.Client, roomId uint) error
 	ResetRoom(roomId uint) error
@@ -60,7 +61,7 @@ func NewRoomManager(userManager UserManager) RoomManager {
 	}
 }
 
-func (m *RoomManagerImpl) NewRoom(config *proto.CreateRoomRequest, master_id *User, onGameFinish func(uint) func()) Room {
+func (m *RoomManagerImpl) NewRoom(config *proto.CreateRoomRequest, masterId *User, onGameFinish func(uint) func()) Room {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -68,12 +69,13 @@ func (m *RoomManagerImpl) NewRoom(config *proto.CreateRoomRequest, master_id *Us
 	id := m.counter
 
 	m.rooms[id] = Room{
-		Id:       id,
-		Clients:  map[*websocket.Client]*game.PopTileGame{},
-		Capacity: int(config.Capacity),
-		PlayTime: config.PlayTime,
-		Status:   RoomStatusIdle,
-		Master:   master_id.Id,
+		Id:        id,
+		Clients:   map[*websocket.Client]*game.PopTileGame{},
+		Headcount: 0,
+		Capacity:  int(config.Capacity),
+		PlayTime:  config.PlayTime,
+		Status:    RoomStatusIdle,
+		Master:    masterId.Id,
 		GameTicker: &utils.GameTicker{
 			TickerDuration:   1 * time.Second,
 			OnFinishCallback: onGameFinish(id),
@@ -142,6 +144,7 @@ func (m *RoomManagerImpl) JoinRoom(client *websocket.Client, roomId uint) error 
 	}
 	m.userManager.SetUser(client, User{user.Id, roomId})
 	room.Clients[client] = new(game.PopTileGame)
+	room.Headcount = len(room.Clients)
 	m.rooms[roomId] = room
 
 	return nil
@@ -188,6 +191,7 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Client, roomId uint) error 
 			room.Master = newMaster.Id
 		}
 		room.Clients = newClients
+		room.Headcount = len(room.Clients)
 		m.rooms[roomId] = room
 	} else {
 		// 방의 마지막 유저인 경우 방 제거

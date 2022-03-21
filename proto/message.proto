@@ -11,11 +11,12 @@ message Room {
     inGame = 2;
   }
   uint32 id = 1;
-  int32 capacity = 2;
-  int32 play_time = 3;
-  string master_id = 4;
-  RoomStatus status = 5;
-  int64 game_started_at = 6;
+  int32 headcount = 2;
+  int32 capacity = 3;
+  int32 play_time = 4;
+  string master_id = 5;
+  RoomStatus status = 6;
+  int64 game_started_at = 7;
 }
 
 enum MessageType {
