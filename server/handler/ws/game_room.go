@@ -148,7 +148,7 @@ func JoinGameRoom(client *websocket2.Client, roomId uint) ([]websocket2.Response
 	roomConfigResp := websocket2.Response{
 		Clients: []*websocket2.Client{client},
 		Payload: &proto.Response{
-			Type: proto.RequestType_join_room,
+			Type: proto.RequestType_room_config,
 			Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(room)}),
 		},
 	}
