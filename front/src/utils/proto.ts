@@ -6,12 +6,16 @@ interface IProtoMessage {
   serializeBinary(): Uint8Array;
 }
 
-export const newProtoRequest = (type: proto.MessageType, message: IProtoMessage): proto.Request => {
+export const newProtoRequest = (type: proto.MessageType, message?: IProtoMessage): proto.Request => {
+  let data;
+  if (message) {
+    data = google.protobuf.Any.fromObject({
+      value: message.serializeBinary()
+    });
+  }
   return proto.Request.fromObject({
     type,
-    data: google.protobuf.Any.fromObject({
-      value: message.serializeBinary()
-    }),
+    data,
   });
 };
 
