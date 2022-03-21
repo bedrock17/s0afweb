@@ -2,12 +2,32 @@ import { proto } from '~/proto/message';
 import type { ProtoMessage } from '~/types/proto';
 import { newProtoRequest } from '~/utils/proto';
 
+import Queue from "~/utils/queue";
+
 export class PopTileWebsocket {
   ws: WebSocket;
   messageHandle: Record<string, (msg: ProtoMessage) => void> = {};
 
+  messageQueue = new Queue<Uint8Array>();
+
   constructor(ws: WebSocket) {
     this.ws = ws;
+    this.ws.addEventListener('open', () => {
+      while (this.messageQueue.length > 0) {
+        const data = this.messageQueue.dequeue();
+        if (data) {
+          this.ws.send(data);
+        }
+      }
+    });
+  }
+
+  send(data: Uint8Array) {
+    if (this.ws.readyState === this.ws.OPEN) {
+      this.ws.send(data);
+    } else {
+      this.messageQueue.enqueue(data);
+    }
   }
 }
 
@@ -34,11 +54,6 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
   };
   setInterval(sendHeartBeat, 5000);
 
-  websocket.onopen = () => {
-    // eslint-disable-next-line no-console
-    console.log('open');
-  };
-
   websocket.onerror = (e) => {
     // eslint-disable-next-line no-console
     console.log('onerror', e);
@@ -48,9 +63,7 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
     // eslint-disable-next-line no-console
     msg.data.arrayBuffer().then((buffer: Uint8Array) => {
       const response = proto.Response.deserializeBinary(buffer);
-      console.log(response);
       const respObj = response.toObject();
-      console.log(respObj, respObj.type);
       if (respObj.type !== undefined && respObj.type in popTileWebsocket.messageHandle) {
         popTileWebsocket.messageHandle[respObj.type](respObj as ProtoMessage);
       } else {

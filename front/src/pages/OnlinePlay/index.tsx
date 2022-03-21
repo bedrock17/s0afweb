@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { userState } from '~/atoms/auth';
@@ -11,7 +11,6 @@ import { newProtoRequest, parseData } from '~/utils/proto';
 import { getWebsocketInstance } from '~/ws/websocket';
 
 import { Wrapper } from './styles';
-import index from "~/pages/Index";
 
 const OnlinePlay = () => {
   const navigate = useNavigate();
@@ -27,10 +26,8 @@ const OnlinePlay = () => {
       return;
     }
 
-
     websocket.messageHandle[proto.MessageType.get_rooms] = (response) => {
       const data = parseData<proto.GetRoomsResponse>(response);
-      console.log(data);
       setRooms(data.rooms);
     };
 
@@ -41,17 +38,11 @@ const OnlinePlay = () => {
       navigate(`/online/room/${data.room.id}`);
     };
 
-    websocket.ws.onopen = () => {
-      console.log('open ---- ');
+    const message = newProtoRequest(
+      proto.MessageType.get_rooms
+    ).serializeBinary();
 
-      const message = newProtoRequest(
-        proto.MessageType.get_rooms
-      ).serializeBinary();
-
-      console.log(message);
-
-      websocket.ws.send(message);
-    };
+    websocket.send(message);
 
   }, []);
 
@@ -72,11 +63,15 @@ const OnlinePlay = () => {
       <Wrapper>
         {
           rooms.map(value => {
-            return <> { value.id } </>
+            return <Link key={value.master_id} to={`/online/room/${value.id}`}>
+              <Button disabled={value.status === proto.Room.RoomStatus.inGame} color={'orange'}>
+                { value.id } - { value.master_id }
+              </Button>
+            </Link>;
           })
         }
         <Button color={'blue'} onClick={onClickCreateRoom} disabled={websocket === null}>
-        Create Room
+          Create Room
         </Button>
       </Wrapper>
     </OnlinePlayLayout>

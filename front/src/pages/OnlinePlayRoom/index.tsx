@@ -56,17 +56,7 @@ const OnlinePlayRoom = () => {
       return;
     }
 
-    const message = newProtoRequest(
-      proto.MessageType.join_room,
-      proto.JoinRoomRequest.fromObject({
-        room_id: roomId,
-      })
-    ).serializeBinary();
     const websocket = getWebsocketInstance();
-
-    websocket.ws.onopen = (() => {
-      websocket.ws.send(message);
-    });
 
     websocket.messageHandle[proto.MessageType.join_room] = (response) => {
       if (response.error !== undefined && response.error !== WSError.NoError) {
@@ -187,17 +177,30 @@ const OnlinePlayRoom = () => {
   }, [user, opponentRefs]);
 
   useEffect(() => {
+    const websocket = getWebsocketInstance();
+    const message = newProtoRequest(
+      proto.MessageType.join_room,
+      proto.JoinRoomRequest.fromObject({
+        room_id: roomId,
+      })
+    ).serializeBinary();
+    if (!room || !user || (room.master_id !== user.user_id)) {
+      websocket.send(message);
+    }
+
     return () => {
       if (timerInterval.current) {
         clearInterval(timerInterval.current);
       }
-      const websocket = getWebsocketInstance();
+
+
       const msg = newProtoRequest(
         proto.MessageType.exit_room,
         proto.ExitRoomRequest.fromObject({
           room_id: roomId,
         })
       ).serializeBinary();
+
       websocket.ws.send(msg);
     };
   }, []);

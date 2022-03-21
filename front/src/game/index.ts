@@ -1,18 +1,7 @@
 
-import XORShift from './xorshift';
+import Queue from '~/utils/queue';
 
-class Queue<T> {
-  list: T[] = [];
-  get length() {
-    return this.list.length;
-  }
-  enqueue(item: T) {
-    this.list.push(item);
-  }
-  dequeue() {
-    return this.list.shift();
-  }
-}
+import XORShift from './xorshift';
 
 const direction4: Point[] = [
   { x: 0, y: 1 },
