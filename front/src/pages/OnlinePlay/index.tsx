@@ -16,15 +16,9 @@ const OnlinePlay = () => {
   const navigate = useNavigate();
   const websocket = getWebsocketInstance();
   const setRoom = useSetRecoilState(gameRoomState);
-  const user = useRecoilValue(userState);
   const [rooms, setRooms] = useState<proto.Room[]>([]);
 
   useEffect(() => {
-
-    if (!user) {
-      navigate('/');
-      return;
-    }
 
     websocket.messageHandle[proto.MessageType.get_rooms] = (response) => {
       const data = parseData<proto.GetRoomsResponse>(response);
