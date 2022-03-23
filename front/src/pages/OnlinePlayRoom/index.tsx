@@ -174,6 +174,25 @@ const OnlinePlayRoom = () => {
       setShowModal(true);
       setGameStarted(false);
     };
+
+    websocket.messageHandle[proto.MessageType.attack] = (response) => {
+      const data = parseData<proto.AttackResponse>(response);
+      opponentRefs.forEach((opponent) => {
+        if (opponent.userId === data.user_id) {
+          for (let i = 0; i < data.lines; i++) {
+            opponent.ref.current?.newBlocks();
+          }
+        }
+      });
+
+      if (user?.user_id === data.user_id) {
+        for (let i = 0; i < data.lines; i++) {
+          tempRef.current?.newBlocks();
+        }
+      }
+
+    };
+
   }, [user, opponentRefs]);
 
   useEffect(() => {
@@ -192,7 +211,6 @@ const OnlinePlayRoom = () => {
       if (timerInterval.current) {
         clearInterval(timerInterval.current);
       }
-
 
       const msg = newProtoRequest(
         proto.MessageType.exit_room,

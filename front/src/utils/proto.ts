@@ -34,4 +34,5 @@ export const responseType: Record<number, ProtoResponse> = {
   [proto.MessageType.touch]: proto.TouchResponse,
   [proto.MessageType.finish_game]: proto.FinishGameResponse,
   [proto.MessageType.room_users]: proto.GetRoomUsersResponse,
+  [proto.MessageType.attack]: proto.AttackResponse,
 };

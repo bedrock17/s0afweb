@@ -174,7 +174,7 @@ export class Game {
     }
   }
 
-  private newBlocks() {
+  public newBlocks() {
     for (let i = 0; i < this.maxBlockRow; i++) {
       for (let j = 0; j < this.maxBlockColumn; j++) {
         if (i === 0) {
