@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/models"
+	"sync"
 )
 
 const (
@@ -40,6 +41,7 @@ type PopTileGame struct {
 
 	GameOver   bool
 	RandomSeed int32
+	mutex      sync.Mutex
 }
 
 func isValidRange(p models.Point, maxColumns, maxRows int) bool {
@@ -143,6 +145,7 @@ func (g *PopTileGame) SimulateOneStep(p models.Point) (int, error) {
 		return 0, errors.InvalidTouchPoint
 	}
 
+	g.mutex.Lock()
 	count := g.removeBlocks(p, g.gameMap[p.Y][p.X])
 	g.Score += count * count
 	g.dropBlocks()
@@ -150,6 +153,7 @@ func (g *PopTileGame) SimulateOneStep(p models.Point) (int, error) {
 	g.GameOver = g.isGameEnd()
 	g.MakeBlocks()
 
+	g.mutex.Unlock()
 	return count, nil
 }
 

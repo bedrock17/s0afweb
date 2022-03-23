@@ -106,8 +106,6 @@ func WebSocketHandlerV1(c echo.Context) error {
 		case proto.MessageType_touch:
 			payload := new(proto.TouchRequest)
 			err = pb.Unmarshal(request.Data.Value, payload)
-			err = SimulateOneStep(client, payload)
-			_, _ = GameOver(client)
 			responses, err = TouchTile(client, payload)
 		case proto.MessageType_heartbeat:
 			client.Conn.SetReadDeadline(time.Now().Add(15 * time.Second))

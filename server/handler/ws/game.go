@@ -5,6 +5,7 @@ import (
 	"github.com/bedrock17/s0afweb/proto"
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/websocket"
+	"math/rand"
 )
 
 func StartGame(client *websocket.Client, roomId uint) ([]websocket.Response, error) {
@@ -44,13 +45,17 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 	user, err := userManager.GetUser(client)
+
 	if err != nil {
 		return nil, err
 	}
+
 	room, err := gameRoomManager.Get(user.RoomId)
 	if err != nil {
 		return nil, err
 	}
+
+	count, _ := SimulateOneStep(client, touch)
 
 	index, clients := 0, make([]*websocket.Client, len(room.Clients)-1)
 
@@ -66,7 +71,9 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 		index += 1
 	}
 
-	resp := websocket.Response{
+	resp := make([]websocket.Response, 0)
+
+	touchMessage := websocket.Response{
 		Clients: clients,
 		Payload: &proto.Response{
 			Type: proto.MessageType_touch,
@@ -78,27 +85,59 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 		},
 	}
 
-	return []websocket.Response{resp}, nil
+	resp = append(resp, touchMessage)
+
+	line := count / 10
+	if line > 0 {
+		targetIndex := rand.Intn(len(clients))
+		simulator, _ := room.Clients[clients[targetIndex]]
+		targetUser, _ := userManager.GetUser(clients[targetIndex])
+
+		for i := 0; i < line; i++ {
+			simulator.MakeBlocks()
+		}
+
+		index, allClients := 0, make([]*websocket.Client, len(room.Clients))
+		for c := range room.Clients {
+			allClients[index] = c
+			index += 1
+		}
+
+		attackMessage := websocket.Response{
+			Clients: allClients,
+			Payload: &proto.Response{
+				Type: proto.MessageType_attack,
+				Data: proto.ToAny(&proto.AttackResponse{
+					UserId: targetUser.Id,
+					Lines:  int32(line),
+				}),
+			},
+		}
+		resp = append(resp, attackMessage)
+	}
+
+	_, _ = GameOver(client)
+
+	return resp, nil
 }
 
-func SimulateOneStep(client *websocket.Client, touch *proto.TouchRequest) error {
+func SimulateOneStep(client *websocket.Client, touch *proto.TouchRequest) (int, error) {
 	gameRoomManager := service.GetService().GameRoomManager()
 	userManager := service.GetService().UserManager()
 	user, err := userManager.GetUser(client)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	room, err := gameRoomManager.Get(user.RoomId)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	simulator, ok := room.Clients[client]
 	if !ok {
-		return errors.UserNotFoundErr
+		return 0, errors.UserNotFoundErr
 	}
 
-	_, err = simulator.WalkOneStep(int(touch.X), int(touch.Y))
-	return err
+	return simulator.WalkOneStep(int(touch.X), int(touch.Y))
 }
 
 func GameOver(client *websocket.Client) (bool, error) {
