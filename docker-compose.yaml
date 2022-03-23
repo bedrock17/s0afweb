@@ -7,7 +7,18 @@ services:
     working_dir: /
     volumes:
       - "./server/.env:/.env"
+    depends_on:
+      - db
   nginx:
     build: front/
     ports:
       - "80:80"
+  db:
+    image: mariadb:focal
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=poptile
+      - MYSQL_DATABASE=poptile
+    ports:
+      - "3306"

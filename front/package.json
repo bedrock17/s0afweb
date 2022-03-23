@@ -9,7 +9,7 @@
     "lint:css": "stylelint --fix 'src/**/*.{ts,css}'",
     "lint:js": "eslint --fix 'src/**/*.{ts,tsx}'",
     "generate": "grpc_tools_node_protoc -I ../proto --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts --js_out=import_style=commonjs,binary:./src/proto --ts_out=./src/proto ../proto/*.proto",
-    "generate-win": "grpc_tools_node_protoc.cmd -I ../proto --plugin=protoc-gen-ts.cmd=./node_modules/.bin/protoc-gen-ts.cmd --js_out=import_style=commonjs,binary:./src/proto --ts_out=./src/proto ../proto/*.proto"
+    "generate-win": "npx grpc_tools_node_protoc -I ../proto --plugin=protoc-gen-ts.cmd=./node_modules/.bin/protoc-gen-ts.cmd --js_out=import_style=commonjs,binary:./src/proto --ts_out=./src/proto ../proto/*.proto"
   },
   "dependencies": {
     "@stitches/react": "^1.2.7",
