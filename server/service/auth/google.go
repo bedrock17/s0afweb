@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -21,7 +22,7 @@ var oauthConfig = oauth2.Config{
 	ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 	ClientSecret: os.Getenv("GOOGLE_SECRET_KEY"),
 	Endpoint:     google.Endpoint,
-	RedirectURL:  "http://localhost:3000/api/v1/auth/google/callback",
+	RedirectURL:  fmt.Sprintf("%v/api/v1/auth/google/callback", os.Getenv("PUBLIC_URL")),
 	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 }
 

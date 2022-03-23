@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/bedrock17/s0afweb/dao"
 	_ "github.com/bedrock17/s0afweb/docs"
 	"github.com/bedrock17/s0afweb/handler"
@@ -14,6 +15,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"os"
 )
 
 // @title Poptile!
@@ -54,5 +56,5 @@ func main() {
 		Validator: validator.New(),
 	}
 	handler.InitV1Handler(e)
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%v", os.Getenv("PORT"))))
 }
