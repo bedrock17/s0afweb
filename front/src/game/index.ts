@@ -229,6 +229,7 @@ export class Game {
   };
 
   private initialize(): void { //init game
+    this.touchQueue = new Queue<Point>();
     for (let i = 0; i < this.maxBlockRow; i++) {
       this.map[i] = new Array(this.maxBlockColumn).fill(0);
     }
