@@ -51,9 +51,13 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 	}
 
 	room, err := gameRoomManager.Get(user.RoomId)
+
 	if err != nil {
 		return nil, err
 	}
+
+	room.Mutex.Lock()
+	defer room.Mutex.Unlock()
 
 	count, _ := SimulateOneStep(client, touch)
 
@@ -88,32 +92,46 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 	resp = append(resp, touchMessage)
 
 	line := count / 10
+
 	if line > 0 {
-		targetIndex := rand.Intn(len(clients))
-		simulator, _ := room.Clients[clients[targetIndex]]
-		targetUser, _ := userManager.GetUser(clients[targetIndex])
 
-		for i := 0; i < line; i++ {
-			simulator.MakeBlocks()
+		alivePlayer := make([]*websocket.Client, 0)
+		for i := 0; i < len(clients); i++ {
+			simulator, _ := room.Clients[clients[i]]
+			if !simulator.GameOver {
+				alivePlayer = append(alivePlayer, clients[i])
+			}
 		}
 
-		index, allClients := 0, make([]*websocket.Client, len(room.Clients))
-		for c := range room.Clients {
-			allClients[index] = c
-			index += 1
-		}
 
-		attackMessage := websocket.Response{
-			Clients: allClients,
-			Payload: &proto.Response{
-				Type: proto.MessageType_attack,
-				Data: proto.ToAny(&proto.AttackResponse{
-					UserId: targetUser.Id,
-					Lines:  int32(line),
-				}),
-			},
+		if len(alivePlayer) > 0 {
+			targetIndex := rand.Intn(len(alivePlayer))
+			simulator, _ := room.Clients[alivePlayer[targetIndex]]
+			targetUser, _ := userManager.GetUser(alivePlayer[targetIndex])
+
+
+			for i := 0; i < line; i++ {
+				simulator.MakeBlocks()
+			}
+
+			index, allClients := 0, make([]*websocket.Client, len(room.Clients))
+			for c := range room.Clients {
+				allClients[index] = c
+				index += 1
+			}
+
+			attackMessage := websocket.Response{
+				Clients: allClients,
+				Payload: &proto.Response{
+					Type: proto.MessageType_attack,
+					Data: proto.ToAny(&proto.AttackResponse{
+						UserId: targetUser.Id,
+						Lines:  int32(line),
+					}),
+				},
+			}
+			resp = append(resp, attackMessage)
 		}
-		resp = append(resp, attackMessage)
 	}
 
 	_, _ = GameOver(client)

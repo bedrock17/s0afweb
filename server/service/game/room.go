@@ -29,6 +29,7 @@ type Room struct {
 	GameStartedAt int64                                   `json:"game_started_at"`
 	Seed          int32                                   `json:"-"`
 	GameTicker    *utils.GameTicker                       `json:"-"`
+	Mutex         sync.Mutex                              `json:"-"`
 }
 
 type RoomManager interface {
