@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/proto"
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
@@ -184,6 +185,9 @@ func ExitGameRoom(client *websocket2.Client, roomId uint) ([]websocket2.Response
 	room, err := gameRoomManager.Get(roomId)
 	if err != nil {
 		return nil, err
+	}
+	if userFound := gameRoomManager.FindUser(client, roomId); !userFound {
+		return nil, errors.UserNotFoundErr
 	}
 	isRoomMaster := room.Master == user.Id
 
