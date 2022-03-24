@@ -36,6 +36,7 @@ type RoomManager interface {
 	NewRoom(config *proto.CreateRoomRequest, masterId *User, onGameFinish func(uint) func()) Room
 	JoinRoom(client *websocket.Client, roomId uint) error
 	ExitRoom(client *websocket.Client, roomId uint) error
+	FindUser(client *websocket.Client, roomId uint) bool
 	ResetRoom(roomId uint) error
 	Get(roomId uint) (Room, error)
 	Gets() []Room
@@ -95,6 +96,22 @@ func (m *RoomManagerImpl) Gets() []Room {
 		rooms = append(rooms, value)
 	}
 	return rooms
+}
+
+func (m *RoomManagerImpl) FindUser(client *websocket.Client, roomId uint) bool {
+	client.Mu.Lock()
+	defer client.Mu.Unlock()
+
+	room, err := m.Get(roomId)
+	if err != nil {
+		return false
+	}
+	for c := range room.Clients {
+		if c == client {
+			return true
+		}
+	}
+	return false
 }
 
 func (m *RoomManagerImpl) ResetRoom(roomId uint) error {
