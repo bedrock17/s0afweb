@@ -198,9 +198,17 @@ func ExitGameRoom(client *websocket2.Client, roomId uint) ([]websocket2.Response
 	room, err = gameRoomManager.Get(roomId)
 	index := 0
 	clients := make([]*websocket2.Client, len(room.Clients))
-	for c := range room.Clients {
+	gameOverUserCount := 0
+	for c, sim := range room.Clients {
+		if sim.GameOver {
+			gameOverUserCount += 1
+		}
 		clients[index] = c
 		index += 1
+	}
+
+	if len(clients) == gameOverUserCount {
+		room.GameTicker.ForceQuit()
 	}
 
 	responses := make([]websocket2.Response, 1)
