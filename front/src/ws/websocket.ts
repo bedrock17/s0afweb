@@ -7,7 +7,9 @@ import Queue from '~/utils/queue';
 
 export class PopTileWebsocket {
   ws: WebSocket;
-  messageHandle: Record<MessageType, (msg: ProtoMessage) => void> = {};
+  messageHandle: Partial<Record<MessageType, (msg: ProtoMessage) => void>> = {
+
+  };
 
   messageQueue = new Queue<Uint8Array>();
 
@@ -64,7 +66,7 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
     msg.data.arrayBuffer().then((buffer: ArrayBuffer) => {
       const response = Response.decodeBinary(new Uint8Array(buffer));
       if (response.type !== undefined && response.type in popTileWebsocket.messageHandle) {
-        popTileWebsocket.messageHandle[response.type](response);
+        popTileWebsocket.messageHandle[response.type]?.(response);
       } else {
         console.error('Unknown message type');
       }

@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "lint:css": "stylelint --fix 'src/**/*.{ts,css}'",
     "lint:js": "eslint --fix 'src/**/*.{ts,tsx}'",
-    "generate": "pb gen ts --entry-path ../proto -o src/proto"
+    "generate": "pb gen ts --entry-path ../proto -o src/proto --ext-in-import '.js'"
   },
   "dependencies": {
     "@stitches/react": "^1.2.7",

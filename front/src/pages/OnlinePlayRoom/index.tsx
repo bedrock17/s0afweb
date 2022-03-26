@@ -96,7 +96,7 @@ const OnlinePlayRoom = () => {
 
     websocket.messageHandle['room_users'] = (response) => {
       const data = parseData<GetRoomUsersResponse>(response);
-      const users = data.userIds;
+      const users = data.userIds as string[];
       const refs = users.filter((userId) => userId !== user?.user_id)
         .map((userId) => ({
           ref: { current: undefined },
