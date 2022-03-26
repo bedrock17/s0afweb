@@ -20,6 +20,10 @@
 
 ### Protocol Buffers 컴파일
 
+프론트엔드 Protobuf 컴파일에는 [pbkit](https://github.com/pbkit/pbkit/blob/main/cli/pb/README.md#how-to-install) 을 사용합니다.
+
+pbkit을 먼저 설치 한 후 아래 지침을 따라주세요
+
 `yarn generate` 명령어를 통해 Protocol Buffers 파일을 컴파일합니다.
 
 윈도우의 경우에는 `yarn generate-win` 명령어를 사용합니다.

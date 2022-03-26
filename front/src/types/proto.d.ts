@@ -14,4 +14,5 @@ type ProtoResponse =
   | typeof proto.StartGameResponse
   | typeof proto.TouchResponse
   | typeof proto.FinishGameResponse
-  | typeof proto.GetRoomUsersResponse;
+  | typeof proto.GetRoomUsersResponse
+  | typeof proto.AttackResponse;

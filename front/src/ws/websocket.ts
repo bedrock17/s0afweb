@@ -1,11 +1,13 @@
-import { proto } from '~/proto/message';
+import type { MessageType } from '~/proto/messages/proto';
+import * as HeartbeatRequest from '~/proto/messages/proto/HeartbeatRequest';
+import * as Response from '~/proto/messages/proto/Response';
 import type { ProtoMessage } from '~/types/proto';
 import { newProtoRequest } from '~/utils/proto';
 import Queue from '~/utils/queue';
 
 export class PopTileWebsocket {
   ws: WebSocket;
-  messageHandle: Record<string, (msg: ProtoMessage) => void> = {};
+  messageHandle: Record<MessageType, (msg: ProtoMessage) => void> = {};
 
   messageQueue = new Queue<Uint8Array>();
 
@@ -44,11 +46,11 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
 
   const sendHeartBeat = () => {
     const message = newProtoRequest(
-      proto.MessageType.heartbeat,
-      proto.HeartbeatRequest.fromObject({
-        timestamp: new Date().getTime(),
-      })
-    ).serializeBinary();
+      'heartbeat',
+      HeartbeatRequest.encodeBinary({
+        timestamp: `${new Date().getTime()}`,
+      }),
+    );
     websocket.send(message);
   };
   setInterval(sendHeartBeat, 5000);
@@ -59,15 +61,12 @@ const createPopTileWebsocket = (): PopTileWebsocket => {
   };
 
   websocket.onmessage = (msg) => {
-    // eslint-disable-next-line no-console
-    msg.data.arrayBuffer().then((buffer: Uint8Array) => {
-      const response = proto.Response.deserializeBinary(buffer);
-      const respObj = response.toObject();
-      if (respObj.type !== undefined && respObj.type in popTileWebsocket.messageHandle) {
-        popTileWebsocket.messageHandle[respObj.type](respObj as ProtoMessage);
+    msg.data.arrayBuffer().then((buffer: ArrayBuffer) => {
+      const response = Response.decodeBinary(new Uint8Array(buffer));
+      if (response.type !== undefined && response.type in popTileWebsocket.messageHandle) {
+        popTileWebsocket.messageHandle[response.type](response);
       } else {
-        // eslint-disable-next-line no-console
-        console.log('Unknown message type');
+        console.error('Unknown message type');
       }
     });
   };
