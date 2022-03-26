@@ -134,6 +134,7 @@ const OnlinePlayRoom = () => {
       setTime(room!.playTime);
       setScore(0);
       setGameStarted(true);
+      setShowModal(false);
       const seed = data.seed ?? 0;
       opponentRefs.forEach((opponent, index) => {
         if (!opponent.ref.current) {
