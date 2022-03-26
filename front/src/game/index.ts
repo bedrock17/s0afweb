@@ -19,7 +19,6 @@ export class Game {
 
   public touchCount: number;
   public animationEffect: boolean;
-  public lineHistory: string[] = [];
   public touchHistory: Point[] = [];
   public random?: XORShift;
 
@@ -113,10 +112,6 @@ export class Game {
     return false;
   }
 
-  public increaseLineCount() {
-    this.receivedLineCount += 1;
-  }
-
   public touch(p: Point) {
     this.touchQueue.enqueue(p);
   }
@@ -193,14 +188,6 @@ export class Game {
             this.map[i][j] = randomValue % this.blockMax + 1;
           }
         }
-      }
-
-      if (i === this.maxBlockRow - 1) {
-        let historyItem = '';
-        for (let j = 0; j < this.maxBlockColumn; j++) {
-          historyItem += this.map[i][j].toString();
-        }
-        this.lineHistory.push(historyItem);
       }
     }
   }
@@ -354,7 +341,6 @@ export class Game {
     this.score = 0;
     this.touchCount = 0;
     this.receivedLineCount = 0;
-    this.lineHistory = [];
     this.touchHistory = [];
     this.isGameOver = false;
     this.createBlock = false;
