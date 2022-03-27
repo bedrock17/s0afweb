@@ -49,7 +49,7 @@ export class Game {
   private singlePlay = true;
 
 
-  constructor(canvas: HTMLCanvasElement, tileWidth = 31, singlePlay: boolean = true) {
+  constructor(canvas: HTMLCanvasElement, tileWidth = 31, singlePlay = true) {
     this.readonly = false;
     this.score = 0;
     this.touchCount = 0;
@@ -213,11 +213,11 @@ export class Game {
     }
 
     if (this.singlePlay) {
-      this.lastPos = {y: row, x: column};
+      this.lastPos = { y: row, x: column };
     } else {
       if (this.isGameOver === false) {
         if (this.touchCallback) {
-          this.touchCallback({y: row, x: column});
+          this.touchCallback({ y: row, x: column });
         }
       }
     }
