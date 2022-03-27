@@ -46,15 +46,17 @@ export class Game {
   private touchQueue: Queue<Point>;
   private removeBlockCode = 0;
   private removeBlockCount = 0;
+  private singlePlay = true;
 
 
-  constructor(canvas: HTMLCanvasElement, tileWidth = 31) {
+  constructor(canvas: HTMLCanvasElement, tileWidth = 31, singlePlay: boolean = true) {
     this.readonly = false;
     this.score = 0;
     this.touchCount = 0;
     this.receivedLineCount = 0;
     this.isGameOver = false;
     this.lastPos = { 'y': -1, 'x': -1 };
+    this.singlePlay = singlePlay;
 
     this.map = [[]];
     this.blockMax = 3; //default
@@ -148,11 +150,9 @@ export class Game {
     this.context.fillRect(0, 0, this.canvasWidth, this.tileWidth);
 
     for (let animationIndex = 0; animationIndex < animationFrame; animationIndex++) {
-
       let yposFrameValue = 0;
       if (animationFrame > 1) {
         yposFrameValue = (this.tileWidth * (animationFrame - animationIndex - 1)) / animationFrame;
-
       }
 
       for (let i = 0; i < this.maxBlockRow; i++) {
@@ -212,7 +212,15 @@ export class Game {
       return;
     }
 
-    this.lastPos = { y: row, x: column };
+    if (this.singlePlay) {
+      this.lastPos = {y: row, x: column};
+    } else {
+      if (this.isGameOver === false) {
+        if (this.touchCallback) {
+          this.touchCallback({y: row, x: column});
+        }
+      }
+    }
   };
 
   private initialize(): void { //init game
@@ -313,10 +321,6 @@ export class Game {
 
     if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
       this.touchHistory.push(this.lastPos);
-
-      if (this.touchCallback) {
-        this.touchCallback(this.lastPos);
-      }
 
       this.removeBlockCode = this.map[this.lastPos.y][this.lastPos.x];
       if (this.removeBlockCode !== 0) {

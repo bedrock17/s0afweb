@@ -61,6 +61,9 @@ func (g *PopTileGame) isGameEnd() bool {
 }
 
 func (g *PopTileGame) MakeBlocks() {
+
+	g.GameOver = g.isGameEnd()
+
 	for i := 1; i < g.rows; i++ {
 		for j := 0; j < g.columns; j++ {
 			g.gameMap[i-1][j] = g.gameMap[i][j]

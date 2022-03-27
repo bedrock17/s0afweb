@@ -169,6 +169,13 @@ const OnlinePlayRoom = () => {
           opponent.ref.current?.touch({ x: data.x ?? 0, y: data.y ?? 0 });
         }
       });
+
+      if (user) {
+        if (user.user_id === data.user_id) {
+          tempRef.current?.touch({x: data.x ?? 0, y: data.y ?? 0});
+        }
+      }
+
     };
 
     websocket.messageHandle['finish_game'] = (response) => {

@@ -80,8 +80,14 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 
 	resp := make([]websocket.Response, 0)
 
+	index, allClients := 0, make([]*websocket.Client, len(room.Clients))
+	for c := range room.Clients {
+		allClients[index] = c
+		index += 1
+	}
+
 	touchMessage := websocket.Response{
-		Clients: clients,
+		Clients: allClients,
 		Payload: &proto.Response{
 			Type: proto.MessageType_touch,
 			Data: proto.ToAny(&proto.TouchResponse{
@@ -99,11 +105,19 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 	if line > 0 {
 
 		alivePlayer := make([]*websocket.Client, 0)
-		for i := 0; i < len(clients); i++ {
-			simulator, _ := room.Clients[clients[i]]
-			if !simulator.GameOver {
-				alivePlayer = append(alivePlayer, clients[i])
+		for c := range room.Clients {
+			participant, err := userManager.GetUser(c)
+			if err != nil {
+				return nil, err
 			}
+			if participant.Id == user.Id {
+				continue
+			}
+			sim, _ := room.Clients[c]
+			if sim.GameOver {
+				continue
+			}
+			alivePlayer = append(alivePlayer, c)
 		}
 
 		if len(alivePlayer) > 0 {

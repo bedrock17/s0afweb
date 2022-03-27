@@ -64,7 +64,7 @@ const SinglePlayPage = () => {
         <Switch checked={animationEffect} onChange={setAnimationEffect}>
         애니메이션 효과
         </Switch>
-        <GameCanvas gameRef={gameRef} animationEffect={animationEffect} />
+        <GameCanvas gameRef={gameRef} animationEffect={animationEffect} single/>
       </Wrapper>
     </SinglePlayLayout>
   );
