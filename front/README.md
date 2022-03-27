@@ -24,6 +24,6 @@
 
 pbkit을 먼저 설치 한 후 아래 지침을 따라주세요
 
-`yarn generate` 명령어를 통해 Protocol Buffers 파일을 컴파일합니다.
+`pb vendor install` 명령어로 Protocol Buffers에 필요한 기본적인 파일들을 받아줍니다. 처음 한 번만 해주면 됩니다.
 
-윈도우의 경우에는 `yarn generate-win` 명령어를 사용합니다.
+`yarn generate` 명령어를 통해 Protocol Buffers 파일을 컴파일합니다.
