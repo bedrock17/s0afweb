@@ -141,7 +141,7 @@ func (m *RoomManagerImpl) JoinRoom(client *websocket.Client, roomId uint) error 
 	}
 
 	if room.Status == proto.Room_inGame {
-		return errors.GameAlreadyStartedErr
+		return errors.ForbiddenErr
 	}
 
 	if len(room.Clients) == room.Capacity {
@@ -225,7 +225,7 @@ func (m *RoomManagerImpl) StartGame(client *websocket.Client, roomId uint) (Room
 	}
 
 	if room.Status == proto.Room_inGame {
-		return Room{}, errors.GameAlreadyStartedErr
+		return Room{}, errors.ForbiddenErr
 	}
 
 	if len(room.Clients) <= 1 {

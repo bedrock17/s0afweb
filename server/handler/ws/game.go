@@ -52,6 +52,9 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 
 	room, err := gameRoomManager.Get(user.RoomId)
 
+	if room.Status == proto.Room_idle {
+		return nil, errors.ForbiddenErr
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -103,12 +106,10 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 			}
 		}
 
-
 		if len(alivePlayer) > 0 {
 			targetIndex := rand.Intn(len(alivePlayer))
 			simulator, _ := room.Clients[alivePlayer[targetIndex]]
 			targetUser, _ := userManager.GetUser(alivePlayer[targetIndex])
-
 
 			for i := 0; i < line; i++ {
 				simulator.MakeBlocks()
