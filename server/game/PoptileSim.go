@@ -186,7 +186,11 @@ func (g *PopTileGame) PrintMap() {
 	fmt.Printf("========%d========\n", g.touchCount)
 	for i := 0; i < g.rows; i++ {
 		for j := 0; j < g.columns; j++ {
-			fmt.Printf("%d ", g.gameMap[i][j])
+			if g.gameMap[i][j] == 0 {
+				fmt.Printf("  ")
+			} else {
+				fmt.Printf("%d ", g.gameMap[i][j])
+			}
 		}
 		fmt.Print("\n")
 	}
