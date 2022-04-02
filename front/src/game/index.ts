@@ -10,6 +10,8 @@ const direction4: Point[] = [
   { x: -1, y: 0 },
 ];
 
+
+
 export class Game {
   public readonly: boolean;
   public score: number;
@@ -43,7 +45,7 @@ export class Game {
   private context: CanvasRenderingContext2D; //canvas 2d
 
   private bfsQueue: Queue<Point>;
-  private touchQueue: Queue<Point>;
+  private eventQueue: Queue<PopTileEvent>;
   private removeBlockCode = 0;
   private removeBlockCount = 0;
   private singlePlay = true;
@@ -90,7 +92,7 @@ export class Game {
     this._seed = 0;
 
     this.bfsQueue = new Queue<Point>();
-    this.touchQueue = new Queue<Point>();
+    this.eventQueue = new Queue<PopTileEvent>();
   }
 
   private static getMousePoint(canvas: HTMLCanvasElement, evt: MouseEvent) {
@@ -115,7 +117,17 @@ export class Game {
   }
 
   public touch(p: Point) {
-    this.touchQueue.enqueue(p);
+    this.eventQueue.enqueue({
+      type: 'Touch',
+      data: p,
+    });
+  }
+
+  public apppendLine(lines: Lines) {
+    this.eventQueue.enqueue({
+      type: 'Attack',
+      data: lines
+    });
   }
 
   public set seed(seed: number) {
@@ -169,7 +181,7 @@ export class Game {
     }
   }
 
-  public newBlocks() {
+  private newBlocks() {
     for (let i = 0; i < this.maxBlockRow; i++) {
       for (let j = 0; j < this.maxBlockColumn; j++) {
         if (i === 0) {
@@ -224,7 +236,7 @@ export class Game {
   };
 
   private initialize(): void { //init game
-    this.touchQueue = new Queue<Point>();
+    this.eventQueue = new Queue<PopTileEvent>();
     for (let i = 0; i < this.maxBlockRow; i++) {
       this.map[i] = new Array(this.maxBlockColumn).fill(0);
     }
@@ -297,10 +309,18 @@ export class Game {
     }
 
     // 외부에서 강제로 발생시킨 touchEvent 를 일반 touch 이벤트 처럼 처리
-    if (this.touchQueue.length > 0 && this.lastPos.x === -1 && this.lastPos.y === -1) {
-      const p = this.touchQueue.dequeue();
+    if (this.eventQueue.length > 0 && this.lastPos.x === -1 && this.lastPos.y === -1) {
+      const p = this.eventQueue.dequeue();
       if (p) {
-        this.lastPos = p;
+        if (p.type === 'Touch') {
+          this.lastPos = p.data as Point;
+        } else {
+          const lines = p.data as Lines;
+          for (let i = 0; i < lines; i++) {
+            this.newBlocks();
+          }
+        }
+
       }
     }
 

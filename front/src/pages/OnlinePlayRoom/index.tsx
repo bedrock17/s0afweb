@@ -166,7 +166,9 @@ const OnlinePlayRoom = () => {
       const data = parseData<TouchResponse>(response);
       opponentRefs.forEach((opponent) => {
         if (opponent.userId === data.userId) {
-          opponent.ref.current?.touch({ x: data.x ?? 0, y: data.y ?? 0 });
+          opponent.ref.current?.touch({
+            x: data.x ?? 0, y: data.y ?? 0
+          });
         }
       });
 
@@ -194,16 +196,12 @@ const OnlinePlayRoom = () => {
       const data = parseData<AttackResponse>(response);
       opponentRefs.forEach((opponent) => {
         if (opponent.userId === data.userId) {
-          for (let i = 0; i < data.lines; i++) {
-            opponent.ref.current?.newBlocks();
-          }
+          opponent.ref.current?.apppendLine(data.lines);
         }
       });
 
       if (user?.user_id === data.userId) {
-        for (let i = 0; i < data.lines; i++) {
-          tempRef.current?.newBlocks();
-        }
+        tempRef.current?.apppendLine(data.lines);
       }
 
     };
