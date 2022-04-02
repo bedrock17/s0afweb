@@ -62,7 +62,10 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 	room.Mutex.Lock()
 	defer room.Mutex.Unlock()
 
-	count, _ := SimulateOneStep(client, touch)
+	count, err := SimulateOneStep(client, touch)
+	if err != nil {
+		return nil, err
+	}
 
 	index, clients := 0, make([]*websocket.Client, len(room.Clients)-1)
 
@@ -168,6 +171,10 @@ func SimulateOneStep(client *websocket.Client, touch *proto.TouchRequest) (int, 
 	simulator, ok := room.Clients[client]
 	if !ok {
 		return 0, errors.UserNotFoundErr
+	}
+
+	if simulator.GameOver {
+		return 0, errors.ForbiddenErr
 	}
 
 	return simulator.WalkOneStep(int(touch.X), int(touch.Y))
