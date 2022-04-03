@@ -115,7 +115,7 @@ func CreateGameRoom(client *websocket2.Client, config *proto.CreateRoomRequest) 
 		Clients: []*websocket2.Client{client},
 		Payload: &proto.Response{
 			Type: proto.MessageType_create_room,
-			Data: proto.ToAny(&proto.CreateRoomResponse{Room: ToProtoRoom(room)}),
+			Data: proto.ToAny(&proto.CreateRoomResponse{Room: ToProtoRoom(*room)}),
 		},
 	}
 	return []websocket2.Response{resp}, nil
@@ -151,7 +151,7 @@ func JoinGameRoom(client *websocket2.Client, roomId uint) ([]websocket2.Response
 		Clients: []*websocket2.Client{client},
 		Payload: &proto.Response{
 			Type: proto.MessageType_room_config,
-			Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(room)}),
+			Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(*room)}),
 		},
 	}
 
@@ -224,7 +224,7 @@ func ExitGameRoom(client *websocket2.Client, roomId uint) ([]websocket2.Response
 			Clients: clients,
 			Payload: &proto.Response{
 				Type: proto.MessageType_room_config,
-				Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(room)}),
+				Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(*room)}),
 			},
 		})
 	}
@@ -243,7 +243,7 @@ func GetRoomConfig(client *websocket2.Client, roomId uint) ([]websocket2.Respons
 		Clients: []*websocket2.Client{client},
 		Payload: &proto.Response{
 			Type: proto.MessageType_room_config,
-			Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(room)}),
+			Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(*room)}),
 		},
 	}
 	return []websocket2.Response{resp}, nil
