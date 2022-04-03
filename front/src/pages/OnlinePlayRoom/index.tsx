@@ -159,11 +159,14 @@ const OnlinePlayRoom = () => {
 
           websocket.ws.send(msg);
         };
+        tempRef.current?.autoTouch();
       }
     };
 
     websocket.messageHandle['touch'] = (response) => {
+      // console.log(response)
       const data = parseData<TouchResponse>(response);
+      // console.log(data);
       opponentRefs.forEach((opponent) => {
         if (opponent.userId === data.userId) {
           opponent.ref.current?.touch({
@@ -175,6 +178,10 @@ const OnlinePlayRoom = () => {
       if (user) {
         if (user.user_id === data.userId) {
           tempRef.current?.touch({ x: data.x ?? 0, y: data.y ?? 0 });
+
+          setTimeout(() => {
+            tempRef.current?.autoTouch();
+          }, 100);
         }
       }
 

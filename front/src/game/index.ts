@@ -230,6 +230,7 @@ export class Game {
       if (this.isGameOver === false) {
         if (this.touchCallback) {
           this.touchCallback({ y: row, x: column });
+          // this.autoTouch();
         }
       }
     }
@@ -360,6 +361,109 @@ export class Game {
       requestAnimationFrame(this.gameLoop);
     }, 1000 / 30);
   };
+
+  private getTilesCount(p: Point): number {
+    const visit: Record<string, boolean> = {};
+    let count = 1;
+    const bfsQueue = new Queue<Point>();
+    visit[p.x.toString() + '|' + p.y.toString()] = true;
+    bfsQueue.enqueue(p);
+    const removeBlockCode = this.map[p.y][p.x];
+
+    while (bfsQueue.length > 0) {
+      const curPoint = bfsQueue.dequeue();
+
+
+      if (!curPoint) {
+        continue;
+      }
+
+      for (const dir of direction4) {
+        const nextPoint = Game.addPoint(curPoint, dir);
+
+        if (!this.pointIsValid(nextPoint)) {
+          continue;
+        }
+
+        if (this.map[nextPoint.y][nextPoint.x] !== removeBlockCode) {
+          continue;
+        }
+
+        const key = nextPoint.x.toString() + '|' + nextPoint.y.toString();
+        if (key in visit)
+          continue;
+        visit[key] = true;
+
+        count += 1;
+        bfsQueue.enqueue(nextPoint);
+      }
+    }
+
+    // count = 0;
+    // for (let y = 0; y < 15; y++) {
+    //   const key = p.x.toString() + '|' + y.toString();
+    //   if (key in visit)
+    //     count += 1;
+    // }
+    return count;
+
+  }
+
+  public autoTouch() {
+    if (this.isGameOver === false) {
+
+      let autoTouchPoint = { x: 7, y: 14 };
+      let maxCount = -1;
+
+      let x = 0;
+      let found = false;
+      for (let y = 0; y < 15 && found === false; y++) {
+        for (x = 0; x < 8; x++) {
+          if (this.map[y][x] !== 0) {
+            found = true;
+            // break;
+          }
+          if (found) {
+            for (let _y = y; _y < 15; _y++) {
+              if (this.map[y][x] !== 0) {
+                const c = this.getTilesCount({x: x, y: _y});
+
+                if (maxCount <= c) {
+                  autoTouchPoint = {x: x, y: _y};
+                  maxCount = c;
+                }
+              }
+            }
+            break;
+          }
+
+        }
+
+        if (found) {
+          break;
+        }
+      }
+
+      // console.log('found colum', x);
+
+      // for (let y = 0; y < 15; y++) {
+      //   if (this.map[y][x] !== 0) {
+      //     const c = this.getTilesCount({ x: x, y: y });
+      //
+      //     if (maxCount <= c) {
+      //       autoTouchPoint = { x: x, y: y };
+      //       maxCount = c;
+      //     }
+      //     else {
+      //     }
+      //   }
+      // }
+
+      if (this.touchCallback) {
+        this.touchCallback(autoTouchPoint);
+      }
+    }
+  }
 
   public startGame(seed: number) {
     this.score = 0;
