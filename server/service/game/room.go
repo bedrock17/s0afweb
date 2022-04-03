@@ -29,41 +29,43 @@ type Room struct {
 	GameStartedAt int64                                   `json:"game_started_at"`
 	Seed          int32                                   `json:"-"`
 	GameTicker    *utils.GameTicker                       `json:"-"`
+	Mutex         sync.Mutex                              `json:"-"`
 }
 
 type RoomManager interface {
-	NewRoom(config *proto.CreateRoomRequest, masterId *User, onGameFinish func(uint) func()) Room
+	NewRoom(config *proto.CreateRoomRequest, masterId *User, onGameFinish func(uint) func()) *Room
 	JoinRoom(client *websocket.Client, roomId uint) error
 	ExitRoom(client *websocket.Client, roomId uint) error
+	FindUser(client *websocket.Client, roomId uint) bool
 	ResetRoom(roomId uint) error
-	Get(roomId uint) (Room, error)
+	Get(roomId uint) (*Room, error)
 	Gets() []Room
-	StartGame(client *websocket.Client, roomId uint) (Room, error)
+	StartGame(client *websocket.Client, roomId uint) (*Room, error)
 }
 
 type RoomManagerImpl struct {
 	mu          sync.Mutex
-	rooms       map[uint]Room
+	rooms       map[uint]*Room
 	counter     uint
 	userManager UserManager
 }
 
 func NewRoomManager(userManager UserManager) RoomManager {
 	return &RoomManagerImpl{
-		rooms:       make(map[uint]Room),
+		rooms:       make(map[uint]*Room),
 		counter:     0,
 		userManager: userManager,
 	}
 }
 
-func (m *RoomManagerImpl) NewRoom(config *proto.CreateRoomRequest, masterId *User, onGameFinish func(uint) func()) Room {
+func (m *RoomManagerImpl) NewRoom(config *proto.CreateRoomRequest, masterId *User, onGameFinish func(uint) func()) *Room {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	m.counter++
 	id := m.counter
 
-	m.rooms[id] = Room{
+	m.rooms[id] = &Room{
 		Id:        id,
 		Clients:   map[*websocket.Client]*game.PopTileGame{},
 		Headcount: 0,
@@ -80,10 +82,10 @@ func (m *RoomManagerImpl) NewRoom(config *proto.CreateRoomRequest, masterId *Use
 	return m.rooms[id]
 }
 
-func (m *RoomManagerImpl) Get(roomId uint) (Room, error) {
+func (m *RoomManagerImpl) Get(roomId uint) (*Room, error) {
 	room, ok := m.rooms[roomId]
 	if !ok {
-		return Room{}, errors.InvalidRoomIdErr
+		return &Room{}, errors.InvalidRoomIdErr
 	}
 	return room, nil
 }
@@ -91,9 +93,25 @@ func (m *RoomManagerImpl) Get(roomId uint) (Room, error) {
 func (m *RoomManagerImpl) Gets() []Room {
 	rooms := make([]Room, 0)
 	for _, value := range m.rooms {
-		rooms = append(rooms, value)
+		rooms = append(rooms, *value)
 	}
 	return rooms
+}
+
+func (m *RoomManagerImpl) FindUser(client *websocket.Client, roomId uint) bool {
+	client.Mu.Lock()
+	defer client.Mu.Unlock()
+
+	room, err := m.Get(roomId)
+	if err != nil {
+		return false
+	}
+	for c := range room.Clients {
+		if c == client {
+			return true
+		}
+	}
+	return false
 }
 
 func (m *RoomManagerImpl) ResetRoom(roomId uint) error {
@@ -123,7 +141,7 @@ func (m *RoomManagerImpl) JoinRoom(client *websocket.Client, roomId uint) error 
 	}
 
 	if room.Status == proto.Room_inGame {
-		return errors.GameAlreadyStartedErr
+		return errors.ForbiddenErr
 	}
 
 	if len(room.Clients) == room.Capacity {
@@ -197,30 +215,30 @@ func (m *RoomManagerImpl) ExitRoom(client *websocket.Client, roomId uint) error 
 	return nil
 }
 
-func (m *RoomManagerImpl) StartGame(client *websocket.Client, roomId uint) (Room, error) {
+func (m *RoomManagerImpl) StartGame(client *websocket.Client, roomId uint) (*Room, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	room, err := m.Get(roomId)
 	if err != nil {
-		return Room{}, err
+		return &Room{}, err
 	}
 
 	if room.Status == proto.Room_inGame {
-		return Room{}, errors.GameAlreadyStartedErr
+		return &Room{}, errors.ForbiddenErr
 	}
 
 	if len(room.Clients) <= 1 {
-		return Room{}, errors.MinimumNumberPlayerErr
+		return &Room{}, errors.MinimumNumberPlayerErr
 	}
 
 	user, err := m.userManager.GetUser(client)
 	if err != nil {
-		return Room{}, err
+		return &Room{}, err
 	}
 
 	if user.Id != room.Master {
-		return Room{}, errors.UnauthorizedErr
+		return &Room{}, errors.UnauthorizedErr
 	}
 
 	now := time.Now()

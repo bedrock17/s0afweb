@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"github.com/bedrock17/s0afweb/errors"
 	"github.com/bedrock17/s0afweb/proto"
 	"github.com/bedrock17/s0afweb/service"
 	"github.com/bedrock17/s0afweb/service/game"
@@ -114,7 +115,7 @@ func CreateGameRoom(client *websocket2.Client, config *proto.CreateRoomRequest) 
 		Clients: []*websocket2.Client{client},
 		Payload: &proto.Response{
 			Type: proto.MessageType_create_room,
-			Data: proto.ToAny(&proto.CreateRoomResponse{Room: ToProtoRoom(room)}),
+			Data: proto.ToAny(&proto.CreateRoomResponse{Room: ToProtoRoom(*room)}),
 		},
 	}
 	return []websocket2.Response{resp}, nil
@@ -150,7 +151,7 @@ func JoinGameRoom(client *websocket2.Client, roomId uint) ([]websocket2.Response
 		Clients: []*websocket2.Client{client},
 		Payload: &proto.Response{
 			Type: proto.MessageType_room_config,
-			Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(room)}),
+			Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(*room)}),
 		},
 	}
 
@@ -185,6 +186,9 @@ func ExitGameRoom(client *websocket2.Client, roomId uint) ([]websocket2.Response
 	if err != nil {
 		return nil, err
 	}
+	if userFound := gameRoomManager.FindUser(client, roomId); !userFound {
+		return nil, errors.UserNotFoundErr
+	}
 	isRoomMaster := room.Master == user.Id
 
 	if err := gameRoomManager.ExitRoom(client, roomId); err != nil {
@@ -194,9 +198,17 @@ func ExitGameRoom(client *websocket2.Client, roomId uint) ([]websocket2.Response
 	room, err = gameRoomManager.Get(roomId)
 	index := 0
 	clients := make([]*websocket2.Client, len(room.Clients))
-	for c := range room.Clients {
+	gameOverUserCount := 0
+	for c, sim := range room.Clients {
+		if sim.GameOver {
+			gameOverUserCount += 1
+		}
 		clients[index] = c
 		index += 1
+	}
+
+	if len(clients) == gameOverUserCount {
+		room.GameTicker.ForceQuit()
 	}
 
 	responses := make([]websocket2.Response, 1)
@@ -212,7 +224,7 @@ func ExitGameRoom(client *websocket2.Client, roomId uint) ([]websocket2.Response
 			Clients: clients,
 			Payload: &proto.Response{
 				Type: proto.MessageType_room_config,
-				Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(room)}),
+				Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(*room)}),
 			},
 		})
 	}
@@ -231,7 +243,7 @@ func GetRoomConfig(client *websocket2.Client, roomId uint) ([]websocket2.Respons
 		Clients: []*websocket2.Client{client},
 		Payload: &proto.Response{
 			Type: proto.MessageType_room_config,
-			Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(room)}),
+			Data: proto.ToAny(&proto.GetRoomConfigResponse{Room: ToProtoRoom(*room)}),
 		},
 	}
 	return []websocket2.Response{resp}, nil

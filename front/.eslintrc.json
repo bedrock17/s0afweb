@@ -50,6 +50,7 @@
     "import/newline-after-import": "error",
     "import/extensions": "off",
     "import/prefer-default-export": "off",
+    "import/no-unused-modules": "error",
     "import/order": [
       "error",
       {

@@ -29,7 +29,9 @@ func (r *userRepositoryImpl) GetOrCreate(user *models.User) error {
 		}
 	}
 
-	result := r.db.Where(&user).Attrs(models.User{UserID: userId}).FirstOrCreate(&user)
+	whereCondition := *user
+	user.Username = userId
+	result := r.db.Where(&whereCondition).Attrs(models.User{UserID: userId}).FirstOrCreate(&user)
 	return result.Error
 }
 

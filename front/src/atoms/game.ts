@@ -1,6 +1,7 @@
 import { atom } from 'recoil';
 
-import { proto } from '~/proto/message';
+import type { Room } from '~/proto/messages/proto';
+
 
 export const gameUsernameState = atom({
   key: 'gameUsername',
@@ -17,7 +18,7 @@ export const gameAnimationEffectState = atom({
   default: true,
 });
 
-export const gameRoomState = atom<proto.Room | undefined>({
+export const gameRoomState = atom<Room | undefined>({
   key: 'gameRoom',
   default: undefined,
 });

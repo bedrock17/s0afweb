@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -18,11 +19,8 @@ import (
 const UserInfoAPIEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
 
 var oauthConfig = oauth2.Config{
-	ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
-	ClientSecret: os.Getenv("GOOGLE_SECRET_KEY"),
-	Endpoint:     google.Endpoint,
-	RedirectURL:  "http://localhost:3000/api/v1/auth/google/callback",
-	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+	Endpoint: google.Endpoint,
+	Scopes:   []string{"https://www.googleapis.com/auth/userinfo.email"},
 }
 
 type GoogleUser struct {
@@ -31,6 +29,7 @@ type GoogleUser struct {
 }
 
 func GetGoogleSignInUrl(c echo.Context) string {
+	fmt.Println(oauthConfig.RedirectURL)
 	expiration := time.Now().Add(7 * 24 * time.Hour)
 
 	b := make([]byte, 16)
@@ -45,6 +44,7 @@ func GetGoogleSignInUrl(c echo.Context) string {
 	if oauthConfig.ClientID == "" {
 		oauthConfig.ClientID = os.Getenv("GOOGLE_CLIENT_ID")
 		oauthConfig.ClientSecret = os.Getenv("GOOGLE_SECRET_KEY")
+		oauthConfig.RedirectURL = fmt.Sprintf("%v/api/v1/auth/google/callback", os.Getenv("PUBLIC_URL"))
 	}
 	return oauthConfig.AuthCodeURL(state)
 }

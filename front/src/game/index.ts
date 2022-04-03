@@ -10,6 +10,8 @@ const direction4: Point[] = [
   { x: -1, y: 0 },
 ];
 
+
+
 export class Game {
   public readonly: boolean;
   public score: number;
@@ -19,7 +21,6 @@ export class Game {
 
   public touchCount: number;
   public animationEffect: boolean;
-  public lineHistory: string[] = [];
   public touchHistory: Point[] = [];
   public random?: XORShift;
 
@@ -44,18 +45,20 @@ export class Game {
   private context: CanvasRenderingContext2D; //canvas 2d
 
   private bfsQueue: Queue<Point>;
-  private touchQueue: Queue<Point>;
+  private eventQueue: Queue<PopTileEvent>;
   private removeBlockCode = 0;
   private removeBlockCount = 0;
+  private singlePlay = true;
 
 
-  constructor(canvas: HTMLCanvasElement, tileWidth = 31) {
+  constructor(canvas: HTMLCanvasElement, tileWidth = 31, singlePlay = true) {
     this.readonly = false;
     this.score = 0;
     this.touchCount = 0;
     this.receivedLineCount = 0;
     this.isGameOver = false;
     this.lastPos = { 'y': -1, 'x': -1 };
+    this.singlePlay = singlePlay;
 
     this.map = [[]];
     this.blockMax = 3; //default
@@ -89,7 +92,7 @@ export class Game {
     this._seed = 0;
 
     this.bfsQueue = new Queue<Point>();
-    this.touchQueue = new Queue<Point>();
+    this.eventQueue = new Queue<PopTileEvent>();
   }
 
   private static getMousePoint(canvas: HTMLCanvasElement, evt: MouseEvent) {
@@ -113,12 +116,18 @@ export class Game {
     return false;
   }
 
-  public increaseLineCount() {
-    this.receivedLineCount += 1;
+  public touch(p: Point) {
+    this.eventQueue.enqueue({
+      type: 'Touch',
+      data: p,
+    });
   }
 
-  public touch(p: Point) {
-    this.touchQueue.enqueue(p);
+  public apppendLine(lines: Lines) {
+    this.eventQueue.enqueue({
+      type: 'Attack',
+      data: lines
+    });
   }
 
   public set seed(seed: number) {
@@ -153,11 +162,9 @@ export class Game {
     this.context.fillRect(0, 0, this.canvasWidth, this.tileWidth);
 
     for (let animationIndex = 0; animationIndex < animationFrame; animationIndex++) {
-
       let yposFrameValue = 0;
       if (animationFrame > 1) {
         yposFrameValue = (this.tileWidth * (animationFrame - animationIndex - 1)) / animationFrame;
-
       }
 
       for (let i = 0; i < this.maxBlockRow; i++) {
@@ -194,14 +201,6 @@ export class Game {
           }
         }
       }
-
-      if (i === this.maxBlockRow - 1) {
-        let historyItem = '';
-        for (let j = 0; j < this.maxBlockColumn; j++) {
-          historyItem += this.map[i][j].toString();
-        }
-        this.lineHistory.push(historyItem);
-      }
     }
   }
 
@@ -225,10 +224,19 @@ export class Game {
       return;
     }
 
-    this.lastPos = { y: row, x: column };
+    if (this.singlePlay) {
+      this.lastPos = { y: row, x: column };
+    } else {
+      if (this.isGameOver === false) {
+        if (this.touchCallback) {
+          this.touchCallback({ y: row, x: column });
+        }
+      }
+    }
   };
 
   private initialize(): void { //init game
+    this.eventQueue = new Queue<PopTileEvent>();
     for (let i = 0; i < this.maxBlockRow; i++) {
       this.map[i] = new Array(this.maxBlockColumn).fill(0);
     }
@@ -301,10 +309,18 @@ export class Game {
     }
 
     // 외부에서 강제로 발생시킨 touchEvent 를 일반 touch 이벤트 처럼 처리
-    if (this.touchQueue.length > 0 && this.lastPos.x === -1 && this.lastPos.y === -1) {
-      const p = this.touchQueue.dequeue();
+    if (this.eventQueue.length > 0 && this.lastPos.x === -1 && this.lastPos.y === -1) {
+      const p = this.eventQueue.dequeue();
       if (p) {
-        this.lastPos = p;
+        if (p.type === 'Touch') {
+          this.lastPos = p.data as Point;
+        } else {
+          const lines = p.data as Lines;
+          for (let i = 0; i < lines; i++) {
+            this.newBlocks();
+          }
+        }
+
       }
     }
 
@@ -325,10 +341,6 @@ export class Game {
 
     if (this.lastPos.x >= 0 && this.lastPos.y >= 0 && userInputProc) {
       this.touchHistory.push(this.lastPos);
-
-      if (this.touchCallback) {
-        this.touchCallback(this.lastPos);
-      }
 
       this.removeBlockCode = this.map[this.lastPos.y][this.lastPos.x];
       if (this.removeBlockCode !== 0) {
@@ -353,7 +365,6 @@ export class Game {
     this.score = 0;
     this.touchCount = 0;
     this.receivedLineCount = 0;
-    this.lineHistory = [];
     this.touchHistory = [];
     this.isGameOver = false;
     this.createBlock = false;

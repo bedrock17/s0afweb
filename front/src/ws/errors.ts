@@ -6,7 +6,7 @@ export const WSError = {
   InvalidRoomIdError: 40001,
   CannotJoinMultipleRoomError: 40002,
   GameValidationError: 40003,
-  GameAlreadyStartedError: 40004,
+  ForbiddenError: 40004,
   MinimumNumberPlayerError: 40005,
   UnauthorizedError: 40006,
 };

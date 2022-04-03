@@ -61,6 +61,9 @@ func (g *PopTileGame) isGameEnd() bool {
 }
 
 func (g *PopTileGame) MakeBlocks() {
+
+	g.GameOver = g.isGameEnd()
+
 	for i := 1; i < g.rows; i++ {
 		for j := 0; j < g.columns; j++ {
 			g.gameMap[i-1][j] = g.gameMap[i][j]
@@ -183,7 +186,11 @@ func (g *PopTileGame) PrintMap() {
 	fmt.Printf("========%d========\n", g.touchCount)
 	for i := 0; i < g.rows; i++ {
 		for j := 0; j < g.columns; j++ {
-			fmt.Printf("%d ", g.gameMap[i][j])
+			if g.gameMap[i][j] == 0 {
+				fmt.Printf("  ")
+			} else {
+				fmt.Printf("%d ", g.gameMap[i][j])
+			}
 		}
 		fmt.Print("\n")
 	}

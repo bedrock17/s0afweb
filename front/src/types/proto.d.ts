@@ -1,17 +1,9 @@
-import type { proto } from '~/proto/message';
+import type { Any } from '~/proto/messages/google/protobuf';
+import type { MessageType } from '~/proto/messages/proto';
 
 type ProtoMessage = {
-  type: typeof proto.Response.prototype.type,
-  data?: typeof proto.Response.prototype.data,
+  type: MessageType,
+  data?: Any,
   error?: number,
 };
 
-type ProtoResponse =
-  | typeof proto.GetRoomsResponse
-  | typeof proto.CreateRoomResponse
-  | typeof proto.JoinRoomResponse
-  | typeof proto.GetRoomConfigResponse
-  | typeof proto.StartGameResponse
-  | typeof proto.TouchResponse
-  | typeof proto.FinishGameResponse
-  | typeof proto.GetRoomUsersResponse;

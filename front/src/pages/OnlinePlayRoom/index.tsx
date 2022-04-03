@@ -11,7 +11,14 @@ import Button from '~/components/Button';
 import GameCanvas from '~/components/GameCanvas';
 import type { Game } from '~/game';
 import OnlinePlayLayout from '~/layout/OnlinePlayLayout';
-import { proto } from '~/proto/message';
+import type {
+  UserScore, JoinRoomResponse, GetRoomUsersResponse, GetRoomConfigResponse, ExitRoomResponse, StartGameResponse,
+  TouchResponse, FinishGameResponse, AttackResponse
+} from '~/proto/messages/proto';
+import * as ExitRoomRequest from '~/proto/messages/proto/ExitRoomRequest';
+import * as JoinRoomRequest from '~/proto/messages/proto/JoinRoomRequest';
+import * as StartGameRequest from '~/proto/messages/proto/StartGameRequest';
+import * as TouchRequest from '~/proto/messages/proto/TouchRequest';
 import { newProtoRequest, parseData } from '~/utils/proto';
 import { WSError } from '~/ws/errors';
 import { getWebsocketInstance } from '~/ws/websocket';
@@ -37,7 +44,7 @@ const OnlinePlayRoom = () => {
   const tempRef = useRef<Game>();
   const navigate = useNavigate();
   const [gameStarted, setGameStarted] = useState(false);
-  const [gameResult, setGameResult] = useState<proto.UserScore[]>([]);
+  const [gameResult, setGameResult] = useState<UserScore[]>([]);
   const [showModal, setShowModal] = useState(false);
   const timerInterval = useRef<NodeJS.Timeout>();
 
@@ -58,7 +65,7 @@ const OnlinePlayRoom = () => {
 
     const websocket = getWebsocketInstance();
 
-    websocket.messageHandle[proto.MessageType.join_room] = (response) => {
+    websocket.messageHandle['join_room'] = (response) => {
       if (response.error !== undefined && response.error !== WSError.NoError) {
         switch (response.error) {
         case WSError.InvalidRoomIdError:
@@ -72,14 +79,14 @@ const OnlinePlayRoom = () => {
         }
       }
 
-      const data = parseData<proto.JoinRoomResponse>(response);
-      if (data.user_id === user?.user_id) {
+      const data = parseData<JoinRoomResponse>(response);
+      if (data.userId === user?.user_id) {
         return;
       }
       setOpponentRefs((prev) => {
         return [...prev, {
           ref: { current: undefined },
-          userId: data.user_id,
+          userId: data.userId,
         }];
       });
       setOpponentScores((prev) => {
@@ -87,9 +94,9 @@ const OnlinePlayRoom = () => {
       });
     };
 
-    websocket.messageHandle[proto.MessageType.room_users] = (response) => {
-      const data = parseData<proto.GetRoomUsersResponse>(response);
-      const users = data.user_ids;
+    websocket.messageHandle['room_users'] = (response) => {
+      const data = parseData<GetRoomUsersResponse>(response);
+      const users = data.userIds as string[];
       const refs = users.filter((userId) => userId !== user?.user_id)
         .map((userId) => ({
           ref: { current: undefined },
@@ -99,14 +106,14 @@ const OnlinePlayRoom = () => {
       setOpponentScores(users.map(() => 0));
     };
 
-    websocket.messageHandle[proto.MessageType.room_config] = (response) => {
-      const data = parseData<proto.GetRoomConfigResponse>(response);
+    websocket.messageHandle['room_config'] = (response) => {
+      const data = parseData<GetRoomConfigResponse>(response);
       setRoom(data.room);
     };
 
-    websocket.messageHandle[proto.MessageType.exit_room] = (response) => {
-      const data = parseData<proto.ExitRoomResponse>(response);
-      const userId = data.user_id;
+    websocket.messageHandle['exit_room'] = (response) => {
+      const data = parseData<ExitRoomResponse>(response);
+      const { userId } = data;
       if (userId === user?.user_id) {
         return;
       }
@@ -115,18 +122,19 @@ const OnlinePlayRoom = () => {
       setOpponentScores([...opponentScores.slice(0, index), ...opponentScores.slice(index + 1)]);
     };
 
-    websocket.messageHandle[proto.MessageType.start_game] = (response) => {
+    websocket.messageHandle['start_game'] = (response) => {
       if ((response.error ?? 0) !== 0) {
         return;
       }
-      const data = parseData<proto.StartGameResponse>(response);
+      const data = parseData<StartGameResponse>(response);
       timerInterval.current = setInterval(() => {
         setTime((prev) => Math.max(0, prev - 1));
       }, 1000);
 
-      setTime(room!.play_time);
+      setTime(room!.playTime);
       setScore(0);
       setGameStarted(true);
+      setShowModal(false);
       const seed = data.seed ?? 0;
       opponentRefs.forEach((opponent, index) => {
         if (!opponent.ref.current) {
@@ -142,49 +150,73 @@ const OnlinePlayRoom = () => {
         tempRef.current.onScoreChange = setScore;
         tempRef.current.touchCallback = (p: Point) => {
           const msg = newProtoRequest(
-            proto.MessageType.touch,
-            proto.TouchRequest.fromObject({
+            'touch',
+            TouchRequest.encodeBinary({
               x: p.x,
               y: p.y,
             })
-          ).serializeBinary();
+          );
 
           websocket.ws.send(msg);
         };
       }
     };
 
-    websocket.messageHandle[proto.MessageType.touch] = (response) => {
-      const data = parseData<proto.TouchResponse>(response);
+    websocket.messageHandle['touch'] = (response) => {
+      const data = parseData<TouchResponse>(response);
       opponentRefs.forEach((opponent) => {
-        if (opponent.userId === data.user_id) {
-          opponent.ref.current?.touch({ x: data.x ?? 0, y: data.y ?? 0 });
+        if (opponent.userId === data.userId) {
+          opponent.ref.current?.touch({
+            x: data.x ?? 0, y: data.y ?? 0
+          });
         }
       });
+
+      if (user) {
+        if (user.user_id === data.userId) {
+          tempRef.current?.touch({ x: data.x ?? 0, y: data.y ?? 0 });
+        }
+      }
+
     };
 
-    websocket.messageHandle[proto.MessageType.finish_game] = (response) => {
+    websocket.messageHandle['finish_game'] = (response) => {
       if (timerInterval.current) {
         clearInterval(timerInterval.current);
       }
-      const data = parseData<proto.FinishGameResponse>(response);
-      const sortedResult = data.user_scores
-        .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+      const data = parseData<FinishGameResponse>(response);
+      const sortedResult = data.userScores
+        .sort((a: UserScore, b: UserScore) => (b.score ?? 0) - (a.score ?? 0));
       setGameResult(sortedResult);
       setShowModal(true);
       setGameStarted(false);
     };
+
+    websocket.messageHandle['attack'] = (response) => {
+      const data = parseData<AttackResponse>(response);
+      opponentRefs.forEach((opponent) => {
+        if (opponent.userId === data.userId) {
+          opponent.ref.current?.apppendLine(data.lines);
+        }
+      });
+
+      if (user?.user_id === data.userId) {
+        tempRef.current?.apppendLine(data.lines);
+      }
+
+    };
+
   }, [user, opponentRefs]);
 
   useEffect(() => {
     const websocket = getWebsocketInstance();
     const message = newProtoRequest(
-      proto.MessageType.join_room,
-      proto.JoinRoomRequest.fromObject({
-        room_id: roomId,
+      'join_room',
+      JoinRoomRequest.encodeBinary({
+        roomId,
       })
-    ).serializeBinary();
-    if (!room || !user || (room.master_id !== user.user_id)) {
+    );
+    if (!room || !user || (room.masterId !== user.user_id)) {
       websocket.send(message);
     }
 
@@ -193,13 +225,12 @@ const OnlinePlayRoom = () => {
         clearInterval(timerInterval.current);
       }
 
-
       const msg = newProtoRequest(
-        proto.MessageType.exit_room,
-        proto.ExitRoomRequest.fromObject({
-          room_id: roomId,
+        'exit_room',
+        ExitRoomRequest.encodeBinary({
+          roomId: roomId,
         })
-      ).serializeBinary();
+      );
 
       websocket.ws.send(msg);
     };
@@ -208,11 +239,11 @@ const OnlinePlayRoom = () => {
   const sendGameStart = () => {
     const websocket = getWebsocketInstance();
     const message = newProtoRequest(
-      proto.MessageType.start_game,
-      proto.StartGameRequest.fromObject({
-        room_id: roomId,
+      'start_game',
+      StartGameRequest.encodeBinary({
+        roomId: roomId,
       })
-    ).serializeBinary();
+    );
     websocket.ws.send(message);
   };
 
@@ -229,7 +260,7 @@ const OnlinePlayRoom = () => {
             opponentRefs.map((opponent, index) => {
               return (
                 <OpponentContainer key={opponent.userId}>
-                  <Username opponent master={room?.master_id === opponent.userId}>{ opponent.userId }</Username>
+                  <Username opponent master={room?.masterId === opponent.userId}>{ opponent.userId }</Username>
                   <GameCanvas animationEffect={false} gameRef={opponent.ref} mini readonly />
                   <GameInfo opponent>{ opponentScores[index] }</GameInfo>
                 </OpponentContainer>
@@ -237,13 +268,13 @@ const OnlinePlayRoom = () => {
             })
           }
         </OpponentWrapper>
-        <Username master={user && room?.master_id === user.user_id}>{ user?.user_id }</Username>
+        <Username master={user && room?.masterId === user.user_id}>{ user?.user_id }</Username>
         <GameInfoWrapper>
           <GameInfo>Time : { time }</GameInfo>
           <GameInfo>Score : { score }</GameInfo>
         </GameInfoWrapper>
         <GameCanvas animationEffect={false} gameRef={tempRef} readonly={!gameStarted} />
-        <Button color={'blue'} onClick={sendGameStart} disabled={!user || room?.master_id !== user.user_id}>
+        <Button color={'blue'} onClick={sendGameStart} disabled={!user || room?.masterId !== user.user_id}>
           Game Start
         </Button>
       </Wrapper>
@@ -260,9 +291,9 @@ const OnlinePlayRoom = () => {
               </thead>
               <tbody>
                 {
-                  gameResult.map(({ user_id, score: user_score }) => (
-                    <tr key={user_id}>
-                      <td>{ user_id }</td>
+                  gameResult.map(({ userId, score: user_score }) => (
+                    <tr key={userId}>
+                      <td>{ userId }</td>
                       <td>{ user_score ?? 0 }</td>
                     </tr>
                   ))
