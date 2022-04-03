@@ -44,6 +44,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 	for {
 		// Read
 		_, message, err := ws.ReadMessage()
+
 		if err != nil {
 			c.Logger().Error(err)
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
@@ -106,7 +107,26 @@ func WebSocketHandlerV1(c echo.Context) error {
 		case proto.MessageType_touch:
 			payload := new(proto.TouchRequest)
 			err = pb.Unmarshal(request.Data.Value, payload)
-			responses, err = TouchTile(client, payload)
+
+			func() {
+				gameRoomManager := service.GetService().GameRoomManager()
+				user, terr := userManager.GetUser(client)
+				if terr != nil {
+					responses, err = nil, terr
+				}
+				room, terr := gameRoomManager.Get(user.RoomId)
+				if terr != nil {
+					responses, err = nil, terr
+				}
+
+				room.Mutex.Lock()
+				defer room.Mutex.Unlock()
+
+				responses, err = TouchTile(client, payload)
+				sendMessage(client, request.Type, responses, err)
+				skipResponse = true
+			}()
+
 		case proto.MessageType_heartbeat:
 			client.Conn.SetReadDeadline(time.Now().Add(15 * time.Second))
 			skipResponse = true
@@ -115,6 +135,7 @@ func WebSocketHandlerV1(c echo.Context) error {
 		if !skipResponse {
 			sendMessage(client, request.Type, responses, err)
 		}
+
 	}
 
 	return nil

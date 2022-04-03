@@ -59,8 +59,8 @@ func TouchTile(client *websocket.Client, touch *proto.TouchRequest) ([]websocket
 		return nil, err
 	}
 
-	room.Mutex.Lock()
-	defer room.Mutex.Unlock()
+	//room.Mutex.Lock()
+	//defer room.Mutex.Unlock()
 
 	count, err := SimulateOneStep(client, touch)
 	if err != nil {
