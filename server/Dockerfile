@@ -2,13 +2,14 @@ FROM golang:1.17-alpine
 
 WORKDIR /app
 
-RUN apk add gcc musl-dev
+RUN apk add gcc musl-dev protobuf-dev
 
-COPY go.mod ./
-COPY go.sum ./
+COPY server ./server
+COPY proto ./proto
+WORKDIR server
 RUN go mod download
-
-COPY . ./
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go
+RUN go generate ./...
 RUN go build -o /poptile-server
 
 EXPOSE 8080
