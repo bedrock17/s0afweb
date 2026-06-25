@@ -11,6 +11,12 @@ export const Auth = {
       return data.data;
     }
   },
+  config: {
+    get: async () => {
+      const { data } = await request.get<APIResponse<ServerConfig>>('/v1/config');
+      return data.data;
+    }
+  }
 };
 
 export const Seed = {

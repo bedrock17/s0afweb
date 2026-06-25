@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "lint:css": "stylelint --fix 'src/**/*.{ts,css}'",
     "lint:js": "eslint --fix 'src/**/*.{ts,tsx}'",
-    "generate": "pb gen ts --entry-path ../proto -o src/proto --ext-in-import '.js'"
+    "generate": "pb gen ts --entry-path ../proto -o src/proto --ext-in-import '.js' --runtime-package @pbkit/runtime"
   },
   "dependencies": {
     "@stitches/react": "^1.2.7",
@@ -17,7 +17,8 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "^6.2.1",
-    "recoil": "^0.6.1"
+    "recoil": "^0.6.1",
+    "@pbkit/runtime": "^0.0.72"
   },
   "devDependencies": {
     "@stylelint/postcss-css-in-js": "^0.37.2",

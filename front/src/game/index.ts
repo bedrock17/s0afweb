@@ -1,4 +1,4 @@
-
+import { darkTheme } from '~/stitches.config';
 import Queue from '~/utils/queue';
 
 import XORShift from './xorshift';
@@ -84,9 +84,9 @@ export class Game {
 
     this._colors = [ //color code
       '(255, 255, 255)',
-      '(0, 171, 255)',
-      '(255, 171, 0)',
-      '(0, 255, 171)',
+      '(80, 150, 220)', // Soft cornflower/pastel blue
+      '(235, 160, 60)',  // Soft warm amber/orange
+      '(85, 195, 145)',  // Soft sage/emerald green
     ];
 
     this._seed = 0;
@@ -158,7 +158,9 @@ export class Game {
 
   // animationFrame 인자로 넘어온 값 만큼 블록이 올라가는 과정을 프임별로 보여준다
   private draw(animationFrame: number) { //draw blocks and score
-    this.context.fillStyle = 'rgb(255, 255, 255)';
+    const isDark = document.documentElement.classList.contains(darkTheme.className);
+    const bgColor = isDark ? 'rgb(37, 37, 38)' : 'rgb(255, 255, 255)';
+    this.context.fillStyle = bgColor;
     this.context.fillRect(0, 0, this.canvasWidth, this.tileWidth);
 
     for (let animationIndex = 0; animationIndex < animationFrame; animationIndex++) {
@@ -167,15 +169,118 @@ export class Game {
         yposFrameValue = (this.tileWidth * (animationFrame - animationIndex - 1)) / animationFrame;
       }
 
+      // Pass 1: Draw all block backgrounds
       for (let i = 0; i < this.maxBlockRow; i++) {
         for (let j = 0; j < this.maxBlockColumn; j++) {
           const yPos = i * this.tileWidth;
           const xPos = j * this.tileWidth;
 
-          const colorCode = this.colors[this.map[i][j]];
+          if (this.map[i][j] === 0) {
+            this.context.fillStyle = bgColor;
+            this.context.fillRect(xPos, yPos + yposFrameValue, this.tileWidth, this.tileWidth);
+          } else {
+            const colorIdx = this.map[i][j];
+            const colorCode = this.colors[colorIdx];
+            const match = colorCode.match(/(\d+),\s*(\d+),\s*(\d+)/);
 
-          this.context.fillStyle = 'rgb' + colorCode;
-          this.context.fillRect(xPos, yPos + yposFrameValue, this.tileWidth, this.tileWidth);
+            let r = 255, g = 255, b = 255;
+            if (match) {
+              r = parseInt(match[1]);
+              g = parseInt(match[2]);
+              b = parseInt(match[3]);
+            }
+
+            let fillColor = '';
+            if (isDark) {
+              fillColor = `rgb(${Math.floor(r * 0.65)}, ${Math.floor(g * 0.65)}, ${Math.floor(b * 0.65)})`;
+            } else {
+              fillColor = `rgb(${r}, ${g}, ${b})`;
+            }
+
+            this.context.fillStyle = fillColor;
+            this.context.fillRect(xPos, yPos + yposFrameValue, this.tileWidth, this.tileWidth);
+          }
+        }
+      }
+
+      // Pass 2: Draw all group outlines on top of the backgrounds
+      for (let i = 0; i < this.maxBlockRow; i++) {
+        for (let j = 0; j < this.maxBlockColumn; j++) {
+          const yPos = i * this.tileWidth;
+          const xPos = j * this.tileWidth;
+
+          if (this.map[i][j] !== 0) {
+            const colorIdx = this.map[i][j];
+            const colorCode = this.colors[colorIdx];
+            const match = colorCode.match(/(\d+),\s*(\d+),\s*(\d+)/);
+
+            let r = 255, g = 255, b = 255;
+            if (match) {
+              r = parseInt(match[1]);
+              g = parseInt(match[2]);
+              b = parseInt(match[3]);
+            }
+
+            let borderColor = '';
+            if (isDark) {
+              borderColor = `rgb(${Math.floor(r * 0.95)}, ${Math.floor(g * 0.95)}, ${Math.floor(b * 0.95)})`;
+            } else {
+              borderColor = `rgb(${Math.floor(r * 0.75)}, ${Math.floor(g * 0.75)}, ${Math.floor(b * 0.75)})`;
+            }
+
+            const leftX = xPos;
+            const rightX = xPos + this.tileWidth;
+            const topY = yPos + yposFrameValue;
+            const bottomY = yPos + yposFrameValue + this.tileWidth;
+
+            const w = 3.0; // lineWidth of 3px
+            const halfW = w / 2; // 1.5px offset to draw strictly inside
+
+            this.context.strokeStyle = borderColor;
+            this.context.lineWidth = w;
+            this.context.lineJoin = 'round';
+            this.context.lineCap = 'round';
+
+            this.context.beginPath();
+
+            // Top edge outer boundary
+            if (i === 0 || this.map[i - 1][j] !== colorIdx) {
+              const lineY = topY + halfW;
+              const startX = (j === 0 || this.map[i][j - 1] !== colorIdx) ? leftX + halfW : leftX;
+              const endX = (j === this.maxBlockColumn - 1 || this.map[i][j + 1] !== colorIdx) ? rightX - halfW : rightX;
+              this.context.moveTo(startX, lineY);
+              this.context.lineTo(endX, lineY);
+            }
+
+            // Bottom edge outer boundary
+            if (i === this.maxBlockRow - 1 || this.map[i + 1][j] !== colorIdx) {
+              const lineY = bottomY - halfW;
+              const startX = (j === 0 || this.map[i][j - 1] !== colorIdx) ? leftX + halfW : leftX;
+              const endX = (j === this.maxBlockColumn - 1 || this.map[i][j + 1] !== colorIdx) ? rightX - halfW : rightX;
+              this.context.moveTo(startX, lineY);
+              this.context.lineTo(endX, lineY);
+            }
+
+            // Left edge outer boundary
+            if (j === 0 || this.map[i][j - 1] !== colorIdx) {
+              const lineX = leftX + halfW;
+              const startY = (i === 0 || this.map[i - 1][j] !== colorIdx) ? topY + halfW : topY;
+              const endY = (i === this.maxBlockRow - 1 || this.map[i + 1][j] !== colorIdx) ? bottomY - halfW : bottomY;
+              this.context.moveTo(lineX, startY);
+              this.context.lineTo(lineX, endY);
+            }
+
+            // Right edge outer boundary
+            if (j === this.maxBlockColumn - 1 || this.map[i][j + 1] !== colorIdx) {
+              const lineX = rightX - halfW;
+              const startY = (i === 0 || this.map[i - 1][j] !== colorIdx) ? topY + halfW : topY;
+              const endY = (i === this.maxBlockRow - 1 || this.map[i + 1][j] !== colorIdx) ? bottomY - halfW : bottomY;
+              this.context.moveTo(lineX, startY);
+              this.context.lineTo(lineX, endY);
+            }
+
+            this.context.stroke();
+          }
         }
       }
     }
@@ -243,7 +348,7 @@ export class Game {
 
     this.newBlocks();
     this.context.globalAlpha = 0.2;
-    this.context.fillStyle = 'rgb(0, 171, 255)';
+    this.context.fillStyle = 'rgb(80, 150, 220)';
     this.context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     this.context.globalAlpha = 1;
   }

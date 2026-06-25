@@ -10,6 +10,9 @@ const Container = styled('input', {
     border: '1px solid $gray100',
     borderRadius: rem(4),
 
+    backgroundColor: '$white',
+    color: '$gray900',
+
     fontSize: rem(16),
 
     appearance: 'none',

@@ -9,7 +9,10 @@ services:
     working_dir: /
     volumes:
       - "./server/.env:/.env"
+      - "./server/db.sqlite:/db.sqlite"
   nginx:
-    build: front/
+    build:
+      context: .
+      dockerfile: front/Dockerfile
     ports:
       - "80:80"

@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"os"
 )
 
 type GoogleUserValidateRequest struct {
@@ -113,4 +114,22 @@ func LogoutV1(c echo.Context) error {
 	}
 	sess.Save(c.Request(), c.Response())
 	return c.Redirect(http.StatusTemporaryRedirect, "/")
+}
+
+type ConfigResponse struct {
+	GoogleLoginEnabled bool `json:"google_login_enabled"`
+}
+
+func GetConfigV1(c echo.Context) BaseResponse {
+	clientID := os.Getenv("GOOGLE_CLIENT_ID")
+	secretKey := os.Getenv("GOOGLE_SECRET_KEY")
+
+	// Google login is enabled only if credentials are set
+	enabled := clientID != "" && secretKey != ""
+
+	return BaseResponse{
+		Code:  http.StatusOK,
+		Data:  ConfigResponse{GoogleLoginEnabled: enabled},
+		Error: nil,
+	}
 }

@@ -13,3 +13,7 @@ type GoogleAuthValidate = {
 type UserProfile = {
   user_id: UserID,
 };
+
+type ServerConfig = {
+  google_login_enabled: boolean;
+};
