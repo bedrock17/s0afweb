@@ -25,6 +25,14 @@
     ]
   },
   "include": ["src"],
-  "exclude": ["src/proto"],
+  "exclude": [
+    "src/proto",
+    "src/layout/OnlinePlayLayout",
+    "src/pages/OnlinePlay",
+    "src/pages/OnlinePlayRoom",
+    "src/types/proto.d.ts",
+    "src/utils/proto.ts",
+    "src/ws"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

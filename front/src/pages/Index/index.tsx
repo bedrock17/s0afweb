@@ -1,9 +1,7 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 
-import { Auth } from '~/api';
-import { userState } from '~/atoms/auth';
 import { gameAnimationEffectState, gameUsernameState } from '~/atoms/game';
 import { darkModeState } from '~/atoms/ui';
 import Button from '~/components/Button';
@@ -16,10 +14,8 @@ import { Title, Wrapper } from './styles';
 
 const IndexPage = () => {
   const [name, setName] = useRecoilState(gameUsernameState);
-  const [user, setUser] = useRecoilState(userState);
   const [animationEffect, setAnimationEffect] = useRecoilState(gameAnimationEffectState);
   const [darkMode, setDarkMode] = useRecoilState(darkModeState);
-  const [googleLoginEnabled, setGoogleLoginEnabled] = useState<boolean>(false);
   const [storedName, setStoredName] = useLocalStorage('username', '');
   const [storedAnimationEffect, setStoredAnimationEffect] = useLocalStorage('animationEffect', true);
   const [storedDarkMode, setStoredDarkMode] = useLocalStorage('darkMode', false);
@@ -45,16 +41,6 @@ const IndexPage = () => {
     setDarkMode(storedDarkMode);
   }, [setAnimationEffect, setName, setDarkMode, storedAnimationEffect, storedName, storedDarkMode]);
 
-  useLayoutEffect(() => {
-    Auth.profile.get().then(setUser).catch(() => setUser(undefined));
-  }, [setUser]);
-
-  useEffect(() => {
-    Auth.config.get()
-      .then(config => setGoogleLoginEnabled(config.google_login_enabled))
-      .catch(() => setGoogleLoginEnabled(false));
-  }, []);
-
   return (
     <SinglePlayLayout>
       <Wrapper>
@@ -74,19 +60,6 @@ const IndexPage = () => {
             <Button color={'cyan'}>Leaderboard</Button>
           </Link>
         </div>
-        {
-          googleLoginEnabled && (
-            user ?  (
-              <Link to={'/online/'}>
-                <Button color={'orange'}>Online Play</Button>
-              </Link>
-            ) : (
-              <a href={'/api/v1/auth/google'}>
-                <Button color={'blue'}>Login</Button>
-              </a>
-            )
-          )
-        }
       </Wrapper>
     </SinglePlayLayout>
   );
