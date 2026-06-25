@@ -27,3 +27,6 @@ db.sqlite
 s0afweb*
 *.pb.go
 front/src/proto
+
+# Local design/research reports
+report/

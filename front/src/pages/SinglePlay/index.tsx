@@ -8,38 +8,21 @@ import { Leaderboard, Seed } from '~/api';
 import {
   gameAnimationEffectState, gameScoreState, gameUsernameState
 } from '~/atoms/game';
-import { darkModeState } from '~/atoms/ui';
+import AppSettingsDrawer from '~/components/AppSettingsDrawer';
 import GameCanvas from '~/components/GameCanvas';
-import Switch from '~/components/Switch';
 import type { Game } from '~/game';
-import { useLocalStorage } from '~/hooks/useLocalStorage';
 import SinglePlayLayout from '~/layout/SinglePlayLayout';
 
-import { Wrapper } from './styles';
+import {
+  Hint, Hud, Label, PlayerBlock, PlayerName, Score, Wrapper
+} from './styles';
 
 const SinglePlayPage = () => {
   const username = useRecoilValue(gameUsernameState);
   const gameRef = useRef<Game>();
   const [score, setScore] = useRecoilState(gameScoreState);
-  const [animationEffect, setAnimationEffect] = useRecoilState(gameAnimationEffectState);
-  const [darkMode, setDarkMode] = useRecoilState(darkModeState);
-  const [storedDarkMode, setStoredDarkMode] = useLocalStorage('darkMode', false);
-  const [storedAnimationEffect, setStoredAnimationEffect] = useLocalStorage('animationEffect', true);
+  const animationEffect = useRecoilValue(gameAnimationEffectState);
   const navigate = useNavigate();
-
-  const onDarkModeChange = (value: boolean) => {
-    setStoredDarkMode(value);
-    setDarkMode(value);
-  };
-
-  const onAnimationEffectChange = (value: boolean) => {
-    setStoredAnimationEffect(value);
-    setAnimationEffect(value);
-  };
-
-  useEffect(() => {
-    setAnimationEffect(storedAnimationEffect);
-  }, [storedAnimationEffect, setAnimationEffect]);
 
   useEffect(() => {
     const game = gameRef.current;
@@ -77,15 +60,16 @@ const SinglePlayPage = () => {
 
   return (
     <SinglePlayLayout>
+      <AppSettingsDrawer />
       <Wrapper>
-        { username }
-        <span>Score : { score }</span>
-        <Switch checked={animationEffect} onChange={onAnimationEffectChange}>
-        애니메이션 효과
-        </Switch>
-        <Switch checked={darkMode} onChange={onDarkModeChange}>
-        다크 모드
-        </Switch>
+        <Hud>
+          <PlayerBlock>
+            <Label>PLAYER</Label>
+            <PlayerName>{ username }</PlayerName>
+          </PlayerBlock>
+          <Score>{ score }</Score>
+        </Hud>
+        <Hint>연결된 타일을 찾아 터치하세요. 큰 묶음일수록 점수가 더 크게 올라갑니다.</Hint>
         <GameCanvas gameRef={gameRef} animationEffect={animationEffect} single/>
       </Wrapper>
     </SinglePlayLayout>

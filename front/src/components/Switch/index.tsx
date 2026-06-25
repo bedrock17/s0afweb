@@ -12,6 +12,7 @@ type Props = PropsWithChildren<{
 
 const Switch = ({ checked, onChange, children }: Props) => {
   const onClick = () => onChange(!checked);
+  const label = typeof children === 'string' ? children.trim() : undefined;
 
   return (
     <Wrapper>
@@ -19,6 +20,7 @@ const Switch = ({ checked, onChange, children }: Props) => {
         type={'button'}
         data-toggle={'button'}
         aria-pressed={checked}
+        aria-label={label}
         onClick={onClick}
         activated={checked}
       >

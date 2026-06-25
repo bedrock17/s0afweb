@@ -15,7 +15,7 @@ import SinglePlayResultPage from './pages/SinglePlayResult';
 
 const globalStyles = globalCss({
   'html, body': {
-    backgroundColor: '$white',
+    backgroundColor: '$surfaceSoft',
     color: '$gray900',
     transition: 'background-color 0.2s ease, color 0.2s ease',
   },

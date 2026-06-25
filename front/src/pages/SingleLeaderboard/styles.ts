@@ -4,91 +4,107 @@ import { memo } from 'react';
 import { keyframes, styled } from '~/stitches.config';
 
 export const Wrapper = styled('div', {
-  '&': {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: rem(6),
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    maxWidth: rem(800),
-  }
+  display: 'grid',
+  gap: rem(14),
+  alignContent: 'start',
+  justifyItems: 'center',
+  width: '100%',
+  maxWidth: rem(820),
+  minHeight: `calc(100dvh - ${rem(36)})`,
+  padding: `${rem(58)} 0 0`,
+});
+
+export const Header = styled('header', {
+  display: 'grid',
+  gap: rem(10),
+  justifyItems: 'center',
+  width: '100%',
+});
+
+export const ActionRow = styled('div', {
+  display: 'flex',
+  gap: rem(8),
+  justifyContent: 'center',
+  width: '100%',
+
+  '& a': {
+    textDecoration: 'none',
+  },
 });
 
 export const Title = memo(styled('h1', {
-  '&': {
-    marginBottom: rem(24),
-
-    color: '$blue',
-    fontSize: rem(40),
-    textAlign: 'center',
-    textTransform: 'uppercase',
-  }
+  margin: `${rem(4)} 0 ${rem(2)}`,
+  color: '$blue',
+  fontSize: rem(32),
+  fontWeight: 900,
+  lineHeight: 1.15,
+  textAlign: 'center',
 }));
+
+export const Summary = styled('p', {
+  color: '$textMuted',
+  fontSize: rem(14),
+  fontWeight: 700,
+  textAlign: 'center',
+});
+
+export const TableWrap = styled('div', {
+  width: '100%',
+  overflowX: 'auto',
+  border: '1px solid $border',
+  borderRadius: rem(8),
+  backgroundColor: '$surface',
+  boxShadow: '0 18px 40px rgba(35, 36, 41, 0.08)',
+});
 
 export const Table = styled('table', {
   width: '100%',
-  borderCollapse: 'collapse',
+  minWidth: rem(620),
+  borderCollapse: 'separate',
+  borderSpacing: 0,
 });
 
 export const TableRow = styled('tr', {
-
+  '&:last-child td': {
+    borderBottom: 'none',
+  },
 });
 
 export const Th = styled('th', {
-  '&': {
-    padding: rem(12),
-    border: '1px solid $gray700',
-    borderRightWidth: 0,
-    borderLeftWidth: 0,
-
-    color: '$white',
-    fontWeight: 'bold',
-
-    fontSize: rem(18),
-    textAlign: 'center',
-
-    backgroundColor: '$gray800',
-  }
+  padding: `${rem(12)} ${rem(10)}`,
+  borderBottom: '1px solid $border',
+  color: '$gray900',
+  fontSize: rem(13),
+  fontWeight: 900,
+  textAlign: 'center',
+  backgroundColor: '$surfaceSoft',
 });
 
 const HyperKeyframe = keyframes({
   '0%': {
-    color: 'black',
-    textShadow: '0 0 8px rgba(0,0,0,0.1)',
+    color: '$gray900',
   },
-  '33%': {
-    color: 'red',
-    textShadow: '0 0 8px rgba(255,0,0,0.1)',
-  },
-  '66%': {
+  '50%': {
     color: '$blue',
-    textShadow: '0 0 8px rgba(0,170,255,0.1)',
   },
   '100%': {
-    color: 'black',
-    textShadow: '0 0 8px rgba(0,0,0,0.1)',
+    color: '$gray900',
   },
 });
 
 export const Td = styled('td', {
-  '&': {
-    padding: rem(12),
-    border: '1px solid $gray700',
-    borderRightWidth: 0,
-    borderLeftWidth: 0,
-
-    color: '$gray700',
-    fontSize: rem(16),
-    textAlign: 'center',
-  },
+  padding: `${rem(12)} ${rem(10)}`,
+  borderBottom: '1px solid $border',
+  color: '$gray800',
+  fontSize: rem(15),
+  fontWeight: 700,
+  textAlign: 'center',
 
   variants: {
     name: {
       true: {
-        maxWidth: rem(140),
-
-        fontWeight: 700,
+        maxWidth: rem(180),
+        fontWeight: 900,
         overflowWrap: 'anywhere',
       }
     },
@@ -97,14 +113,10 @@ export const Td = styled('td', {
         animation: `${HyperKeyframe} 1.5s ease-in-out infinite`,
       },
       nutella: {
-        color: 'red',
-
-        '&::first-letter': {
-          color: '$black',
-        }
+        color: '$pink',
       },
       red: {
-        color: 'red',
+        color: '$pink',
       },
       orange: {
         color: '$orange',
@@ -113,17 +125,52 @@ export const Td = styled('td', {
         color: '$purple',
       },
       blue: {
-        color: 'blue',
+        color: '$blue',
       },
       cyan: {
         color: '$cyan',
       },
       green: {
-        color: 'green',
+        color: '$green',
       },
       gray: {
-        color: 'gray',
+        color: '$textMuted',
       }
     }
   }
+});
+
+export const RankBadge = styled('span', {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minWidth: rem(34),
+  height: rem(28),
+  borderRadius: rem(8),
+  color: '$gray800',
+  fontSize: rem(13),
+  fontWeight: 900,
+  backgroundColor: '$surfaceSoft',
+
+  variants: {
+    highlight: {
+      true: {
+        color: '$white',
+        backgroundColor: '$blue',
+      },
+    },
+  },
+});
+
+export const StateBox = styled('div', {
+  width: '100%',
+  padding: `${rem(28)} ${rem(18)}`,
+  border: '1px solid $border',
+  borderRadius: rem(8),
+  color: '$textMuted',
+  fontSize: rem(15),
+  fontWeight: 800,
+  lineHeight: 1.5,
+  textAlign: 'center',
+  backgroundColor: '$surface',
 });
